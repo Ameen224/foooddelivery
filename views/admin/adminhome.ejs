@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #f9d423, #ff4e50);
+      color: #333;
+    }
+
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.9);
+      padding: 15px 30px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      border-radius: 0 0 12px 12px;
+    }
+
+    .navbar .brand {
+      color: #333;
+      font-size: 24px;
+      font-weight: bold;
+      text-decoration: none;
+    }
+
+    .navbar .nav-buttons {
+      display: flex;
+      gap: 15px;
+    }
+
+    .navbar button {
+      background-color: #ffcc00;
+      border: none;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 25px;
+      color: #333;
+      font-weight: bold;
+      transition: background-color 0.3s ease;
+    }
+
+    .navbar button:hover {
+      background-color: #e6b800;
+    }
+
+    .container {
+      background: rgba(255, 255, 255, 0.9);
+      padding: 20px;
+      margin: 20px;
+      border-radius: 12px;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+      background-color: #fff;
+      border: 2px solid black;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    table th, table td {
+      border: 2px solid black;
+      padding: 12px;
+      text-align: left;
+    }
+
+    table th {
+      background-color: #ffcc00;
+      color: #333;
+      font-weight: bold;
+    }
+
+    table tr:nth-child(even) {
+      background-color: #fff8e1;
+    }
+
+    table tr:nth-child(odd) {
+      background-color: #ffffff;
+    }
+
+    .btn {
+      border: none;
+      padding: 8px 12px;
+      font-size: 14px;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: background-color 0.3s ease;
+    }
+
+    .approve-btn {
+      background-color: #4CAF50;
+      color: white;
+    }
+
+    .approve-btn:hover {
+      background-color: #45a049;
+    }
+
+    .delete-btn {
+      background-color: #f44336;
+      color: white;
+    }
+
+    .delete-btn:hover {
+      background-color: #e53935;
+    }
+
+    .btn-container {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+    }
+
+    /* Hide the "Add Category" button by default */
+    #addCategoryBtn {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="navbar">
+    <a href="#" class="brand">Admin Panel</a>
+    <div class="nav-buttons">
+      <button id="vendorListBtn">Vendors</button>
+      <button id="pendingVendorsBtn">Pending Vendors</button>
+      <button id="categoryListBtn">Category</button>
+      <button id="userListBtn">Users</button>
+      <button id="orderListBtn">Orders</button>
+      <button id="deliveryListBtn">Deliveries</button>
+    </div>
+  </div>
+
+  <div class="container" id="tableContainer">
+    <h1 id="tableTitle">Categories</h1>
+    <button id="addCategoryBtn" style="background-color: #4CAF50; color: white; padding: 10px 20px; border-radius: 8px; margin-bottom: 20px;">
+      Add Category
+    </button>
+
+   <!-- Category Form (Initially hidden) -->
+<div id="categoryFormContainer" style="display: none;">
+  <form id="categoryForm" enctype="multipart/form-data">
+    <input type="text" id="categoryName" placeholder="Enter category name" required
+      style="padding: 8px; margin-bottom: 10px; border-radius: 4px; border: 1px solid #ccc;">
+    <input type="text" id="subcategory" placeholder="Enter subcategory name" 
+      style="padding: 8px; margin-bottom: 10px; border-radius: 4px; border: 1px solid #ccc;">
+    <button type="submit" style="background-color: #ffcc00; color: white; padding: 10px 20px; border-radius: 8px;">
+      Save Category
+    </button>
+    <button type="button" id="cancelBtn" style="background-color: #f44336; color: white; padding: 10px 20px; border-radius: 8px; margin-left: 10px;">
+      Cancel
+    </button>
+  </form>
+</div>
+
+
+    <table id="dataTable">
+      <thead>
+        <tr id="tableHeader"></tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+
+  <script>
+    const tableTitle = document.getElementById("tableTitle");
+    const tableHeader = document.getElementById("tableHeader");
+    const tableBody = document.getElementById("tableBody");
+    const addCategoryBtn = document.getElementById("addCategoryBtn");
+
+    // Event listeners for the buttons
+    document.getElementById("vendorListBtn").addEventListener("click", () => {
+      addCategoryBtn.style.display = "none"; // Hide the "Add Category" button
+      fetchAndDisplayData("/admin/vendor-list", "Vendors", ["Restaurant Name", "Email", "Address"], true);
+    });
+
+    document.getElementById("pendingVendorsBtn").addEventListener("click", () => {
+      addCategoryBtn.style.display = "none"; // Hide the "Add Category" button
+      fetchAndDisplayData("/admin/pending-vendors", "Pending Vendors", ["Restaurant Name", "Email", "Address"], false, true);
+    });
+
+    document.getElementById("categoryListBtn").addEventListener("click", () => {
+      addCategoryBtn.style.display = "block"; // Show the "Add Category" button
+      fetchAndDisplayCategories();
+    });
+
+    // Show the form to add a new category
+    addCategoryBtn.addEventListener("click", () => {
+      document.getElementById("categoryFormContainer").style.display = "block";
+    });
+
+    // Hide the form when clicking cancel
+    document.getElementById("cancelBtn").addEventListener("click", () => {
+      document.getElementById("categoryFormContainer").style.display = "none";
+      document.getElementById("categoryName").value = "";  // Clear the form input
+      document.getElementById("subcategory").value = "";  // Clear the subcategory input
+    });
+
+    // Handle form submission for adding category
+    document.getElementById("categoryForm").addEventListener("submit", async function (event) {
+      event.preventDefault();
+      const categoryName = document.getElementById("categoryName").value;
+      const subcategory = document.getElementById("subcategory").value; // Get subcategory value
+
+      try {
+        const response = await fetch("/admin/add-category", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name: categoryName, subcategory: subcategory }),  // Send subcategory in the request body
+        });
+
+        if (response.ok) {
+          alert("Category added successfully!");
+          document.getElementById("categoryName").value = ""; // Clear form input
+          document.getElementById("subcategory").value = ""; // Clear subcategory input
+          document.getElementById("categoryFormContainer").style.display = "none";  // Hide form after saving
+          fetchAndDisplayCategories(); // Refresh categories list
+        } else {
+          alert("Failed to add category.");
+        }
+      } catch (error) {
+        alert("Error occurred while adding category.");
+      }
+    });
+
+
+
+    // Function to fetch and display categories
+    async function fetchAndDisplayCategories() {
+  tableTitle.textContent = "Categories";
+  tableHeader.innerHTML = "";
+  tableBody.innerHTML = "";
+  const response = await fetch("/admin/category-list"); 
+  const categories = await response.json();
+
+  tableHeader.innerHTML = "<th>Category Name</th><th>Subcategory</th><th>Actions</th>";
+
+  categories.forEach(category => {
+    const tr = document.createElement("tr");
+    
+    const categoryTd = document.createElement("td");
+    categoryTd.textContent = category.name;
+    tr.appendChild(categoryTd);
+
+    const subcategoryTd = document.createElement("td");
+    subcategoryTd.textContent = category.subcategory || 'N/A';
+    tr.appendChild(subcategoryTd);
+
+    const actionTd = document.createElement("td");
+
+    // Edit Button
+    const editBtn = document.createElement("button");
+    editBtn.textContent = "Edit";
+    editBtn.classList.add("btn", "approve-btn");
+    editBtn.style.marginRight = "10px";  
+    editBtn.onclick = () => editCategory(category._id, category.name, category.subcategory);
+    actionTd.appendChild(editBtn);
+
+    // Delete Button
+    const deleteBtn = document.createElement("button");
+    deleteBtn.textContent = "Delete";
+    deleteBtn.classList.add("btn", "delete-btn");
+    deleteBtn.onclick = () => deleteCategory(category._id);
+    actionTd.appendChild(deleteBtn);
+
+    tr.appendChild(actionTd);
+    tableBody.appendChild(tr);
+  });
+}
+
+// Function to handle edit category
+function editCategory(id, name, subcategory) {
+  // Show the form to edit the category
+  document.getElementById("categoryFormContainer").style.display = "block";
+  document.getElementById("categoryName").value = name;
+  document.getElementById("subcategory").value = subcategory;
+  
+  // Change form title and button text for editing
+  tableTitle.textContent = "Edit Category";
+  document.getElementById("categoryForm").onsubmit = function(event) {
+    event.preventDefault();
+    updateCategory(id);
+  };
+}
+
+// Function to update category
+async function updateCategory(id) {
+  const categoryName = document.getElementById("categoryName").value;
+  const subcategory = document.getElementById("subcategory").value; 
+
+  try {
+    const response = await fetch(`/admin/edit-category/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: categoryName, subcategory: subcategory }),
+    });
+
+    if (response.ok) {
+      alert("Category updated successfully!");
+      document.getElementById("categoryFormContainer").style.display = "none"; 
+      fetchAndDisplayCategories(); // Refresh categories list
+    } else {
+      alert("Failed to update category.");
+    }
+  } catch (error) {
+    alert("Error occurred while updating category.");
+  }
+}
+// Function to delete category
+async function deleteCategory(id) {
+  if (!confirm("Are you sure you want to delete this category?")) return;  // Confirm deletion
+  
+  try {
+    const response = await fetch(`/admin/delete-category/${id}`, {
+      method: "DELETE",
+    });
+
+    if (response.ok) {
+      alert("Category deleted successfully!");
+      fetchAndDisplayCategories();  // Refresh the categories list
+    } else {
+      alert("Failed to delete category.");
+    }
+  } catch (error) {
+    alert("Error occurred while deleting category.");
+  }
+}
+
+
+
+
+
+    // Function to fetch and display data in tables (for vendors, pending vendors, etc.)
+    async function fetchAndDisplayData(url, title, headers, showDelete = false, showApprove = false) {
+  tableTitle.textContent = title;
+  tableHeader.innerHTML = "";
+  tableBody.innerHTML = "";
+
+  // Dynamically create headers
+  headers.forEach(header => {
+    const th = document.createElement("th");
+    th.textContent = header;
+    tableHeader.appendChild(th);
+  });
+
+  // Add an "Actions" header
+  const actionTh = document.createElement("th");
+  actionTh.textContent = "Actions";
+  tableHeader.appendChild(actionTh);
+
+  try {
+    const response = await fetch(url);
+    const data = await response.json();
+
+    data.forEach(row => {
+      const tr = document.createElement("tr");
+
+      // Map the required fields
+      const rowData = [
+        row.restaurantName || '',  // restaurant name
+        row.email || '',            // email
+        row.restaurantAddress || '' // address
+      ];
+
+      // Dynamically display data based on rowData
+      rowData.forEach(cell => {
+        const td = document.createElement("td");
+        td.textContent = cell;
+        tr.appendChild(td);
+      });
+
+      const actionTd = document.createElement("td");
+
+      // Approve Button (only for pending vendors)
+      if (showApprove) {
+        const approveBtn = document.createElement("button");
+        approveBtn.textContent = "Approve";
+        approveBtn.classList.add("btn", "approve-btn");
+        approveBtn.onclick = () => approveVendor(row._id);
+        actionTd.appendChild(approveBtn);
+      }
+
+      // Delete Button (for vendors and pending vendors)
+      if (showDelete) {
+        const deleteBtn = document.createElement("button");
+        deleteBtn.textContent = "Delete";
+        deleteBtn.classList.add("btn", "delete-btn");
+        deleteBtn.onclick = () => deleteVendor(row._id);
+        actionTd.appendChild(deleteBtn);
+      }
+
+      // Block/Unblock Button (only for vendors, not pending vendors)
+      if (!showApprove) {
+        const blockUnblockBtn = document.createElement("button");
+        blockUnblockBtn.classList.add("btn");
+        blockUnblockBtn.style.marginLeft = "10px";  
+
+        if (row.isBlocked) {
+          blockUnblockBtn.textContent = "Unblock";
+          blockUnblockBtn.classList.add("approve-btn");
+          blockUnblockBtn.onclick = () => unblockVendor(row._id);
+        } else {
+          blockUnblockBtn.textContent = "Block";
+          blockUnblockBtn.classList.add("delete-btn");
+          blockUnblockBtn.onclick = () => blockVendor(row._id);
+        }
+        actionTd.appendChild(blockUnblockBtn);
+      }
+
+      tr.appendChild(actionTd);
+      tableBody.appendChild(tr);
+    });
+  } catch (error) {
+    alert("Error fetching data.");
+  }
+}
+
+
+// Function to block a vendor
+async function blockVendor(id) {
+  if (!confirm("Are you sure you want to block this vendor?")) return;
+  try {
+    const response = await fetch(`/admin/block-vendor/${id}`, { method: "PATCH" });
+    if (response.ok) {
+      alert("Vendor blocked successfully!");
+      fetchAndDisplayData("/admin/vendor-list", "Vendors", ["Restaurant Name", "Email", "Address"], true);
+    }
+  } catch (error) {
+    alert("Error blocking vendor.");
+  }
+}
+
+// Function to unblock a vendor
+async function unblockVendor(id) {
+  if (!confirm("Are you sure you want to unblock this vendor?")) return;
+  try {
+    const response = await fetch(`/admin/unblock-vendor/${id}`, { method: "PATCH" });
+    if (response.ok) {
+      alert("Vendor unblocked successfully!");
+      fetchAndDisplayData("/admin/vendor-list", "Vendors", ["Restaurant Name", "Email", "Address"], true);
+    }
+  } catch (error) {
+    alert("Error unblocking vendor.");
+  }
+}
+
+    // Function to delete vendor
+    async function deleteVendor(id) {
+      if (!confirm("Are you sure you want to delete this vendor?")) return;
+      try {
+        const response = await fetch(`/admin/delete-vendor/${id}`, { method: "DELETE" });
+        if (response.ok) {
+          alert("Vendor deleted successfully!");
+          fetchAndDisplayData("/admin/vendor-list", "Vendors", ["Restaurant Name", "Email", "Address"], true);
+        }
+      } catch (error) {
+        alert("Error deleting vendor.");
+      }
+    }
+
+    // Approve Vendor
+    async function approveVendor(id) {
+      try {
+        const response = await fetch(`/admin/approve-vendor/${id}`, { method: "PATCH" });
+        if (response.ok) {
+          alert("Vendor approved successfully!");
+          fetchAndDisplayData("/admin/pending-vendors", "Pending Vendors", ["Restaurant Name", "Email", "Address"], false, true);
+        }
+      } catch (error) {
+        alert("Error approving vendor.");
+      }
+    }
+
+    // Fetch and display vendor list by default
+  fetchAndDisplayData("/admin/vendor-list", "Vendors", ["Restaurant Name", "Email", "Address"], true);
+
+  </script>
+</body>
+</html>

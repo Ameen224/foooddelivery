@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vendor Profile</title>
+  <link rel="stylesheet" href="/css/bootstrap.css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="http://localhost:3000/css/font-awesome.min.css">
+
+  <style>
+    :root {
+      --primary-color: #ff6b6b;
+      --accent-color: #4ecdc4;
+      --dark-color: #343a40;
+      --light-color: #f8f9fa;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: linear-gradient(135deg, #f9d423, #ff4e50);
+      margin: 0;
+      padding: 0;
+      color: var(--dark-color);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .profile-container {
+      background: rgba(255, 255, 255, 0.95);
+      padding: 2.5rem;
+      border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      max-width: 600px;
+      width: 100%;
+      margin: 2rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .profile-container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+    }
+
+    .profile-container h3 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--dark-color);
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--dark-color);
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 0.8rem 1rem;
+      font-size: 1rem;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      background: var(--light-color);
+      transition: all 0.3s ease;
+    }
+
+    .form-group input:focus {
+      border-color: var(--accent-color);
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.2);
+    }
+
+    .btn-update {
+      background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+      color: white;
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      width: 100%;
+      margin-top: 1rem;
+    }
+
+    .btn-update:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
+    }
+
+    .loading {
+      display: none;
+      text-align: center;
+      margin-top: 1.5rem;
+    }
+
+    .loading img {
+      width: 50px;
+    }
+
+    .message {
+      margin-top: 1.5rem;
+      font-size: 0.9rem;
+      text-align: center;
+    }
+
+    .message.success {
+      color: #28a745;
+    }
+
+    .message.error {
+      color: #dc3545;
+    }
+
+    @media (max-width: 768px) {
+      .profile-container {
+        padding: 1.5rem;
+      }
+
+      .profile-container h3 {
+        font-size: 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="profile-container">
+    <h3>Vendor Profile</h3>
+    <!-- Loading Spinner -->
+    <div class="loading" id="loading">
+      <img src="https://i.gifer.com/YCZH.gif" alt="Loading...">
+      <p>Updating...</p>
+    </div>
+    <form id="profileForm">
+      <div class="form-group">
+        <label for="restaurantName">Restaurant Name</label>
+        <input type="text" id="restaurantName" name="restaurantName" value="<%= vendor.restaurantName %>" required>
+      </div>
+      <div class="form-group">
+        <label for="restaurantAddress">Restaurant Address</label>
+        <input type="text" id="restaurantAddress" name="restaurantAddress" value="<%= vendor.restaurantAddress %>" required>
+      </div>
+      <div class="form-group">
+        <label for="phoneNumber">Phone Number</label>
+        <input type="text" id="phoneNumber" name="phoneNumber" value="<%= vendor.phoneNumber %>" required>
+      </div>
+      <button type="submit" class="btn-update">Update Profile</button>
+    </form>
+    <div id="message" class="message"></div>
+  </div>
+
+  <script>
+    document.getElementById("profileForm").addEventListener("submit", async function (event) {
+  event.preventDefault(); // Prevent default form submission
+
+  const restaurantName = document.getElementById("restaurantName").value.trim();
+  const restaurantAddress = document.getElementById("restaurantAddress").value.trim();
+  const phoneNumber = document.getElementById("phoneNumber").value.trim();
+  const loading = document.getElementById("loading");
+  const message = document.getElementById("message");
+
+  if (!restaurantName || !restaurantAddress || !phoneNumber) {
+    message.innerHTML = "<span class='error'>All fields are required.</span>";
+    return;
+  }
+
+  loading.style.display = "block";
+  message.innerHTML = "";
+
+  try {
+    const response = await fetch("http://localhost:3000/vendor/update-profile", { // Ensure this matches your backend route
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ restaurantName, restaurantAddress, phoneNumber }),
+    });
+
+    const result = await response.json();
+    loading.style.display = "none";
+
+    if (response.ok) {
+      message.innerHTML = "<span class='success'>Profile updated successfully!</span>";
+    } else {
+      message.innerHTML = `<span class='error'>${result.message || "Failed to update profile."}</span>`;
+    }
+  } catch (error) {
+    console.error("Error:", error);
+    message.innerHTML = "<span class='error'>An error occurred. Please try again.</span>";
+    loading.style.display = "none";
+  }
+});
+  </script>
+  
+</body>
+</html>
