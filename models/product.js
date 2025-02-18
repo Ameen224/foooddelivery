@@ -1,3 +1,4 @@
+// Ensure mongoose is required at the top
 const mongoose = require("mongoose");
 
 const productSchema = new mongoose.Schema({
@@ -29,10 +30,15 @@ const productSchema = new mongoose.Schema({
   stock: {
     type: Number,
     default: 0
+  },
+  vendorId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Vendor", // Reference to the Vendor model
+    required: true
   }
 });
 
-// Fix: Prevent OverwriteModelError
+// Prevent OverwriteModelError
 const Product = mongoose.models.Product || mongoose.model("Product", productSchema);
 
 module.exports = Product;

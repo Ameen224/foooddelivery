@@ -9,7 +9,7 @@ const router = express.Router();
 
 const Admin = require("../models/admin");
 const Vendor = require("../models/vendor");
-const Product = require("../models/product");
+// const Product = require("../models/product");
 const Category = require("../models/category");
 
 // Admin Login Page

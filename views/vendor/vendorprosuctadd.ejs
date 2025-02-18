@@ -137,12 +137,12 @@
       <div class="form-group">
         <label for="product-category">Category</label>
         <select id="product-category" name="category" required>
-          <option value="65c2a3f5b18c4e2a2b6f1234">Electronics</option>
-          <option value="65c2a3f5b18c4e2a2b6f5678">Clothing</option>
+            <% categories.forEach(category => { %>
+                <option value="<%= category._id %>"><%= category.name %></option>
+            <% }); %>
         </select>
-      </div>
+    </div>
       
-
       <div class="form-group">
         <label for="product-description">Description</label>
         <textarea id="product-description" name="product_description" rows="4" required></textarea>
@@ -168,9 +168,12 @@
   <script>
     document.getElementById("product-images").addEventListener("change", function (event) {
       const previewContainer = document.getElementById("image-preview-container");
-      previewContainer.innerHTML = ""; // Clear previous previews
+    //   previewContainer.innerHTML = ""; // Clear previous previews
+          const file = event.target.files
+        console.log("select",file);
+        
 
-      Array.from(event.target.files).forEach(file => {
+      Array.from(file).forEach(file => {
         const reader = new FileReader();
         reader.onload = function (e) {
           const img = document.createElement("img");
@@ -185,9 +188,10 @@
       e.preventDefault();
 
       const formData = new FormData(this);
+      // You can log form data here for debugging
       for (let [key, value] of formData.entries()) {
-    console.log(key, value); // This will log all form data
-  }      
+        console.log(key, value); // This will log all form data
+      }
 
       try {
         const response = await fetch("/vendor/api/products/add", {
@@ -199,9 +203,7 @@
 
         if (response.ok) {
           alert("Product added successfully!");
-          setTimeout(() => {
-            window.location.href = "/vendor/home";
-          }, 2000);
+          window.location.href = "/vendor/home"; // Redirect immediately without timeout
         } else {
           alert(result.message);
         }

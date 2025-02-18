@@ -9,6 +9,7 @@ const mongoose = require("mongoose");
 
 const Vendor = require("../models/vendor");
 const Product = require("../models/Product");
+const Category = require("../models/category");
 const cloudinary = require("../config/cloudinary"); // Import Cloudinary config
 
 const router = express.Router();
@@ -128,13 +129,25 @@ router.post("/login", async (req, res) => {
 // Vendor Home
 router.get("/home", async (req, res) => {
   if (!req.session.vendorId) {
-    return res.redirect("/vendor/login");
+    // If request is from API (JSON expected), return 401
+    if (req.headers.accept && req.headers.accept.includes("application/json")) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+    return res.redirect("/vendor/login"); // Otherwise, redirect
   }
 
   try {
-    // Fetch products that belong to the logged-in vendor
     const products = await Product.find({ vendorId: req.session.vendorId });
+    
 
+
+
+    // If request expects JSON, return JSON
+    if (req.headers.accept && req.headers.accept.includes("application/json")) {
+      return res.json(products);
+    }
+
+    // Otherwise, render EJS
     res.render("vendor/vendorhome", { vendor: req.session.vendor, products });
   } catch (error) {
     console.error("Error fetching products:", error);
@@ -191,9 +204,16 @@ router.post("/update-profile", async (req, res) => {
  */
 
 // Render Add Product Page
-router.get("/add", (req, res) => {
+router.get("/add", async(req, res) => {
   if (!req.session.vendor) return res.redirect("/vendor/login");
-  res.render("vendor/vendorprosuctadd", { vendor: req.session.vendor });
+  try {
+    const categories= await Category.find()
+    res.render("vendor/vendorprosuctadd", { vendor: req.session.vendor ,categories});
+  } catch (error) {
+    console.error("Error fetching categories:", error);
+    res.status(500).send("Server Error");
+  }
+  
 });
 
 // Add New Product
@@ -203,6 +223,10 @@ router.post("/api/products/add", upload.array("product_images", 5), async (req, 
   try {
     const { product_name, category, product_description, product_price } = req.body;
     const imageUrls = req.files.map(file => file.path); // Ensure Cloudinary URLs are retrieved
+
+    console.log("Uploaded Files:", req.files);
+
+    
 
     if (!mongoose.Types.ObjectId.isValid(category)) {
       return res.status(400).json({ message: "Invalid category ID" });
@@ -224,5 +248,21 @@ router.post("/api/products/add", upload.array("product_images", 5), async (req, 
     res.status(500).json({ message: "Server error" });
   }
 });
+
+
+/// Delete a product
+router.delete("/delete-product/:id", async (req, res) => {
+  try {
+      const deleteproduct = await Product.findByIdAndDelete(req.params.id);
+      if (!deleteproduct) {
+          return res.status(404).json({ message: "Product not found" });
+      }
+      res.status(200).json({ message: "Product deleted successfully" });
+  } catch (err) {
+      console.error("Error deleting product:", err);
+      res.status(500).json({ message: "Server error", error: err.message });
+  }
+});
+
 
 module.exports = router;
