@@ -7,6 +7,8 @@
   <link rel="stylesheet" href="/css/bootstrap.css">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
   <link rel="stylesheet" href="http://localhost:3000/css/font-awesome.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> 
+
 
   <style>
     :root {
@@ -185,25 +187,37 @@
   message.innerHTML = "";
 
   try {
-    const response = await fetch("http://localhost:3000/vendor/update-profile", { // Ensure this matches your backend route
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ restaurantName, restaurantAddress, phoneNumber }),
+    const response = await fetch("http://localhost:3000/vendor/update-profile", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ restaurantName, restaurantAddress, phoneNumber }),
     });
 
-    const result = await response.json();
     loading.style.display = "none";
 
-    if (response.ok) {
-      message.innerHTML = "<span class='success'>Profile updated successfully!</span>";
-    } else {
-      message.innerHTML = `<span class='error'>${result.message || "Failed to update profile."}</span>`;
+    // Check if response is OK before parsing JSON
+    if (!response.ok) {
+        const errorText = await response.text(); // Get raw text for debugging
+        throw new Error(`Server Error: ${response.status} - ${errorText}`);
     }
-  } catch (error) {
+
+    const result = await response.json(); // Now parse safely
+
+    Swal.fire({
+        position: "center",
+        icon: "success",
+        title: "Your profile has been updated",
+        showConfirmButton: false,
+        timer: 2000
+    }).then(() => {
+        location.reload(); // Reload the current page
+    });
+
+} catch (error) {
     console.error("Error:", error);
-    message.innerHTML = "<span class='error'>An error occurred. Please try again.</span>";
+    message.innerHTML = `<span class='error'>An error occurred: ${error.message}</span>`;
     loading.style.display = "none";
-  }
+}
 });
   </script>
   

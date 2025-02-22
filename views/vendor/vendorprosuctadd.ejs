@@ -6,6 +6,8 @@
   <title>Add Product</title>
   <link rel="stylesheet" href="/css/bootstrap.css">
   <link href="/css/font-awesome.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> <!-- SweetAlert -->
+
   <style>
     body {
       font-family: 'Segoe UI', system-ui, sans-serif;
@@ -142,6 +144,13 @@
             <% }); %>
         </select>
     </div>
+    <div class="form-group">
+      <label for="product-type">Type</label>
+      <select id="product-type" name="isVeg" required>
+        <option value="true">Veg</option>
+        <option value="false">Non-Veg</option>
+      </select>
+    </div>
       
       <div class="form-group">
         <label for="product-description">Description</label>
@@ -155,6 +164,27 @@
       </div>
 
       <div class="form-group">
+        <label for="product-stock">Stock</label>
+        <input type="number" id="product-stock" name="stock" min="0" required>
+      </div>
+      
+      <div class="form-group">
+        <label for="product-status">Status</label>
+        <select id="product-status" name="status" required>
+          <option value="available">Available</option>
+          <option value="out_of_stock">Out of Stock</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label for="second-price">Discount Price ($)</label>
+        <input type="number" id="discount-price" name="discount_price" step="0.01">
+      </div>
+      
+      
+      
+
+      <div class="form-group">
         <label for="product-price">Price ($)</label>
         <input type="number" id="product-price" name="product_price" step="0.01" required>
       </div>
@@ -166,52 +196,87 @@
   </div>
 
   <script>
+    const arrImg = [];
+    
     document.getElementById("product-images").addEventListener("change", function (event) {
       const previewContainer = document.getElementById("image-preview-container");
-    //   previewContainer.innerHTML = ""; // Clear previous previews
-          const file = event.target.files
-        console.log("select",file);
-        
-
-      Array.from(file).forEach(file => {
-        const reader = new FileReader();
-        reader.onload = function (e) {
-          const img = document.createElement("img");
-          img.src = e.target.result;
-          previewContainer.appendChild(img);
-        };
-        reader.readAsDataURL(file);
+      previewContainer.innerHTML = ""; // Clear previous previews
+    
+      const files = Array.from(event.target.files);
+    
+      files.forEach(file => {
+        // Prevent duplicate files
+        if (!arrImg.some(img => img.name === file.name && img.lastModified === file.lastModified)) {
+          arrImg.push(file);
+    
+          const reader = new FileReader();
+          reader.onload = function (e) {
+            const img = document.createElement("img");
+            img.src = e.target.result;
+            img.style.width = "100px";
+            img.style.height = "100px";
+            img.style.margin = "5px";
+            previewContainer.appendChild(img);
+          };
+          reader.readAsDataURL(file);
+        }
       });
+    
+      console.log("Final arrImg before submitting:", arrImg);
     });
-
+    
     document.getElementById("add-product-form").addEventListener("submit", async function (e) {
       e.preventDefault();
+    
+      const formData = new FormData();
+  formData.append("product_name", document.getElementById("product-name").value);
+  formData.append("category", document.getElementById("product-category").value);
+  formData.append("product_description", document.getElementById("product-description").value);
+  formData.append("product_price", document.getElementById("product-price").value);
+  formData.append("stock", document.getElementById("product-stock").value);
+  formData.append("status", document.getElementById("product-status").value);
+  formData.append("second_price", document.getElementById("discount-price").value);
+  formData.append("isVeg", document.getElementById("product-type").value);
 
-      const formData = new FormData(this);
-      // You can log form data here for debugging
-      for (let [key, value] of formData.entries()) {
-        console.log(key, value); // This will log all form data
-      }
-
+  arrImg.forEach(file => formData.append("product_images", file)); // ✅ Append only selected images
+      console.log("Final FormData before sending:");
+      formData.forEach((value, key) => console.log(key, value));
+    
       try {
         const response = await fetch("/vendor/api/products/add", {
           method: "POST",
           body: formData
         });
-
+    
         const result = await response.json();
-
+    
         if (response.ok) {
-          alert("Product added successfully!");
-          window.location.href = "/vendor/home"; // Redirect immediately without timeout
+          Swal.fire({
+            icon: "success",
+            title: "Product Added!",
+            text: "Your product has been successfully added.",
+            showConfirmButton: false,
+            timer: 2000
+          }).then(() => {
+            window.location.href = "/vendor/home"; // Redirect after successful upload
+          });
         } else {
-          alert(result.message);
+          Swal.fire({
+            icon: "error",
+            title: "Error",
+            text: result.message || "Failed to add product. Please try again.",
+          });
         }
       } catch (err) {
-        console.log("Error:", err);
-        alert("Failed to add product. Please try again.");
+        console.error("Error:", err);
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "Failed to add product. Please try again.",
+        });
       }
     });
-  </script>
+    </script>
+    
 </body>
 </html>

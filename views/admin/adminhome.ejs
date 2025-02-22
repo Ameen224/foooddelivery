@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Panel</title>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> 
   <style>
     body {
       font-family: 'Arial', sans-serif;
@@ -429,52 +430,100 @@ async function deleteCategory(id) {
 
 // Function to block a vendor
 async function blockVendor(id) {
-  if (!confirm("Are you sure you want to block this vendor?")) return;
-  try {
-    const response = await fetch(`/admin/block-vendor/${id}`, { method: "PATCH" });
-    if (response.ok) {
-      alert("Vendor blocked successfully!");
-      fetchAndDisplayData("/admin/vendor-list", "Vendors", ["Restaurant Name", "Email", "Address"], true);
+  Swal.fire({
+    title: "Are you sure?",
+    text: "This vendor will be blocked!",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#d33",
+    cancelButtonColor: "#3085d6",
+    confirmButtonText: "Yes, block it!"
+  }).then(async (result) => {
+    if (result.isConfirmed) {
+      try {
+        const response = await fetch(`/admin/block-vendor/${id}`, { method: "PATCH" });
+
+        if (response.ok) {
+          Swal.fire("Blocked!", "Vendor has been blocked.", "success");
+          fetchAndDisplayData("/admin/vendor-list", "Vendors", ["Restaurant Name", "Email", "Address"], true);
+        } else {
+          Swal.fire("Error!", "Failed to block vendor.", "error");
+        }
+      } catch (error) {
+        Swal.fire("Error!", "An error occurred while blocking the vendor.", "error");
+      }
     }
-  } catch (error) {
-    alert("Error blocking vendor.");
-  }
+  });
 }
+
 
 // Function to unblock a vendor
 async function unblockVendor(id) {
-  if (!confirm("Are you sure you want to unblock this vendor?")) return;
-  try {
-    const response = await fetch(`/admin/unblock-vendor/${id}`, { method: "PATCH" });
-    if (response.ok) {
-      alert("Vendor unblocked successfully!");
-      fetchAndDisplayData("/admin/vendor-list", "Vendors", ["Restaurant Name", "Email", "Address"], true);
+  Swal.fire({
+    title: "Are you sure?",
+    text: "This vendor will be unblocked!",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#28a745",
+    cancelButtonColor: "#3085d6",
+    confirmButtonText: "Yes, unblock it!"
+  }).then(async (result) => {
+    if (result.isConfirmed) {
+      try {
+        const response = await fetch(`/admin/unblock-vendor/${id}`, { method: "PATCH" });
+
+        if (response.ok) {
+          Swal.fire("Unblocked!", "Vendor has been unblocked.", "success");
+          fetchAndDisplayData("/admin/vendor-list", "Vendors", ["Restaurant Name", "Email", "Address"], true);
+        } else {
+          Swal.fire("Error!", "Failed to unblock vendor.", "error");
+        }
+      } catch (error) {
+        Swal.fire("Error!", "An error occurred while unblocking the vendor.", "error");
+      }
     }
-  } catch (error) {
-    alert("Error unblocking vendor.");
-  }
+  });
 }
+
 
     // Function to delete vendor
     async function deleteVendor(id) {
-      if (!confirm("Are you sure you want to delete this vendor?")) return;
+  Swal.fire({
+    title: "Are you sure",
+    text: "You won't be able to revert this!",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#d33",
+    cancelButtonColor: "#3085d6",
+    confirmButtonText: "Yes, delete it!"
+  }).then(async (result) => {
+    if (result.isConfirmed) {
       try {
         const response = await fetch(`/admin/delete-vendor/${id}`, { method: "DELETE" });
+
         if (response.ok) {
-          alert("Vendor deleted successfully!");
+          Swal.fire("Deleted!", "Vendor has been deleted.", "success");
           fetchAndDisplayData("/admin/vendor-list", "Vendors", ["Restaurant Name", "Email", "Address"], true);
+        } else {
+          Swal.fire("Error!", "Failed to delete vendor.", "error");
         }
       } catch (error) {
-        alert("Error deleting vendor.");
+        Swal.fire("Error!", "An error occurred while deleting the vendor.", "error");
       }
     }
+  });
+}
+
 
     // Approve Vendor
     async function approveVendor(id) {
       try {
         const response = await fetch(`/admin/approve-vendor/${id}`, { method: "PATCH" });
         if (response.ok) {
-          alert("Vendor approved successfully!");
+          swal.fire({
+            icon:"success",
+            title:"vendor approved successfully"
+          })
           fetchAndDisplayData("/admin/pending-vendors", "Pending Vendors", ["Restaurant Name", "Email", "Address"], false, true);
         }
       } catch (error) {

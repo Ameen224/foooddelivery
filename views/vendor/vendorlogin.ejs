@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sign Up & Login - Venture</title>
   <link rel="stylesheet" href="css/bootstrap.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <style>
     body {
       font-family: 'Arial', sans-serif;
@@ -135,13 +136,14 @@
         });
 
         const data = await response.json();
-        if (data.redirect) {
-          window.location.href = data.redirect;
+        if (data.redirect){
+          swal.fire("success!","login successfull")
+         .then(()=> window.location.href = data.redirect)
         } else {
           document.getElementById("login-password-error").innerText = "Invalid email or password";
         }
       } catch (error) {
-        console.error("Login Error:", error);
+        Swal.fire("Error!", "Something went wrong. Please try again.", "error");
       }
     });
 
@@ -172,13 +174,16 @@
 
         const data = await response.json();
         if (data.success) {
-          alert(data.message);
-          window.location.href = "/vendor/login";
+          swal.fire({title: "success!",
+                     text:data.message,
+                     icon:"success"
+                   })
+          .then(()=>window.location.href = "/vendor/login")
         } else {
           document.getElementById("signup-email-error").innerText = data.message || "Signup failed";
         }
       } catch (error) {
-        console.error("Signup Error:", error);
+        Swal.fire("Error!", "Something went wrong. Please try again.", "error");
       }
     });
   </script>

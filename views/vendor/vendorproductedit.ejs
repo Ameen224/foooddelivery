@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Edit Product</title>
+  <link rel="stylesheet" href="/css/bootstrap.css">
+  <link href="/css/font-awesome.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <style>
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: linear-gradient(135deg, #f9d423, #ff4e50);
+      margin: 0;
+      padding: 0;
+      color: #343a40;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      background: rgba(255, 255, 255, 0.95);
+      padding: 2rem;
+      border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      max-width: 500px;
+      width: 100%;
+      position: relative;
+      text-align: center;
+    }
+
+    .container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: linear-gradient(90deg, #ff6b6b, #4ecdc4);
+    }
+
+    h2 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.2rem;
+      text-align: left;
+    }
+
+    .form-group label {
+      font-size: 1rem;
+      font-weight: 600;
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+
+    .form-group input, 
+    .form-group textarea,
+    .form-group select {
+      width: 100%;
+      padding: 0.8rem;
+      font-size: 1rem;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      background: #f8f9fa;
+      transition: 0.3s ease;
+    }
+
+    .form-group input:focus, 
+    .form-group textarea:focus,
+    .form-group select:focus {
+      border-color: #4ecdc4;
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.2);
+    }
+
+    .btn {
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      width: 100%;
+      margin-top: 1rem;
+    }
+
+    .btn-submit {
+      background: linear-gradient(135deg, #28a745, #218838);
+      color: white;
+    }
+
+    .btn-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+    }
+
+    .btn-back {
+      background: linear-gradient(135deg, #ffc107, #e0a800);
+      color: #343a40;
+    }
+
+    .btn-back:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(255, 193, 7, 0.3);
+    }
+
+    .image-preview-container {
+      display: flex;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    .image-preview-container img {
+      width: 100px;
+      height: 100px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin: 5px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .image-wrapper {
+      position: relative;
+      display: inline-block;
+      margin: 5px;
+    }
+
+    .delete-image-btn {
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      background: red;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      font-size: 14px;
+      line-height: 20px;
+      cursor: pointer;
+      z-index: 1;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h2>Edit Product</h2>
+    <form id="edit-product-form" method="POST" enctype="multipart/form-data">
+      <input type="hidden" id="deleted-images" name="deleted_images" value="">
+
+      <div class="form-group">
+        <label for="product-name">Product Name</label>
+        <input type="text" id="product-name" name="product_name" value="<%= product.name %>" required>
+      </div>
+
+      <div class="form-group">
+        <label for="product-category">Category</label>
+        <select id="product-category" name="category" required>
+          <% categories.forEach(category => { %>
+            <option value="<%= category._id %>" <%= category._id.toString() === product.category.toString() ? 'selected' : '' %>><%= category.name %></option>
+          <% }); %>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="product-type">Type</label>
+        <select id="product-type" name="isVeg" required>
+          <option value="true" <%= product.isVeg ? 'selected' : '' %>>Veg</option>
+          <option value="false" <%= !product.isVeg ? 'selected' : '' %>>Non-Veg</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="product-description">Description</label>
+        <textarea id="product-description" name="product_description" rows="4" required><%= product.description %></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Current Images</label>
+        <div class="image-preview-container">
+          <% product.images.forEach(image => { %>
+            <div class="image-wrapper">
+              <img src="<%= image %>" alt="Product Image">
+              <button type="button" class="delete-image-btn" data-image="<%= image %>">×</button>
+            </div>
+          <% }); %>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="product-images">Upload New Images (optional)</label>
+        <input type="file" id="product-images" name="product_images" accept="image/*" multiple>
+        <div class="image-preview-container" id="new-image-preview-container"></div>
+      </div>
+
+      <div class="form-group">
+        <label for="product-stock">Stock</label>
+        <input type="number" id="product-stock" name="stock" value="<%= product.stock %>" min="0" required>
+      </div>
+
+      <div class="form-group">
+        <label for="product-status">Status</label>
+        <select id="product-status" name="status" required>
+          <option value="available" <%= product.status === 'available' ? 'selected' : '' %>>Available</option>
+          <option value="out_of_stock" <%= product.status === 'out_of_stock' ? 'selected' : '' %>>Out of Stock</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="discount-price">Discount Price ($)</label>
+        <input type="number" id="discount-price" name="discount_price" step="0.01" value="<%= product.secondprice %>">
+      </div>
+
+      <div class="form-group">
+        <label for="product-price">Price ($)</label>
+        <input type="number" id="product-price" name="product_price" step="0.01" value="<%= product.price %>" required>
+      </div>
+
+      <button type="submit" class="btn btn-submit">Update Product</button>
+    </form>
+    
+    <button onclick="window.location.href='/vendor/home'" class="btn btn-back">Back to Product List</button>
+  </div>
+
+  <script>
+    const arrImg = [];
+    let deletedImagesArray = [];
+
+    // Handle existing image deletion
+    document.querySelectorAll(".delete-image-btn").forEach(button => {
+      button.addEventListener("click", function() {
+        const imageWrapper = this.closest(".image-wrapper");
+        const imageUrl = this.getAttribute("data-image");
+        
+        imageWrapper.remove();
+        deletedImagesArray.push(imageUrl);
+        document.getElementById("deleted-images").value = JSON.stringify(deletedImagesArray);
+      });
+    });
+
+    // Handle new image preview
+    document.getElementById("product-images").addEventListener("change", function(event) {
+      const previewContainer = document.getElementById("new-image-preview-container");
+      const files = Array.from(event.target.files);
+
+      files.forEach(file => {
+        if (!arrImg.some(img => img.name === file.name && img.lastModified === file.lastModified)) {
+          arrImg.push(file);
+
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            const wrapper = document.createElement("div");
+            wrapper.className = "image-wrapper";
+            
+            const img = document.createElement("img");
+            img.src = e.target.result;
+            
+            const deleteBtn = document.createElement("button");
+            deleteBtn.className = "delete-image-btn";
+            deleteBtn.textContent = "×";
+            deleteBtn.onclick = function() {
+              const index = arrImg.indexOf(file);
+              if (index > -1) {
+                arrImg.splice(index, 1);
+              }
+              wrapper.remove();
+            };
+
+            wrapper.appendChild(img);
+            wrapper.appendChild(deleteBtn);
+            previewContainer.appendChild(wrapper);
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+    });
+
+    // Handle form submission
+    document.getElementById("edit-product-form").addEventListener("submit", async function(e) {
+      e.preventDefault();
+
+      const formData = new FormData();
+      formData.append("product_name", document.getElementById("product-name").value);
+      formData.append("category", document.getElementById("product-category").value);
+      formData.append("isVeg", document.getElementById("product-type").value);
+      formData.append("product_description", document.getElementById("product-description").value);
+      formData.append("product_price", document.getElementById("product-price").value);
+      formData.append("stock", document.getElementById("product-stock").value);
+      formData.append("status", document.getElementById("product-status").value);
+      formData.append("discount_price", document.getElementById("discount-price").value);
+      formData.append("deleted_images", document.getElementById("deleted-images").value);
+
+      arrImg.forEach(file => formData.append("product_images", file));
+
+      try {
+        const response = await fetch("/vendor/api/products/edit/<%= product._id %>", {
+          method: "PUT",
+          body: formData
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          Swal.fire({
+            icon: "success",
+            title: "Success!",
+            text: "Product updated successfully!",
+            showConfirmButton: false,
+            timer: 2000
+          }).then(() => {
+            window.location.href = "/vendor/home";
+          });
+        } else {
+          Swal.fire({
+            icon: "error",
+            title: "Error",
+            text: result.message || "Failed to update product. Please try again.",
+          });
+        }
+      } catch (err) {
+        console.error("Error:", err);
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "Failed to update product. Please try again.",
+        });
+      }
+    });
+  </script>
+</body>
+</html>
