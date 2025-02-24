@@ -1,7 +1,11 @@
 const express = require("express");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const mongoose = require("mongoose");
 const dotenv = require("dotenv");
+const multer = require("multer");
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
+
 const { check, validationResult } = require("express-validator");  // Added express-validator for better input validation
 
 dotenv.config();
@@ -9,8 +13,16 @@ const router = express.Router();
 
 const Admin = require("../models/admin");
 const Vendor = require("../models/vendor");
-// const Product = require("../models/product");
+const Product = require("../models/product");
 const Category = require("../models/category");
+const cloudinary = require("../config/cloudinary"); 
+
+
+
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
+
+
 
 // Admin Login Page
 router.get("/login", (req, res) => {
@@ -163,66 +175,67 @@ router.get("/category-list", async (req, res) => {
   }
 });
 
-// Add a category with validation
-router.post(
-  "/add-category",
-  [
-    check("name").notEmpty().withMessage("Category name is required"),
-    check("name").custom(async (name) => {
-      const existingCategory = await Category.findOne({ name });
-      if (existingCategory) {
-        throw new Error("Category with this name already exists");
-      }
-    }),
-    check("subcategory").optional().isString().withMessage("Subcategory must be a string"),
-  ],
-  async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+// Add a category with image upload
+router.post("/add-category", upload.single("image"), async (req, res) => {
+  const { name } = req.body;
+
+  try {
+    // Check for duplicate category
+    const existingCategory = await Category.findOne({ name });
+    if (existingCategory) {
+      return res.status(400).json({ message: "Category name already exists" });
     }
 
-    const { name, subcategory } = req.body;
-
-    try {
-      const newCategory = new Category({
-        name: name,
-        subcategory: subcategory,
+    // Upload image to Cloudinary if provided
+    let imageUrl = "";
+    if (req.file) {
+      const result = await new Promise((resolve, reject) => {
+        cloudinary.uploader.upload_stream({ resource_type: "image" }, (error, result) => {
+          if (error) reject(error);
+          else resolve(result.secure_url);
+        }).end(req.file.buffer);
       });
 
-      await newCategory.save();
-
-      res.status(200).send({ message: "Category added successfully!" });
-    } catch (error) {
-      console.error("Error adding category:", error);
-      res.status(500).send({ message: "Failed to add category." });
+      imageUrl = result;
     }
-  }
-);
 
-// Delete a category
-router.delete("/delete-category/:id", async (req, res) => {
-  try {
-    const deletedCategory = await Category.findByIdAndDelete(req.params.id);
-    if (!deletedCategory) {
-      return res.status(404).json({ message: "Category not found" });
-    }
-    res.status(200).json({ message: "Category deleted successfully" });
-  } catch (err) {
-    console.error("Error deleting category:", err);
-    res.status(500).json({ message: "Server error", error: err.message });
+    // Save category to DB
+    const category = new Category({ name, image: imageUrl });
+    await category.save();
+
+    res.status(201).json({ message: "Category added successfully!", category });
+  } catch (error) {
+    console.error("Error adding category:", error);
+    res.status(500).json({ message: "Failed to add category." });
   }
 });
 
+
 // Edit a category
-router.put("/edit-category/:id", async (req, res) => {
-  const { name, subcategory } = req.body;
+router.put("/edit-category/:id", upload.single("image"), async (req, res) => {
+  const { name } = req.body;
 
   try {
-    // Find the category by ID and update
+    // Check for duplicate category name (excluding current category)
+    const existingCategory = await Category.findOne({ name, _id: { $ne: req.params.id } });
+    if (existingCategory) {
+      return res.status(400).json({ message: "Category name already exists" });
+    }
+
+    let imageUrl = req.body.image; // Keep existing image if no new file is uploaded
+
+    if (req.file) {
+      imageUrl = await new Promise((resolve, reject) => {
+        cloudinary.uploader.upload_stream({ resource_type: "image" }, (error, result) => {
+          if (error) reject(error);
+          else resolve(result.secure_url);
+        }).end(req.file.buffer);
+      });
+    }
+
     const updatedCategory = await Category.findByIdAndUpdate(
       req.params.id,
-      { name, subcategory },
+      { name, image: imageUrl },
       { new: true }
     );
 
@@ -231,10 +244,39 @@ router.put("/edit-category/:id", async (req, res) => {
     }
 
     res.status(200).json({ message: "Category updated successfully", updatedCategory });
-  } catch (err) {
-    console.error("Error updating category:", err);
-    res.status(500).json({ message: "Server error", error: err.message });
+  } catch (error) {
+    console.error("Error updating category:", error);
+    res.status(500).json({ message: "Failed to update category." });
   }
 });
+
+// DELETE: Delete a category by ID
+router.delete("/delete-category/:id", async (req, res) => {
+  try {
+      console.log("DELETE request received for category:", req.params);
+
+      const { id } = req.params;
+
+      
+      if (!mongoose.Types.ObjectId.isValid(id)) {
+          return res.status(400).json({ message: "Invalid category ID format" });
+      }
+
+      const category = await Category.findById(id);
+      if (!category) {
+          console.log("Category not found in DB");
+          return res.status(404).json({ message: "Category not found" });
+      }
+
+      await Category.findByIdAndDelete(id);
+      console.log("Category deleted successfully");
+
+      res.status(200).json({ message: "Category deleted successfully" });
+  } catch (error) {
+      console.error("Error deleting category:", error);
+      res.status(500).json({ message: "Internal server error" });
+  }
+});
+
 
 module.exports = router;

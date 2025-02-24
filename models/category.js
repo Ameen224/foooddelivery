@@ -6,9 +6,9 @@ const categorySchema = new mongoose.Schema({
     required: true,
     unique: true
   },
-  subcategory: {
-    type: String,  // or use an array if you want multiple subcategories
-    required: false
+  image:{
+    type: String, // Store a single image URL
+    required: true
   }
 });
 

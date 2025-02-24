@@ -140,7 +140,9 @@
           swal.fire("success!","login successfull")
          .then(()=> window.location.href = data.redirect)
         } else {
-          document.getElementById("login-password-error").innerText = "Invalid email or password";
+          swal.fire({text:data.message,
+                    icon:"error"
+        })
         }
       } catch (error) {
         Swal.fire("Error!", "Something went wrong. Please try again.", "error");
