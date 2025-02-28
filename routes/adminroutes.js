@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const multer = require("multer");
+const fs = require('fs');
 const { CloudinaryStorage } = require("multer-storage-cloudinary");
 
 const { check, validationResult } = require("express-validator");  // Added express-validator for better input validation
@@ -16,10 +17,20 @@ const Vendor = require("../models/vendor");
 const Product = require("../models/product");
 const Category = require("../models/category");
 const cloudinary = require("../config/cloudinary"); 
+const Banner = require("../models/banner");
 
 
 
-const storage = multer.memoryStorage();
+// Multer Storage Setup for Cloudinary
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+      folder: "banners",
+      format: async (req, file) => "jpg", // You can specify other formats
+      public_id: (req, file) => file.fieldname + "-" + Date.now(),
+  },
+});
+
 const upload = multer({ storage });
 
 
@@ -64,48 +75,37 @@ router.post("/login", async (req, res) => {
 });
 
 // Admin Home Page
-router.get("/home", (req, res) => {
-  res.render("admin/adminhome");
-});
-
-// Fetch All Vendors (approved)
-router.get("/vendor-list", async (req, res) => {
+router.get("/home", async (req, res) => {
   try {
-    const vendors = await Vendor.find({ isApproved: true });
-    res.status(200).json(vendors);
-  } catch (err) {
-    console.error("Vendor List Error:", err);
-    res.status(500).json({ message: "Error fetching vendor list", error: err.message });
+    const vendor = await Vendor.find({ isApproved: true }); // Fetch only approved vendors
+    res.render("admin/adminhome", { vendor });
+  } catch (error) {
+    console.error("Error fetching vendors:", error);
+    res.render("admin/adminhome", { vendor: [] }); // Pass an empty array if there's an error
   }
 });
+
 
 // Fetch Pending Vendors
 router.get("/pending-vendors", async (req, res) => {
   try {
     const pendingVendors = await Vendor.find({ isApproved: false });
-    res.status(200).json(pendingVendors);
+    res.render("admin/pendingvendor",{ vendor: pendingVendors });
   } catch (err) {
     console.error("Error fetching pending vendors:", err);
     res.status(500).json({ message: "Error fetching pending vendors", error: err.message });
   }
 });
 
-// Approve Vendor (PATCH instead of PUT)
+// Approve Vendor
 router.patch("/approve-vendor/:id", async (req, res) => {
   try {
-    const vendor = await Vendor.findByIdAndUpdate(
-      req.params.id,
-      { isApproved: true },
-      { new: true }
-    );
+    const vendor = await Vendor.findByIdAndUpdate(req.params.id, { isApproved: true }, { new: true });
+    if (!vendor) return res.status(404).json({ message: "Vendor not found" });
 
-    if (!vendor) {
-      return res.status(404).json({ message: "Vendor not found" });
-    }
-
-    res.status(200).json({ message: `Vendor ${vendor.restaurantName} has been approved` });
+    res.status(200).json({ message: `Vendor ${vendor.restaurantName} approved successfully` });
   } catch (err) {
-    console.error("Approval Error:", err);
+    console.error("Error approving vendor:", err);
     res.status(500).json({ message: "Error approving vendor", error: err.message });
   }
 });
@@ -168,12 +168,13 @@ router.patch("/unblock-vendor/:id", async (req, res) => {
 router.get("/category-list", async (req, res) => {
   try {
     const categories = await Category.find();
-    res.status(200).json(categories);
+    res.render("admin/category", { category: categories }); // Fix the variable name
   } catch (error) {
     console.error("Error fetching categories:", error);
     res.status(500).send({ message: "Failed to fetch categories." });
   }
 });
+
 
 // Add a category with image upload
 router.post("/add-category", upload.single("image"), async (req, res) => {
@@ -192,89 +193,333 @@ router.post("/add-category", upload.single("image"), async (req, res) => {
       const result = await new Promise((resolve, reject) => {
         cloudinary.uploader.upload_stream({ resource_type: "image" }, (error, result) => {
           if (error) reject(error);
-          else resolve(result.secure_url);
+          else resolve(result);
         }).end(req.file.buffer);
       });
 
-      imageUrl = result;
+      imageUrl = result.secure_url; // Fix: Use result.secure_url instead of assigning the whole result object
     }
 
-    // Save category to DB
-    const category = new Category({ name, image: imageUrl });
-    await category.save();
+    // Create new category
+    const newCategory = new Category({ name, image: imageUrl });
+    await newCategory.save();
 
-    res.status(201).json({ message: "Category added successfully!", category });
+    res.json({ success: true, message: "Category added successfully!" });
   } catch (error) {
     console.error("Error adding category:", error);
-    res.status(500).json({ message: "Failed to add category." });
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 
 
-// Edit a category
-router.put("/edit-category/:id", upload.single("image"), async (req, res) => {
-  const { name } = req.body;
-
+router.get("/get-category/:id", async (req, res) => {
   try {
-    // Check for duplicate category name (excluding current category)
-    const existingCategory = await Category.findOne({ name, _id: { $ne: req.params.id } });
-    if (existingCategory) {
-      return res.status(400).json({ message: "Category name already exists" });
+    const category = await Category.findById(req.params.id);
+    if (!category) {
+      return res.status(404).json({ success: false, message: "Category not found" });
     }
-
-    let imageUrl = req.body.image; // Keep existing image if no new file is uploaded
-
-    if (req.file) {
-      imageUrl = await new Promise((resolve, reject) => {
-        cloudinary.uploader.upload_stream({ resource_type: "image" }, (error, result) => {
-          if (error) reject(error);
-          else resolve(result.secure_url);
-        }).end(req.file.buffer);
-      });
-    }
-
-    const updatedCategory = await Category.findByIdAndUpdate(
-      req.params.id,
-      { name, image: imageUrl },
-      { new: true }
-    );
-
-    if (!updatedCategory) {
-      return res.status(404).json({ message: "Category not found" });
-    }
-
-    res.status(200).json({ message: "Category updated successfully", updatedCategory });
+    res.status(200).json({ success: true, category });
   } catch (error) {
-    console.error("Error updating category:", error);
-    res.status(500).json({ message: "Failed to update category." });
+    console.error("Error fetching category:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
   }
 });
+
+
+/// Edit a category
+router.put("/edit-category/:id", upload.single("image"), async (req, res) => {
+  try {
+    console.log("🟢 Edit request received for category ID:", req.params.id);
+    console.log("📌 Request body:", req.body);
+    console.log("📷 Uploaded file:", req.file);
+
+    const { name, removeImage } = req.body;
+    const category = await Category.findById(req.params.id);
+
+    if (!category) {
+      console.log("🔴 Category not found!");
+      return res.status(404).json({ success: false, message: "Category not found" });
+    }
+
+    // Handle Image Removal
+    if (removeImage === "true" && category.imageId) {
+      try {
+        await cloudinary.uploader.destroy(category.imageId);
+        category.image = null;
+        category.imageId = null;
+      } catch (cloudError) {
+        console.error("Cloudinary error:", cloudError);
+        return res.status(500).json({ success: false, message: "Error removing image" });
+      }
+    }
+
+    // Handle New Image Upload
+    if (req.file) {
+      console.log("🔄 Uploading new image...");
+      
+      if (category.imageId) await cloudinary.uploader.destroy(category.imageId);
+
+      const uploadPromise = new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream({ resource_type: "image" }, (error, result) => {
+          if (error) {
+            console.error("Cloudinary upload error:", error);
+            reject(error);
+          } else {
+            resolve(result);
+          }
+        });
+        stream.end(req.file.buffer);
+      });
+
+      const uploadResult = await uploadPromise;
+
+      category.image = uploadResult.secure_url;
+      category.imageId = uploadResult.public_id;
+    }
+
+    // Ensure Image Field Doesn't Cause Validation Error
+    if (!category.image) {
+      category.image = ""; // Ensure empty string if required in schema
+    }
+
+    // Update Name
+    category.name = name || category.name;
+    await category.save();
+
+    console.log("✅ Category updated successfully!");
+    res.json({ success: true, category });
+
+  } catch (error) {
+    console.error("❌ Error updating category:", error);
+    res.status(500).json({ success: false, message: "Error updating category", error });
+  }
+});
+
+
 
 // DELETE: Delete a category by ID
 router.delete("/delete-category/:id", async (req, res) => {
   try {
-      console.log("DELETE request received for category:", req.params);
+    console.log("DELETE request received for category:", req.params);
 
-      const { id } = req.params;
+    const { id } = req.params;
 
-      
-      if (!mongoose.Types.ObjectId.isValid(id)) {
-          return res.status(400).json({ message: "Invalid category ID format" });
-      }
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ success: false, message: "Invalid category ID format" });
+    }
 
-      const category = await Category.findById(id);
-      if (!category) {
-          console.log("Category not found in DB");
-          return res.status(404).json({ message: "Category not found" });
-      }
+    const category = await Category.findById(id);
+    if (!category) {
+      console.log("Category not found in DB");
+      return res.status(404).json({ success: false, message: "Category not found" });
+    }
 
-      await Category.findByIdAndDelete(id);
-      console.log("Category deleted successfully");
+    await Category.findByIdAndDelete(id);
+    console.log("Category deleted successfully");
 
-      res.status(200).json({ message: "Category deleted successfully" });
+    res.status(200).json({ success: true, message: "Category deleted successfully" });
   } catch (error) {
-      console.error("Error deleting category:", error);
-      res.status(500).json({ message: "Internal server error" });
+    console.error("Error deleting category:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+});
+
+
+
+
+// Banner routes
+router.get("/banner", async (req, res) => {
+  try {
+    const banners = await Banner.find();
+    console.log("Fetched Banners:", JSON.stringify(banners, null, 2)); // Better debugging
+    res.render("admin/adminbanner", { banners });
+  } catch (error) {
+    console.error("Error fetching banners:", error);
+    res.status(500).render("admin/adminbanner", { 
+      banners: [],
+      error: "Failed to fetch banners. Please try again later."
+    });
+  }
+});
+
+// Route to render banner management page
+router.get('/banner', async (req, res) => {
+  try {
+    const banners = await Banner.find({});
+    res.render('admin/banner', { banners: banners });
+  } catch (err) {
+    console.error('Error fetching banners:', err);
+    res.status(500).render('error', { message: 'Error fetching banners' });
+  }
+});
+
+// Route to upload banners
+router.post('/upload-banner', upload.array('images', 10), async (req, res) => {
+  try {
+    // Check if files were uploaded
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({ success: false, message: 'No files uploaded' });
+    }
+
+    // Get form data
+    const { superkey, title, description } = req.body;
+    
+    console.log('Files received:', req.files.length);
+    console.log('Form data received:', req.body);
+
+    // Make sure superkey is provided
+    if (!superkey) {
+      return res.status(400).json({ success: false, message: 'Super Key is required' });
+    }
+
+    // Convert title and description to arrays if they aren't already
+    const titles = Array.isArray(title) ? title : [title];
+    const descriptions = Array.isArray(description) ? description : [description];
+
+    // Check if we have a title and description for each image
+    if (titles.length !== req.files.length || descriptions.length !== req.files.length) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Title and description are required for each image' 
+      });
+    }
+
+    // Upload images to cloudinary and collect URLs
+    const uploadPromises = req.files.map(async (file, index) => {
+      const result = await cloudinary.uploader.upload(file.path, {
+        folder: 'banners',
+        resource_type: 'auto'
+      });
+      
+      // Delete the temporary file if it exists
+      if (fs.existsSync(file.path)) {
+        fs.unlinkSync(file.path);
+      }
+      
+      return {
+        url: result.secure_url,
+        title: titles[index],
+        description: descriptions[index]
+      };
+    });
+
+    const uploadResults = await Promise.all(uploadPromises);
+
+    // Create banner URLs, titles, and descriptions arrays
+    const urls = uploadResults.map(result => result.url);
+    const processedTitles = uploadResults.map(result => result.title);
+    const processedDescriptions = uploadResults.map(result => result.description);
+
+    // Check if banner with the same superkey exists
+    let banner = await Banner.findOne({ superkey: superkey });
+
+    if (banner) {
+      // Update existing banner
+      if (!banner.images) {
+        banner.images = {};
+      }
+      
+      if (!banner.images.url) {
+        banner.images.url = [];
+      }
+      
+      if (!banner.images.title) {
+        banner.images.title = [];
+      }
+      
+      if (!banner.images.description) {
+        banner.images.description = [];
+      }
+      
+      // Append new data
+      banner.images.url = [...banner.images.url, ...urls];
+      banner.images.title = [...banner.images.title, ...processedTitles];
+      banner.images.description = [...banner.images.description, ...processedDescriptions];
+      
+      await banner.save();
+    } else {
+      // Create new banner
+      banner = new Banner({
+        superkey: superkey,
+        images: {
+          url: urls,
+          title: processedTitles,
+          description: processedDescriptions
+        }
+      });
+      
+      await banner.save();
+    }
+
+    return res.status(200).json({ 
+      success: true, 
+      message: 'Banners uploaded successfully', 
+      data: banner 
+    });
+  } catch (err) {
+    console.warn('Error uploading banners:', err);
+    
+    // Delete any uploaded files on error
+    if (req.files) {
+      req.files.forEach(file => {
+        if (fs.existsSync(file.path)) {
+          fs.unlinkSync(file.path);
+        }
+      });
+    }
+    
+    return res.status(500).json({ 
+      success: false, 
+      message: 'Error uploading banners', 
+      error: err.message 
+    });
+  }
+});
+// Route to delete a banner image
+router.post('/banners/delete/:id/:index', async (req, res) => {
+  try {
+    const { id, index } = req.params;
+    
+    // Find the banner
+    const banner = await Banner.findById(id);
+    
+    if (!banner) {
+      return res.status(404).send('Banner not found');
+    }
+    
+    // Get the URL to delete from Cloudinary
+    const imageUrl = banner.images.url[index];
+    
+    if (imageUrl) {
+      // Extract the public_id from the URL
+      const publicId = imageUrl.split('/').pop().split('.')[0];
+      
+      // Delete from Cloudinary
+      await cloudinary.uploader.destroy(`banners/${publicId}`);
+      
+      // Remove the image, title, and description from arrays
+      banner.images.url.splice(index, 1);
+      
+      if (banner.images.title) {
+        banner.images.title.splice(index, 1);
+      }
+      
+      if (banner.images.description) {
+        banner.images.description.splice(index, 1);
+      }
+      
+      // If no images left, delete the whole banner
+      if (banner.images.url.length === 0) {
+        await Banner.findByIdAndDelete(id);
+      } else {
+        await banner.save();
+      }
+    }
+    
+    res.redirect('/admin/banner');
+  } catch (err) {
+    console.error('Error deleting banner:', err);
+    res.status(500).send('Error deleting banner');
   }
 });
 

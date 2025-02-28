@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel - Categories</title>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #f9d423, #ff4e50);
+      color: #333;
+    }
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.9);
+      padding: 15px 30px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      border-radius: 0 0 12px 12px;
+    }
+    .navbar .brand {
+      font-size: 24px;
+      font-weight: bold;
+      text-decoration: none;
+      color: #333;
+    }
+    .nav-buttons button {
+      background-color: #ffcc00;
+      border: none;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 25px;
+      margin-right: 10px;
+      font-weight: bold;
+    }
+    .container {
+      background: rgba(255, 255, 255, 0.9);
+      padding: 20px;
+      margin: 20px;
+      border-radius: 12px;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    table, th, td {
+      border: 1px solid black;
+    }
+    th, td {
+      padding: 10px;
+      text-align: left;
+    }
+    th {
+      background-color: #ffcc00;
+    }
+    img {
+      width: 80px;
+      height: 80px;
+      object-fit: cover;
+      border-radius: 5px;
+    }
+    button {
+      cursor: pointer;
+      padding: 5px 10px;
+      border: none;
+      border-radius: 5px;
+      margin-right: 5px;
+    }
+    .btn-delete {
+      background-color: red;
+      color: white;
+    }
+    .btn-edit {
+      background-color: blue;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <div class="navbar">
+    <a href="#" class="brand">Admin Panel</a>
+    <div class="nav-buttons">
+        <button onclick="window.location.href='/admin/home'">Vendors</button>
+        <button onclick="window.location.href='/admin/pending-vendors'">Pending Vendors</button>
+        <button onclick="window.location.href='/admin/category-list'">Category</button>
+        <button onclick="window.location.href='/admin/banner'">Banners</button>
+        <button id="userListBtn">Users</button>
+        <button id="orderListBtn">Orders</button>
+        <button id="deliveryListBtn">Deliveries</button>
+      </div>
+  </div>
+  
+  <div class="container">
+    <h2>Categories</h2>
+    <form id="categoryForm" enctype="multipart/form-data">
+        <input type="hidden" id="categoryId" name="categoryId"> <!-- Hidden field for ID -->
+        
+        <label for="name">Category Name:</label>
+        <input type="text" id="name" name="name" required>
+        
+        <label for="image">Category Image:</label>
+        <input type="file" id="image" name="image" accept="image/*">
+        
+        <div id="existingImageContainer" style="display: none;">
+          <p>Current Image:</p>
+          <img id="currentImage" src="" alt="Category Image" style="width: 80px; height: 80px;">
+          <button type="button" id="removeImage">Remove Image</button>
+        </div>
+        
+        <button type="submit">Save Category</button>
+      </form>
+      
+
+    <table>
+      <thead>
+        <tr>
+          <th>Category Name</th>
+          <th>Image</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (Array.isArray(category) && category.length > 0) { %>
+          <% category.forEach(category => { %>
+            <tr>
+              <td><%= category.name %></td>
+              <td><img src="<%= category.image %>" alt="Category Image"></td>
+              <td>
+                <button class="btn-delete" onclick="deleteCategory('<%= category._id %>')">Delete</button>
+                <button class="btn-edit" onclick="editCategory('<%= category._id %>')">Edit</button>
+              </td>
+            </tr>
+          <% }); %>
+        <% } else { %>
+          <tr><td colspan="3">No categories found.</td></tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+  
+  <script>
+    document.getElementById("categoryForm").addEventListener("submit", async function (event) {
+  event.preventDefault();
+
+  const id = document.getElementById("categoryId").value;
+  const name = document.getElementById("name").value;
+  const image = document.getElementById("image").files[0];
+  const removeImage = document.getElementById("existingImageContainer").style.display === "none"; // Check if image was removed
+
+  const formData = new FormData();
+  formData.append("name", name);
+  if (image) formData.append("image", image);
+  if (removeImage) formData.append("removeImage", "true");
+
+  const url = id ? `/admin/edit-category/${id}` : "/admin/add-category"; // Decide endpoint
+  const method = id ? "PUT" : "POST";
+
+  try {
+    const response = await fetch(url, { method, body: formData });
+    const data = await response.json();
+
+    if (data.success) {
+      Swal.fire("Success!", id ? "Category updated successfully!" : "Category added successfully!", "success")
+        .then(() => window.location.reload());
+    } else {
+      Swal.fire("Error!", data.message || "Failed to process request.", "error");
+    }
+  } catch (error) {
+    Swal.fire("Error!", "Could not process request.", "error");
+  }
+});
+
+    
+    function deleteCategory(id) {
+  Swal.fire({
+    title: "Are you sure?",
+    text: "This category will be deleted permanently!",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#d33",
+    cancelButtonColor: "#3085d6",
+    confirmButtonText: "Yes, delete it!"
+  }).then(async (result) => {
+    if (result.isConfirmed) {
+      try {
+        const response = await fetch(`/admin/delete-category/${id}`, { method: "DELETE" });
+        const data = await response.json();
+
+        if (!response.ok) throw new Error(data.message || "Failed to delete category");
+
+        Swal.fire("Deleted!", "Category has been deleted.", "success").then(() => window.location.reload());
+      } catch (error) {
+        Swal.fire("Error!", error.message, "error");
+      }
+    }
+  });
+}
+
+function editCategory(id) {
+  fetch(`/admin/get-category/${id}`)
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        document.getElementById("categoryId").value = id;
+        document.getElementById("name").value = data.category.name;
+
+        if (data.category.image) {
+          document.getElementById("currentImage").src = data.category.image;
+          document.getElementById("existingImageContainer").style.display = "block";
+        } else {
+          document.getElementById("existingImageContainer").style.display = "none";
+        }
+      } else {
+        Swal.fire("Error!", "Could not fetch category details.", "error");
+      }
+    })
+    .catch(error => {
+      Swal.fire("Error!", "Could not fetch category details.", "error");
+    });
+}
+
+// Remove existing image
+document.getElementById("removeImage").addEventListener("click", function () {
+  document.getElementById("currentImage").src = "";
+  document.getElementById("existingImageContainer").style.display = "none";
+});
+
+document.addEventListener("DOMContentLoaded", function () {
+  const editForm = document.getElementById("editCategoryForm");
+
+  if (editForm) {
+    editForm.addEventListener("submit", async function (event) {
+      event.preventDefault();
+
+      const id = document.getElementById("editCategoryId").value;
+      const name = document.getElementById("editName").value;
+      const image = document.getElementById("editImage").files[0];
+
+      const formData = new FormData();
+      formData.append("name", name);
+      if (image) formData.append("image", image);
+
+      console.log("Sending PUT request to:", `/admin/edit-category/${id}`);
+      console.log("Form Data:", [...formData.entries()]);
+
+      try {
+        const response = await fetch(`/admin/edit-category/${id}`, {
+          method: "PUT",
+          body: formData,
+        });
+
+        const data = await response.json();
+        console.log("Server Response:", data);
+
+        if (data.success) {
+          Swal.fire("Updated!", "Category has been updated.", "success").then(() => {
+            window.location.reload();
+          });
+        } else {
+          Swal.fire("Error!", data.message || "Failed to update category.", "error");
+        }
+      } catch (error) {
+        console.error("Error updating category:", error);
+        Swal.fire("Error!", "Could not update category.", "error");
+      }
+    });
+  } else {
+    console.error("Edit form not found in DOM!");
+  }
+});
+
+
+
+  </script>
+</body>
+</html>

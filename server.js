@@ -43,6 +43,9 @@ app.use("/admin", require("./routes/adminroutes"));
 // Routes vendor
 app.use("/vendor", require("./routes/vendorroutes"));
 
+// Routes user
+app.use("/user",require("./routes/userroutes"))
+
 // Start the Server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel</title>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> 
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #f9d423, #ff4e50);
+      color: #333;
+    }
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.9);
+      padding: 15px 30px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      border-radius: 0 0 12px 12px;
+    }
+    .navbar .brand {
+      color: #333;
+      font-size: 24px;
+      font-weight: bold;
+      text-decoration: none;
+    }
+    .nav-buttons button {
+      background-color: #ffcc00;
+      border: none;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 25px;
+      color: #333;
+      font-weight: bold;
+      transition: background-color 0.3s ease;
+      margin-right: 10px;
+    }
+    .nav-buttons button:hover {
+      background-color: #e6b800;
+    }
+    .container {
+      background: rgba(255, 255, 255, 0.9);
+      padding: 20px;
+      margin: 20px;
+      border-radius: 12px;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+      background-color: #fff;
+      border: 2px solid black;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    table th, table td {
+      border: 2px solid black;
+      padding: 12px;
+      text-align: left;
+    }
+    table th {
+      background-color: #ffcc00;
+      color: #333;
+      font-weight: bold;
+    }
+
+    .btn {
+  border: none;
+  padding: 8px 15px;
+  font-size: 14px;
+  cursor: pointer;
+  border-radius: 20px;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+  margin: 5px;
+}
+
+.btn-approve {
+  background-color: #28a745;
+  color: white;
+}
+
+.btn-approve:hover {
+  background-color: #218838;
+}
+
+.btn-block {
+  background-color: #dc3545;
+  color: white;
+}
+
+.btn-block:hover {
+  background-color: #c82333;
+}
+
+.btn-unblock {
+  background-color: #007bff;
+  color: white;
+}
+
+.btn-unblock:hover {
+  background-color: #0056b3;
+}
+
+  </style>
+</head>
+<body>
+  <div class="navbar">
+    <a href="#" class="brand">Admin Panel</a>
+    <div class="nav-buttons">
+      <button onclick="window.location.href='/admin/home'">Vendors</button>
+      <button onclick="window.location.href='/admin/pending-vendors'">Pending Vendors</button>
+      <button onclick="window.location.href='/admin/category-list'">Category</button>
+      <button onclick="window.location.href='/admin/banner'">Banners</button>
+      <button onclick="window.location.href='/admin/users'">Users</button>
+      <button onclick="window.location.href='/admin/orders'">Orders</button>
+      <button onclick="window.location.href='/admin/deliveries'">Deliveries</button>
+    </div>
+  </div>
+  
+  <div class="container">
+    <h2>Vendors</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Restaurant Name</th>
+          <th>Email</th>
+          <th>Address</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (Array.isArray(vendor) && vendor.length > 0) { %>
+            <% vendor.forEach(vendor => { %>
+                <tr>
+              <td><%= vendor.restaurantName %></td>
+              <td><%= vendor.email %></td>
+              <td><%= vendor.restaurantAddress %></td>
+              <td>
+                <% if (!vendor.isApproved) { %>
+                  <button class="btn btn-approve" onclick="approveVendor('<%= vendor._id %>')">Approve</button>
+                <% } %>
+                <% if (vendor.isBlocked) { %>
+                  <button class="btn btn-unblock" onclick="unblockVendor('<%= vendor._id %>')">Unblock</button>
+                <% } else { %>
+                  <button class="btn btn-block" onclick="blockVendor('<%= vendor._id %>')">Block</button>
+                <% } %>
+              </td>
+            </tr>
+          <% }); %>
+        <% } else { %>
+          <tr>
+            <td colspan="4">No vendors found.</td>
+          </tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    function approveVendor(vendorId) {
+      fetch(`/admin/approve-vendor/${vendorId}`, {
+        method: 'PATCH',
+      })
+      .then(response => response.json())
+      .then(data => {
+        Swal.fire('Success', 'Vendor approved successfully!', 'success')
+        .then(() => location.reload());
+      })
+      .catch(error => {
+        console.error('Error approving vendor:', error);
+        Swal.fire('Error', 'Failed to approve vendor', 'error');
+      });
+    }
+  
+    function blockVendor(vendorId) {
+      fetch(`/admin/block-vendor/${vendorId}`, {
+        method: 'PATCH',
+      })
+      .then(response => response.json())
+      .then(data => {
+        Swal.fire('Success', 'Vendor blocked successfully!', 'success')
+        .then(() => location.reload());
+      })
+      .catch(error => {
+        console.error('Error blocking vendor:', error);
+        Swal.fire('Error', 'Failed to block vendor', 'error');
+      });
+    }
+  
+    function unblockVendor(vendorId) {
+      fetch(`/admin/unblock-vendor/${vendorId}`, {
+        method: 'PATCH',
+      })
+      .then(response => response.json())
+      .then(data => {
+        Swal.fire('Success', 'Vendor unblocked successfully!', 'success')
+        .then(() => location.reload());
+      })
+      .catch(error => {
+        console.error('Error unblocking vendor:', error);
+        Swal.fire('Error', 'Failed to unblock vendor', 'error');
+      });
+    }
+  </script>
+      
+</body>
+</html>

@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Home</title>
+  <link rel="shortcut icon" href="/images/favicon.png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&display=swap" rel="stylesheet">
+
+  
+  <style>
+    @font-face {
+      font-family: 'CustomFont';
+      src: url('/fonts/custom-font.woff2') format('woff2'),
+           url('/fonts/custom-font.ttf') format('truetype');
+      font-weight: normal;
+      font-style: normal;
+    }
+    body {
+      font-family: 'CustomFont', sans-serif;
+      color: white;
+    }
+    h1, h2, h3, h4, h5, h6 {
+     font-family: 'Dancing Script', cursive;
+    }
+
+    .header_section, .footer_section {
+      background-color: #222831;
+      padding: 20px 0;
+    }
+    .navbar-nav .nav-item .nav-link {
+      color: white;
+    }
+    .user_option a {
+      color: white;
+      margin-left: 10px;
+    }
+    .footer_section a, .footer_section p {
+      color: white;
+    }
+    .footer_social a {
+      color: white;
+      margin-right: 10px;
+    }
+    .carousel-item {
+      text-align: center;
+      color: white;
+      background: url('/images/banner.jpg') no-repeat center center/cover;
+      height: 400px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      padding: 20px;
+    }
+    .carousel-item h1 {
+      font-size: 3rem;
+      font-weight: bold;
+    }
+    .carousel-item p {
+      font-size: 1.2rem;
+      margin: 10px 0;
+    }
+    .carousel-btn {
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="hero_area">
+    <header class="header_section">
+      <div class="container">
+        <nav class="navbar navbar-expand-lg">
+          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mx-auto">
+              <li class="nav-item <%= activePage === 'home' ? 'active' : '' %>"><a class="nav-link" href="/">Home</a></li>
+              <li class="nav-item <%= activePage === 'menu' ? 'active' : '' %>"><a class="nav-link" href="/menu">Menu</a></li>
+              <li class="nav-item <%= activePage === 'about' ? 'active' : '' %>"><a class="nav-link" href="/about">About</a></li>
+            </ul>
+            <div class="user_option">
+              <a href="/login"><i class="fa fa-user"></i></a>
+              <a href="/cart"><i class="fa fa-shopping-cart"></i></a>
+              <a href="/orderstatus"><i class="fa fa-list-alt"></i></a>
+            </div>
+          </div>
+        </nav>
+      </div>
+    </header>
+
+    <section class="slider_section">
+      <div class="carousel slide" id="customCarousel1" data-ride="carousel">
+        <div class="carousel-inner">
+          <div class="carousel-item active">
+            <h1>Welcome to Our Restaurant</h1>
+            <p>Experience the best food delivered to your doorstep.</p>
+            <a href="/menu" class="btn btn-primary carousel-btn">Order Now</a>
+          </div>
+          <div class="carousel-item">
+            <h1>Enjoy Delicious Food</h1>
+            <p>Fresh ingredients, mouth-watering dishes.</p>
+            <a href="/menu" class="btn btn-primary carousel-btn">Order Now</a>
+          </div>
+          <div class="carousel-item">
+            <h1>Order Your Favorite Meals</h1>
+            <p>Quick delivery and exceptional service.</p>
+            <a href="/menu" class="btn btn-primary carousel-btn">Order Now</a>
+          </div>
+        </div>
+        <a class="carousel-control-prev" href="#customCarousel1" role="button" data-slide="prev">
+          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        </a>
+        <a class="carousel-control-next" href="#customCarousel1" role="button" data-slide="next">
+          <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        </a>
+      </div>
+    </section>
+  </div>
+
+  <footer class="footer_section py-5">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-4">
+          <h4>Contact Us</h4>
+          <p><i class="fa fa-phone"></i> Call +01 1234567890</p>
+          <p><i class="fa fa-envelope"></i> demo@gmail.com</p>
+        </div>
+        <div class="col-md-4 text-center">
+          <a href="/" class="footer-logo"><h2>Feane</h2></a>
+          <p>Necessary, making this the first true generator on the Internet.</p>
+          <div class="footer_social">
+            <a href="#"><i class="fa fa-facebook"></i></a>
+            <a href="#"><i class="fa fa-twitter"></i></a>
+            <a href="#"><i class="fa fa-linkedin"></i></a>
+            <a href="#"><i class="fa fa-instagram"></i></a>
+            <a href="#"><i class="fa fa-pinterest"></i></a>
+          </div>
+        </div>
+        <div class="col-md-4 text-right">
+          <h4>Opening Hours</h4>
+          <p>Everyday 10.00 AM - 10.00 PM</p>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+  <script>
+    $(document).ready(function(){
+      $('.navbar-toggler').click(function(){
+        $('#navbarSupportedContent').toggleClass('show');
+      });
+    });
+  </script>
+</body>
+</html>

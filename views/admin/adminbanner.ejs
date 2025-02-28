@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Banner Management</title>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #f9d423, #ff4e50);
+      color: #333;
+    }
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.9);
+      padding: 15px 30px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      border-radius: 0 0 12px 12px;
+    }
+    .navbar .brand {
+      color: #333;
+      font-size: 24px;
+      font-weight: bold;
+      text-decoration: none;
+    }
+    .nav-buttons button {
+      background-color: #ffcc00;
+      border: none;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 25px;
+      color: #333;
+      font-weight: bold;
+      transition: background-color 0.3s ease;
+      margin-right: 10px;
+    }
+    .nav-buttons button:hover {
+      background-color: #e6b800;
+    }
+    .container {
+      background: rgba(255, 255, 255, 0.9);
+      padding: 20px;
+      margin: 20px;
+      border-radius: 12px;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    }
+    .banner-form {
+      max-width: 600px;
+      margin: 20px auto;
+      padding: 20px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+    .banner-form input, .banner-form textarea, .banner-form button {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
+    .banner-form button {
+      background-color: #4CAF50;
+      color: white;
+      cursor: pointer;
+    }
+    .banner-form button:hover {
+      background-color: #45a049;
+    }
+    .image-preview {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .preview-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      border: 1px solid #ccc;
+      padding: 10px;
+      border-radius: 8px;
+      background: white;
+      position: relative;
+      width: 150px;
+    }
+    .preview-item img {
+      max-width: 130px;
+      max-height: 130px;
+      border-radius: 4px;
+      margin-bottom: 5px;
+      object-fit: cover;
+    }
+    .remove-btn {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      background: rgba(255, 0, 0, 0.7);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .existing-banners {
+      margin-top: 30px;
+      overflow-x: auto;
+    }
+    .existing-banners table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    .existing-banners th, .existing-banners td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: center;
+    }
+    .existing-banners th {
+      background-color: #f2f2f2;
+    }
+    .existing-banners img {
+      max-width: 100px;
+      max-height: 100px;
+      border-radius: 4px;
+    }
+    .delete-btn {
+      background-color: #ff4d4d;
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .delete-btn:hover {
+      background-color: #ff1a1a;
+    }
+  </style>
+</head>
+<body>
+  <div class="navbar">
+    <a href="#" class="brand">Admin Panel</a>
+    <div class="nav-buttons">
+      <button onclick="window.location.href='/admin/home'">Vendors</button>
+      <button onclick="window.location.href='/admin/pending-vendors'">Pending Vendors</button>
+      <button onclick="window.location.href='/admin/category-list'">Category</button>
+      <button onclick="window.location.href='/admin/banner'">Banners</button>
+      <button id="userListBtn">Users</button>
+      <button id="orderListBtn">Orders</button>
+      <button id="deliveryListBtn">Deliveries</button>
+    </div>
+  </div>
+  
+  <div class="container">
+    <h1>Banner Management</h1>
+    <div class="banner-form">
+      <form id="bannerForm" enctype="multipart/form-data">
+        <label for="superkey">Super Key (Unique)</label>
+        <input type="text" id="superkey" name="superkey" placeholder="Enter a unique key" required />
+        <label for="bannerImages">Select Images</label>
+        <input type="file" name="images" id="bannerImages" multiple accept="image/*">
+        <div class="image-preview" id="imagePreview"></div>
+        <button type="submit" id="saveButton">Save Banners</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="container">
+    <h2>Existing Banners</h2>
+    <div class="existing-banners">
+      <% if (typeof banners !== "undefined" && banners.length > 0) { %>
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Image</th>
+              <th>Title</th>
+              <th>Description</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% banners.forEach((banner, index) => { %>
+              <% if (banner.images && banner.images.url && banner.images.url.length > 0) { %>
+                <% banner.images.url.forEach((url, imgIndex) => { %>
+                  <tr>
+                    <td><%= imgIndex + 1 %></td>
+                    <td><img src="<%= url %>" alt="Banner Image"></td>
+                    <td><%= banner.images.title[imgIndex] || 'No title' %></td>
+                    <td><%= banner.images.description[imgIndex] || 'No description' %></td>
+                    <td>
+                      <form action="/admin/banners/delete/<%= banner._id %>/<%= imgIndex %>" method="POST">
+                        <button type="submit" class="delete-btn">Delete</button>
+                      </form>
+                    </td>
+                  </tr>
+                <% }) %>
+              <% } else { %>
+                <tr>
+                  <td colspan="5">No images found for this banner</td>
+                </tr>
+              <% } %>
+            <% }) %>
+          </tbody>
+        </table>
+      <% } else { %>
+        <p>No banners available</p>
+      <% } %>
+    </div>
+  </div>
+
+  <script>
+    // Array to store banner images and their details
+    const arrImg = [];
+    
+    // Function to update preview
+    function updatePreview() {
+      const previewContainer = document.getElementById('imagePreview');
+      previewContainer.innerHTML = ''; // Clear previous previews
+      
+      arrImg.forEach((item, index) => {
+        const bannerDiv = document.createElement('div');
+        bannerDiv.classList.add('preview-item');
+        
+        // Create image preview
+        const img = document.createElement('img');
+        if (typeof item.file !== 'undefined') {
+          // For new files
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            img.src = e.target.result;
+          };
+          reader.readAsDataURL(item.file);
+        } else {
+          // For existing files (showing URLs)
+          img.src = item.url;
+        }
+        img.alt = "Banner Image";
+        
+        // Create remove button
+        const removeBtn = document.createElement('button');
+        removeBtn.classList.add('remove-btn');
+        removeBtn.textContent = 'X';
+        removeBtn.onclick = function(e) {
+          e.preventDefault();
+          arrImg.splice(index, 1);
+          updatePreview();
+        };
+        
+        // Create title input
+        const titleInput = document.createElement('input');
+        titleInput.type = 'text';
+        titleInput.name = 'title';
+        titleInput.placeholder = 'Title for Image';
+        titleInput.required = true;
+        titleInput.value = item.title || '';
+        
+        // Create description textarea
+        const descInput = document.createElement('textarea');
+        descInput.name = 'description';
+        descInput.placeholder = 'Description for Image';
+        descInput.required = true;
+        descInput.value = item.description || '';
+        
+        // Add event listeners to update the item in the array
+        titleInput.addEventListener('input', function() {
+          arrImg[index].title = this.value;
+        });
+        
+        descInput.addEventListener('input', function() {
+          arrImg[index].description = this.value;
+        });
+        
+        // Append all elements to the banner div
+        bannerDiv.appendChild(img);
+        bannerDiv.appendChild(removeBtn);
+        bannerDiv.appendChild(titleInput);
+        bannerDiv.appendChild(descInput);
+        
+        // Append banner div to preview container
+        previewContainer.appendChild(bannerDiv);
+      });
+      
+      // Update the save button state
+      document.getElementById('saveButton').disabled = arrImg.length === 0;
+    }
+    
+    // Handle file input change
+    document.getElementById('bannerImages').addEventListener('change', function(event) {
+      const files = Array.from(event.target.files);
+      
+      files.forEach(file => {
+        // Check if file already exists in arrImg
+        if (!arrImg.some(img => 
+          img.file && img.file.name === file.name && img.file.lastModified === file.lastModified
+        )) {
+          // Add new file to array
+          arrImg.push({
+            file: file,
+            title: '',
+            description: ''
+          });
+        }
+      });
+      
+      // Reset the file input to allow selecting the same files again
+      this.value = '';
+      
+      // Update the preview
+      updatePreview();
+    });
+    
+    // Handle form submission
+    document.getElementById('bannerForm').addEventListener('submit', async function(event) {
+  event.preventDefault();
+  
+  // Validation
+  if (arrImg.length === 0) {
+    Swal.fire("Error", "Please select at least one image", "error");
+    return;
+  }
+  
+  // Check for empty titles or descriptions
+  for (let i = 0; i < arrImg.length; i++) {
+    if (!arrImg[i].title || !arrImg[i].title.trim() || 
+        !arrImg[i].description || !arrImg[i].description.trim()) {
+      Swal.fire("Error", "Title and description cannot be empty", "error");
+      return;
+    }
+  }
+  
+  // Create FormData object
+  const formData = new FormData();
+  
+  // Get superkey value and append to formData
+  const superkey = document.getElementById("superkey").value;
+  if (!superkey || !superkey.trim()) {
+    Swal.fire("Error", "Super Key is required", "error");
+    return;
+  }
+  formData.append("superkey", superkey.trim());
+
+  // Append only new files to formData with array notation for title and description
+  for (let i = 0; i < arrImg.length; i++) {
+    if (arrImg[i].file) {
+      formData.append('images', arrImg[i].file);
+      formData.append('title[]', arrImg[i].title.trim());  // Use array notation
+      formData.append('description[]', arrImg[i].description.trim());  // Use array notation
+    }
+  }
+  
+      
+      // Check if we have any new files to upload
+      let hasNewFiles = Array.from(formData.getAll('images')).length > 0;
+      
+      if (!hasNewFiles) {
+        Swal.fire("Error", "No new images to upload", "error");
+        return;
+      }
+      
+      // Show loading indicator
+      Swal.fire({
+        title: 'Uploading...',
+        text: 'Please wait while we upload your banners',
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
+      
+      try {
+        const response = await fetch('/admin/upload-banner', {
+          method: 'POST',
+          body: formData
+        });
+        
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error("Server Error Response:", errorText);
+          Swal.fire("Error", "Failed to upload banners", "error");
+          return;
+        }
+        
+        const data = await response.json();
+        console.log("Server Response:", data);
+        
+        Swal.fire({
+          icon: "success",
+          title: "Banners Uploaded!",
+          text: "Your banners have been successfully uploaded.",
+          showConfirmButton: false,
+          timer: 2000
+        }).then(() => {
+          // Clear the array
+          arrImg.length = 0;
+          
+          // Reset form and preview
+          document.getElementById('bannerForm').reset();
+          updatePreview();
+          
+          // Reload the page to show new banners
+          window.location.reload();
+        });
+        
+      } catch (err) {
+        console.error("Error:", err);
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "Failed to upload banners. Please try again.",
+        });
+      }
+    });
+    
+    // Initialize with existing banners
+    window.addEventListener('load', function() {
+      updatePreview();
+      // Add event listeners for the nav buttons
+      document.getElementById('userListBtn').addEventListener('click', function() {
+        window.location.href = '/admin/users';
+      });
+      document.getElementById('orderListBtn').addEventListener('click', function() {
+        window.location.href = '/admin/orders';
+      });
+      document.getElementById('deliveryListBtn').addEventListener('click', function() {
+        window.location.href = '/admin/deliveries';
+      });
+    });
+  </script>    
+</body>
+</html>
