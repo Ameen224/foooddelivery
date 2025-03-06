@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Product Details</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+    }
+
+    .navbar {
+      background-color: #222831;
+      padding: 15px 20px;
+    }
+
+    .navbar .back-button {
+      color: white;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .navbar .back-button:hover {
+      color: #e6e6e6;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 30px auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .product-content {
+      display: flex;
+      flex-direction: row;
+    }
+
+    .product-image {
+      flex: 1;
+      padding: 20px;
+    }
+
+    .carousel-inner {
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .product-details {
+      flex: 1;
+      padding: 20px;
+    }
+
+    .product-details h2 {
+      color: #333;
+      font-size: 1.8rem;
+    }
+
+    .product-details p {
+      color: #666;
+      font-size: 1rem;
+    }
+
+    .product-price {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #ff9800;
+    }
+
+    .product-quantity input {
+      width: 60px;
+      padding: 5px;
+      font-size: 1rem;
+      text-align: center;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    .add-to-cart-btn {
+      width: 100%;
+      background: #ff9800;
+      color: white;
+      font-size: 1rem;
+      padding: 12px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.3s;
+      margin-top: 15px;
+    }
+
+    .add-to-cart-btn:hover {
+      background: #e68900;
+    }
+
+    @media (max-width: 768px) {
+      .product-content {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="container-fluid">
+            <a href="javascript:void(0);" class="back-button" onclick="window.history.back()">
+                <i class="fas fa-arrow-left"></i> Back to Menu
+            </a>
+        </div>
+    </nav>
+    
+
+  <div class="container">
+    <div class="product-content">
+      <div class="product-image">
+        <div id="productCarousel" class="carousel slide" data-bs-ride="carousel">
+          <div class="carousel-indicators">
+            <% product.images.forEach((image, index) => { %>
+              <button type="button" data-bs-target="#productCarousel" data-bs-slide-to="<%= index %>" class="<%= index === 0 ? 'active' : '' %>" aria-label="Slide <%= index + 1 %>"></button>
+            <% }) %>
+          </div>
+          <div class="carousel-inner">
+            <% product.images.forEach((image, index) => { %>
+              <div class="carousel-item <%= index === 0 ? 'active' : '' %>">
+                <img src="<%= image %>" class="d-block w-100" alt="Product Image <%= index + 1 %>">
+              </div>
+            <% }) %>
+          </div>
+          <button class="carousel-control-prev" type="button" data-bs-target="#productCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+          </button>
+          <button class="carousel-control-next" type="button" data-bs-target="#productCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="product-details">
+        <h2><%= product.name %></h2>
+        <p><%= product.description %></p>
+        <p class="product-price">$<%= product.price.toFixed(2) %></p>
+
+        <div class="product-quantity">
+          <label for="quantity">Quantity:</label>
+          <input type="number" id="quantity" value="1" min="1" max="10">
+        </div>
+
+        <button class="add-to-cart-btn">Add to Cart</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+  <script>
+    document.querySelector('.add-to-cart-btn').addEventListener('click', function() {
+      const quantity = document.getElementById('quantity').value;
+      alert(`${quantity} item(s) added to your cart!`);
+    });
+  </script>
+</body>
+
+</html>

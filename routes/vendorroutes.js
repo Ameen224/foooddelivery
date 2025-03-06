@@ -64,10 +64,10 @@ router.get("/login", (req, res) => {
 // Vendor Signup
 router.post("/signup", async (req, res) => {
   try {
-    const { restaurantName, restaurantAddress, email, password, confirmPassword } = req.body;
+    const { restaurantName, email, password, confirmPassword } = req.body;
     
-    if (!restaurantName || !restaurantAddress || !email || !password || !confirmPassword) {
-      return res.status(400).json({ success: false, message: "Please fill in all fields." });
+    if (!restaurantName || !email || !password || !confirmPassword) {
+      return res.status(400).json({ success: false, message: "Please fill in all required fields." });
     }
 
     if (password !== confirmPassword) {
@@ -83,7 +83,6 @@ router.post("/signup", async (req, res) => {
 
     const newVendor = new Vendor({
       restaurantName,
-      restaurantAddress,
       email,
       password: hashedPassword,
       isApproved: false, // Requires admin approval
@@ -95,6 +94,8 @@ router.post("/signup", async (req, res) => {
     return res.status(500).json({ success: false, message: "Server error", error: err.message });
   }
 });
+
+
 
 // Vendor Login
 router.post("/login", async (req, res) => {
@@ -176,25 +177,41 @@ router.get("/profile", async (req, res) => {
 // Update Vendor Profile
 router.post("/update-profile", async (req, res) => {
   try {
-    const { restaurantName, restaurantAddress, phoneNumber } = req.body;
-    if (!restaurantName || !restaurantAddress || !phoneNumber) {
-      return res.status(400).json({ message: "All fields are required" });
+    const { restaurantName, phoneNumber, location } = req.body;
+    
+    if (!restaurantName || !phoneNumber) {
+      return res.status(400).json({ message: "Restaurant name and phone number are required" });
     }
 
     if (!req.session.vendorId) {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
+    // Prepare the update object
+    const updateData = {
+      restaurantName,
+      phoneNumber
+    };
+
+    // Add location data if provided
+    if (location && (location.latitude || location.longitude)) {
+      updateData.location = {
+        latitude: location.latitude || null,
+        longitude: location.longitude || null
+      };
+    }
+
     const updatedVendor = await Vendor.findByIdAndUpdate(
       req.session.vendorId,
-      { restaurantName, restaurantAddress, phoneNumber },
+      updateData,
       { new: true }
     );
 
     if (!updatedVendor) return res.status(404).json({ message: "Vendor not found" });
     res.json({ message: "Profile updated successfully", vendor: updatedVendor });
   } catch (error) {
-    res.status(500).json({ message: "Internal server error" });
+    console.error("Update profile error:", error);
+    res.status(500).json({ message: "Internal server error", error: error.message });
   }
 });
 
@@ -222,44 +239,55 @@ router.post("/api/products/add", upload.array("product_images", 5), async (req, 
   if (!req.session.vendorId) return res.status(403).json({ message: "Unauthorized" });
 
   try {
-    console.log("Received Request Body:", req.body); // ✅ Log to check if isVeg is received
+    console.log("Received Request Body:", req.body);
     console.log("Uploaded Files:", req.files);
 
-    const { product_name, category, product_description, product_price, stock, status, second_price, isVeg } = req.body;
+    let { product_name, category, product_description, product_price, stock, status, discount_price, isVeg } = req.body;
+
+    // Ensure category is an array
+    if (!Array.isArray(category)) {
+      category = [category]; // Convert to array if it's a single category
+    }
+
+    // Validate category IDs
+    for (const categoryId of category) {
+      if (!mongoose.Types.ObjectId.isValid(categoryId)) {
+        return res.status(400).json({ message: "Invalid category ID detected" });
+      }
+    }
+
+    // Check for required fields
+    if (!product_name || !product_description || !product_price || !stock || !status || !isVeg) {
+      return res.status(400).json({ message: "Missing required product information" });
+    }
+
+    // Check if images were uploaded
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({ message: "At least one product image is required" });
+    }
+
     const imageUrls = req.files.map(file => file.path);
-
-    
-
-    // 🛑 Check if isVeg is missing
-    if (isVeg === undefined) {
-      return res.status(400).json({ message: "isVeg is required but not received" });
-    }
-
-    if (!mongoose.Types.ObjectId.isValid(category)) {
-      return res.status(400).json({ message: "Invalid category ID" });
-    }
 
     const newProduct = new Product({
       name: product_name,
-      category: category,
+      category: category, // Now properly handling multiple categories
       description: product_description,
       price: product_price,
-      stock: stock,
+      stock: parseInt(stock, 10), // Ensure stock is a number
       status: status,
-      secondprice: second_price || 0, // Default to 0 if not provided
-      isVeg: isVeg === "true", // ✅ Convert string to boolean
+      secondprice: discount_price || 0, // Match frontend field name
+      isVeg: isVeg === "true", // Convert string to boolean
       images: imageUrls,
       vendorId: req.session.vendorId,
     });
 
     await newProduct.save();
-    res.json({ message: "Product added successfully!", product: newProduct });
+    res.status(200).json({ message: "Product added successfully!", product: newProduct });
   } catch (error) {
     console.error("Error saving product:", error);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ message: "Server error occurred while adding product" });
   }
 });
-
 
 
 /// Delete a product

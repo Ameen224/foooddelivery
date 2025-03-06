@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel - Messages</title>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> 
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #f9d423, #ff4e50);
+      color: #333;
+    }
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.9);
+      padding: 15px 30px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      border-radius: 0 0 12px 12px;
+    }
+    .navbar .brand {
+      color: #333;
+      font-size: 24px;
+      font-weight: bold;
+      text-decoration: none;
+    }
+    .nav-buttons button {
+      background-color: #ffcc00;
+      border: none;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 25px;
+      color: #333;
+      font-weight: bold;
+      transition: background-color 0.3s ease;
+      margin-right: 10px;
+    }
+    .nav-buttons button:hover {
+      background-color: #e6b800;
+    }
+    .container {
+      background: rgba(255, 255, 255, 0.9);
+      padding: 20px;
+      margin: 20px;
+      border-radius: 12px;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+      background-color: #fff;
+      border: 2px solid black;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    table th, table td {
+      border: 2px solid black;
+      padding: 12px;
+      text-align: left;
+    }
+    table th {
+      background-color: #ffcc00;
+      color: #333;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="navbar">
+    <a href="#" class="brand">Messages</a>
+    <div class="nav-buttons">
+      <button onclick="window.location.href='/admin/home'">Vendors</button>
+      <button onclick="window.location.href='/admin/pending-vendors'">Pending Vendors</button>
+      <button onclick="window.location.href='/admin/category-list'">Category</button>
+      <button onclick="window.location.href='/admin/banner'">Banners</button>
+      <button onclick="window.location.href='/admin/contact'">Messages</button>
+      <button onclick="window.location.href='/admin/users'">Users</button>
+      <button onclick="window.location.href='/admin/orders'">Orders</button>
+      <button onclick="window.location.href='/admin/deliveries'">Deliveries</button>
+    </div>
+  </div>
+
+  <div class="container">
+    <h2>Messages</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Message</th>
+            </tr>
+        </thead>
+        <tbody>
+          <% if (Array.isArray(contact) && contact.length > 0) { %>
+            <% contact.forEach(message => { %>
+              <tr>
+                <td><%= message.name %></td>
+                <td><%= message.email %></td>
+                <td><%= message.message %></td>
+              </tr>
+            <% }); %>
+          <% } else { %>
+            <tr>
+              <td colspan="3">No messages found.</td>
+            </tr>
+          <% } %>
+        </tbody>
+    </table>
+  </div>
+
+</body>
+</html>

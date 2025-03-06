@@ -7,9 +7,7 @@
   <link rel="stylesheet" href="/css/bootstrap.css">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
   <link rel="stylesheet" href="http://localhost:3000/css/font-awesome.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> 
-
-
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <style>
     :root {
       --primary-color: #ff6b6b;
@@ -35,7 +33,7 @@
       padding: 2.5rem;
       border-radius: 16px;
       box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-      max-width: 600px;
+      max-width: 700px;
       width: 100%;
       margin: 2rem;
       position: relative;
@@ -107,6 +105,37 @@
       box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
     }
 
+    .btn-secondary {
+      background: #6c757d;
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      border: none;
+      cursor: pointer;
+      margin-bottom: 0.5rem;
+      margin-right: 0.5rem;
+    }
+
+    .location-section {
+      background: #f0f8ff;
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1.5rem;
+    }
+
+    .location-inputs {
+      display: flex;
+      gap: 1rem;
+    }
+
+    @media (max-width: 768px) {
+      .location-inputs {
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+    }
+
     .loading {
       display: none;
       text-align: center;
@@ -129,6 +158,26 @@
 
     .message.error {
       color: #dc3545;
+    }
+
+    #map {
+      height: 300px;
+      width: 100%;
+      border-radius: 8px;
+      margin-top: 1rem;
+      border: 1px solid #ddd;
+    }
+
+    .map-fallback {
+      height: 300px;
+      width: 100%;
+      border-radius: 8px;
+      margin-top: 1rem;
+      border: 1px solid #ddd;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: #f8f9fa;
     }
 
     @media (max-width: 768px) {
@@ -156,70 +205,231 @@
         <input type="text" id="restaurantName" name="restaurantName" value="<%= vendor.restaurantName %>" required>
       </div>
       <div class="form-group">
-        <label for="restaurantAddress">Restaurant Address</label>
-        <input type="text" id="restaurantAddress" name="restaurantAddress" value="<%= vendor.restaurantAddress %>" required>
-      </div>
-      <div class="form-group">
         <label for="phoneNumber">Phone Number</label>
         <input type="text" id="phoneNumber" name="phoneNumber" value="<%= vendor.phoneNumber %>" required>
       </div>
+
+      <!-- Location Section -->
+      <div class="location-section">
+        <h4>Restaurant Location</h4>
+        <p>Enter your restaurant's coordinates or use the buttons below to set location</p>
+        
+        <div class="location-inputs">
+          <div class="form-group">
+            <label for="latitude">Latitude</label>
+            <input type="text" id="latitude" name="latitude" value="<%= vendor.location ? vendor.location.latitude : '' %>">
+          </div>
+          <div class="form-group">
+            <label for="longitude">Longitude</label>
+            <input type="text" id="longitude" name="longitude" value="<%= vendor.location ? vendor.location.longitude : '' %>">
+          </div>
+        </div>
+        
+        <div>
+          <button type="button" id="getLocationBtn" class="btn-secondary">
+            <i class="fas fa-map-marker-alt"></i> Use Current Location
+          </button>
+          <button type="button" id="showMapBtn" class="btn-secondary">
+            <i class="fas fa-map"></i> Pick Location on Map
+          </button>
+        </div>
+        
+        <!-- Map container for selecting location -->
+        <div id="map"></div>
+        
+        <!-- Fallback iframe map that will be shown if JavaScript API fails -->
+        <div id="mapFallback" class="map-fallback" style="display: none;">
+          <iframe
+            width="100%"
+            height="100%"
+            style="border:0; border-radius: 8px;"
+            loading="lazy"
+            allowfullscreen
+            referrerpolicy="no-referrer-when-downgrade"
+            src="https://www.google.com/maps/embed/v1/place?key=YOUR_ACTUAL_API_KEY&q=Restaurant">
+          </iframe>
+        </div>
+      </div>
+
       <button type="submit" class="btn-update">Update Profile</button>
     </form>
     <div id="message" class="message"></div>
   </div>
 
+  <!-- Google Maps API - Improved loading with fallback -->
   <script>
-    document.getElementById("profileForm").addEventListener("submit", async function (event) {
-  event.preventDefault(); // Prevent default form submission
+    let map, marker;
 
-  const restaurantName = document.getElementById("restaurantName").value.trim();
-  const restaurantAddress = document.getElementById("restaurantAddress").value.trim();
-  const phoneNumber = document.getElementById("phoneNumber").value.trim();
-  const loading = document.getElementById("loading");
-  const message = document.getElementById("message");
-
-  if (!restaurantName || !restaurantAddress || !phoneNumber) {
-    message.innerHTML = "<span class='error'>All fields are required.</span>";
-    return;
-  }
-
-  loading.style.display = "block";
-  message.innerHTML = "";
-
-  try {
-    const response = await fetch("http://localhost:3000/vendor/update-profile", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ restaurantName, restaurantAddress, phoneNumber }),
-    });
-
-    loading.style.display = "none";
-
-    // Check if response is OK before parsing JSON
-    if (!response.ok) {
-        const errorText = await response.text(); // Get raw text for debugging
-        throw new Error(`Server Error: ${response.status} - ${errorText}`);
+    // Function to load Google Maps API
+    function loadGoogleMapsAPI() {
+      const apiKey = 'AIzaSyCQTVsuDfldoX5wwtX9P1LR58_4ZoXa_8w'; // Replace with your actual API key
+      
+      const script = document.createElement('script');
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&callback=initializeMapFunctions`;
+      script.async = true;
+      script.defer = true;
+      
+      // Handle API loading error
+      script.onerror = function() {
+        console.error("Google Maps API failed to load");
+        document.getElementById('map').style.display = 'none';
+        document.getElementById('mapFallback').style.display = 'block';
+        
+        // Update iframe with coordinates if available
+        const lat = document.getElementById('latitude').value || '';
+        const lng = document.getElementById('longitude').value || '';
+        
+        if (lat && lng) {
+          const iframe = document.querySelector('#mapFallback iframe');
+          iframe.src = `https://www.google.com/maps/embed/v1/view?key=${apiKey}&center=${lat},${lng}&zoom=15`;
+        }
+      };
+      
+      document.head.appendChild(script);
     }
 
-    const result = await response.json(); // Now parse safely
+    // Initialize map functions
+    function initializeMapFunctions() {
+      const lat = parseFloat(document.getElementById('latitude').value) || 47.6062; // Default to Seattle
+      const lng = parseFloat(document.getElementById('longitude').value) || -122.3321;
 
-    Swal.fire({
-        position: "center",
-        icon: "success",
-        title: "Your profile has been updated",
-        showConfirmButton: false,
-        timer: 2000
-    }).then(() => {
-        location.reload(); // Reload the current page
+      map = new google.maps.Map(document.getElementById('map'), {
+        center: { lat, lng },
+        zoom: 15,
+      });
+
+      marker = new google.maps.Marker({
+        position: { lat, lng },
+        map: map,
+        draggable: true,
+        title: "Restaurant Location",
+      });
+
+      // Update lat/lng fields when marker is dragged
+      google.maps.event.addListener(marker, 'dragend', function() {
+        const position = marker.getPosition();
+        document.getElementById('latitude').value = position.lat().toFixed(6);
+        document.getElementById('longitude').value = position.lng().toFixed(6);
+      });
+
+      // Add click event to map to place marker
+      google.maps.event.addListener(map, 'click', function(event) {
+        const clickedLocation = event.latLng;
+        marker.setPosition(clickedLocation);
+        document.getElementById('latitude').value = clickedLocation.lat().toFixed(6);
+        document.getElementById('longitude').value = clickedLocation.lng().toFixed(6);
+      });
+    }
+
+    // Get current location
+    function getLocation() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          function(position) {
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+            
+            document.getElementById('latitude').value = lat.toFixed(6);
+            document.getElementById('longitude').value = lng.toFixed(6);
+            
+            // Initialize map with these coords
+            if (map) {
+              map.setCenter({ lat, lng });
+              marker.setPosition({ lat, lng });
+            }
+          },
+          function(error) {
+            let errorMessage;
+            switch(error.code) {
+              case error.PERMISSION_DENIED:
+                errorMessage = "Location access denied. Please enable location services.";
+                break;
+              case error.POSITION_UNAVAILABLE:
+                errorMessage = "Location information unavailable.";
+                break;
+              case error.TIMEOUT:
+                errorMessage = "Request for location timed out.";
+                break;
+              default:
+                errorMessage = "An unknown error occurred.";
+            }
+            Swal.fire("Error", errorMessage, "error");
+          }
+        );
+      } else {
+        Swal.fire("Error", "Geolocation is not supported by this browser.", "error");
+      }
+    }
+
+    // Form submission
+    document.getElementById('profileForm').addEventListener('submit', async function(event) {
+      event.preventDefault();
+
+      const restaurantName = document.getElementById('restaurantName').value.trim();
+      const phoneNumber = document.getElementById('phoneNumber').value.trim();
+      const latitude = document.getElementById('latitude').value.trim();
+      const longitude = document.getElementById('longitude').value.trim();
+      
+      const loading = document.getElementById('loading');
+      const message = document.getElementById('message');
+
+      if (!restaurantName || !phoneNumber) {
+        message.innerHTML = "<span class='error'>Restaurant name and phone number are required.</span>";
+        return;
+      }
+
+      loading.style.display = 'block';
+      message.innerHTML = '';
+
+      try {
+        const response = await fetch('/vendor/update-profile', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            restaurantName, 
+            phoneNumber,
+            location: {
+              latitude: latitude ? parseFloat(latitude) : null,
+              longitude: longitude ? parseFloat(longitude) : null
+            }
+          }),
+        });
+
+        loading.style.display = 'none';
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`Server Error: ${response.status} - ${errorText}`);
+        }
+
+        const result = await response.json();
+
+        Swal.fire({
+          position: 'center',
+          icon: 'success',
+          title: 'Your profile has been updated',
+          showConfirmButton: false,
+          timer: 2000
+        }).then(() => {
+          location.reload();
+        });
+
+      } catch (error) {
+        console.error('Error:', error);
+        message.innerHTML = `<span class='error'>An error occurred: ${error.message}</span>`;
+        loading.style.display = 'none';
+      }
     });
 
-} catch (error) {
-    console.error("Error:", error);
-    message.innerHTML = `<span class='error'>An error occurred: ${error.message}</span>`;
-    loading.style.display = "none";
-}
-});
+    // Event listeners for buttons
+    document.getElementById('getLocationBtn').addEventListener('click', getLocation);
+    document.getElementById('showMapBtn').addEventListener('click', function() {
+      document.getElementById('map').style.display = 'block';
+      document.getElementById('mapFallback').style.display = 'none';
+    });
+
+    // Load Google Maps API when page loads
+    window.onload = loadGoogleMapsAPI;
   </script>
-  
 </body>
 </html>

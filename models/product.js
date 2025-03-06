@@ -16,12 +16,12 @@ const productSchema = new mongoose.Schema(
       required: true,
       min: 0 // Ensures price is non-negative
     },
-    category: {
+    category: [{
       type: mongoose.Schema.Types.ObjectId,
       ref: "Category",
       required: true,
       index: true
-    },
+    }],
   secondprice :{
     type: Number,
     require:true,

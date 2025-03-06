@@ -44,28 +44,303 @@
       color: white;
       margin-right: 10px;
     }
-    .carousel-item {
-      text-align: center;
-      color: white;
-      background: url('/images/banner.jpg') no-repeat center center/cover;
-      height: 400px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-      padding: 20px;
+    
+    /* Fixed carousel styling */
+    .slider_section {
+      position: relative;
     }
-    .carousel-item h1 {
+    
+    .carousel-item {
+      height: 100vh;
+      position: relative;
+    }
+    
+    .carousel-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .carousel-caption {
+  position: absolute;
+  top: 50%;
+  left: 10%;
+  transform: translateY(-50%);
+  text-align: left;
+  width: 40%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+}
+    
+    .carousel-caption h1 {
       font-size: 3rem;
       font-weight: bold;
+      margin-bottom: 1rem;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
     }
-    .carousel-item p {
+    
+    .carousel-caption p {
       font-size: 1.2rem;
-      margin: 10px 0;
+      margin-bottom: 1.5rem;
+      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
     }
+    
     .carousel-btn {
       margin-top: 10px;
+      padding: 0.5rem 1.5rem;
+      font-weight: bold;
     }
+    
+    /* Fallback background for carousel when no images */
+    .carousel-item.no-image {
+      background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('/images/banner.jpg') no-repeat center center/cover;
+    }
+    
+    /* Make carousel controls more visible */
+    .carousel-control-prev, .carousel-control-next {
+      width: 5%;
+    }
+    
+    .carousel-control-prev-icon, .carousel-control-next-icon {
+      background-color: rgba(0, 0, 0, 0.5);
+      padding: 20px;
+      border-radius: 50%;
+    }
+    .carousel-btn {
+  display: inline-block;
+  padding: 10px 45px;
+  background-color: #ffbe33;
+  color: #ffffff;
+  border-radius: 16px;
+  -webkit-transition: all 0.3s;
+  transition: all 0.3s;
+  border: none;
+  margin-top: 13px;
+  font-weight: bold;
+  text-decoration: none;
+}
+.carousel-btn:hover {
+  background-color: #e6a62b;
+  color: #fff;
+}
+
+
+.vendor_section {
+    background-color: #f8f9fa;
+    padding: 60px 0;
+  }
+  
+  .section_heading h2 {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+    color: #222831;
+  }
+  
+  .section_heading p {
+    color: #666;
+    margin-bottom: 30px;
+  }
+  
+  .vendor_box {
+    background-color: white;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    height: 100%;
+  }
+  
+  .vendor_box:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+  }
+  
+  .vendor_img_box {
+    height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background-color: #ffbe33;
+  }
+  
+  .restaurant-icon {
+    font-size: 4rem;
+    color: white;
+  }
+  
+  .vendor_detail_box {
+    background-color: white;
+    color: #222831;
+  }
+  
+  .vendor_detail_box h5 {
+    font-weight: bold;
+    margin-bottom: 10px;
+    font-size: 1.2rem;
+  }
+  
+  .vendor_address {
+    color: #666;
+    font-size: 0.9rem;
+    margin-bottom: 15px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+
+  tyle>
+  /* Horizontal Categories Styling */
+  .categories_container {
+    position: relative;
+    padding: 0 30px;
+  }
+  
+  .categories_scroll {
+    display: flex;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    padding: 10px 5px;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+    gap: 15px;
+  }
+  
+  .categories_scroll::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+  }
+  
+  .category_item {
+    flex: 0 0 auto;
+    width: 200px;
+  }
+  
+  .category_box {
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    height: 100%;
+    background-color: white;
+  }
+  
+  .category_box:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+  }
+  
+  .category_img_box {
+    height: 150px;
+    overflow: hidden;
+  }
+  
+  .category_img_box img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  .category_detail_box {
+    padding: 15px;
+    text-align: center;
+  }
+  
+  .category_detail_box h5 {
+    font-family: 'Dancing Script', cursive;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: #222831;
+    font-size: 1.2rem;
+  }
+  
+  /* Navigation buttons */
+  .scroll-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #ffbe33;
+    color: white;
+    border: none;
+    font-size: 1.2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    z-index: 10;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    transition: all 0.3s ease;
+  }
+  
+  .scroll-btn:hover {
+    background-color: #e6a62b;
+  }
+  
+  .prev-btn {
+    left: 0;
+  }
+  
+  .next-btn {
+    right: 0;
+  }
+  
+  .empty-state {
+    width: 100%;
+    text-align: center;
+    padding: 30px;
+    color: #666;
+  }
+
+
+
+
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      @media (max-width: 768px) {
+  .carousel-caption {
+    width: 80%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    align-items: center;
+  }
+}
+      
+      .carousel-caption h1 {
+        font-size: 2rem;
+      }
+      
+      .carousel-caption p {
+        font-size: 1rem;
+      }
+    }
+
+    @media (max-width: 768px) {
+    .vendor_carousel .row {
+      display: flex;
+      overflow-x: auto;
+      flex-wrap: nowrap;
+      padding-bottom: 20px;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none; /* Firefox */
+    }
+    
+    .vendor_carousel .row::-webkit-scrollbar {
+      display: none; /* Chrome, Safari, Edge */
+    }
+    
+    .vendor_carousel .col-sm-6 {
+      flex: 0 0 80%;
+      max-width: 80%;
+      padding: 0 10px;
+    }
+  }
   </style>
 </head>
 <body>
@@ -78,48 +353,178 @@
           </button>
           <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav mx-auto">
-              <li class="nav-item <%= activePage === 'home' ? 'active' : '' %>"><a class="nav-link" href="/">Home</a></li>
-              <li class="nav-item <%= activePage === 'menu' ? 'active' : '' %>"><a class="nav-link" href="/menu">Menu</a></li>
-              <li class="nav-item <%= activePage === 'about' ? 'active' : '' %>"><a class="nav-link" href="/about">About</a></li>
+              <li class="nav-item <%= activePage === 'home' ? 'active' : '' %>"><a class="nav-link" href="#">Home</a></li>
+              <li class="nav-item <%= activePage === 'about' ? 'active' : '' %>"><a class="nav-link" href="/user/about">About</a></li>
             </ul>
-            <div class="user_option">
-              <a href="/login"><i class="fa fa-user"></i></a>
-              <a href="/cart"><i class="fa fa-shopping-cart"></i></a>
-              <a href="/orderstatus"><i class="fa fa-list-alt"></i></a>
-            </div>
+            <div class="user_option d-flex align-items-center ml-auto">
+              <form class="form-inline my-2 mx-lg-2" id="searchForm" action="/user/search" method="GET">
+                <input class="form-control mr-sm-2" type="search" id="searchInput" name="q" placeholder="Search for products..." aria-label="Search" required>
+                <button class="btn btn-outline-light my-2 my-sm-0" type="submit">
+                    <i class="fa fa-search"></i>
+                </button>
+            </form>
+            
+              
+              <a href="/login" class="ml-3"><i class="fa fa-user"></i></a>
+              <a href="/cart" class="ml-3"><i class="fa fa-shopping-cart"></i></a>
+              <a href="/orderstatus" class="ml-3"><i class="fa fa-list-alt"></i></a>
+            </div>     
           </div>
         </nav>
       </div>
     </header>
 
     <section class="slider_section">
-      <div class="carousel slide" id="customCarousel1" data-ride="carousel">
+      <div id="customCarousel1" class="carousel slide" data-ride="carousel">
         <div class="carousel-inner">
-          <div class="carousel-item active">
-            <h1>Welcome to Our Restaurant</h1>
-            <p>Experience the best food delivered to your doorstep.</p>
-            <a href="/menu" class="btn btn-primary carousel-btn">Order Now</a>
-          </div>
-          <div class="carousel-item">
-            <h1>Enjoy Delicious Food</h1>
-            <p>Fresh ingredients, mouth-watering dishes.</p>
-            <a href="/menu" class="btn btn-primary carousel-btn">Order Now</a>
-          </div>
-          <div class="carousel-item">
-            <h1>Order Your Favorite Meals</h1>
-            <p>Quick delivery and exceptional service.</p>
-            <a href="/menu" class="btn btn-primary carousel-btn">Order Now</a>
-          </div>
+          <% if (banners && banners.length > 0) { %>
+            <% banners.forEach((banner, index) => { %>
+              <div class="carousel-item <%= index === 0 ? 'active' : '' %>">
+                <img src="<%= banner.url %>" alt="Banner Image">
+                <div class="carousel-caption">
+                  <h1><%= banner.title %></h1>
+                  <p><%= banner.description %></p>
+                  <a href="/menu" class="btn btn-primary carousel-btn">Order Now</a>
+                </div>
+              </div>
+            <% }); %>
+          <% } else { %>
+            <div class="carousel-item active no-image">
+              <div class="carousel-caption">
+                <h1>Welcome to Feane</h1>
+                <p>Delicious food for every mood</p>
+                <a href="/menu" class="btn btn-primary carousel-btn">Order Now</a>
+              </div>
+            </div>
+          <% } %>
         </div>
         <a class="carousel-control-prev" href="#customCarousel1" role="button" data-slide="prev">
           <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+          <span class="sr-only">Previous</span>
         </a>
         <a class="carousel-control-next" href="#customCarousel1" role="button" data-slide="next">
           <span class="carousel-control-next-icon" aria-hidden="true"></span>
+          <span class="sr-only">Next</span>
         </a>
       </div>
-    </section>
+    </section>      
   </div>
+
+
+<!-- Food Categories Section - Horizontal Layout -->
+<section class="categories_section py-5" style="background-color: #f0f0f0;">
+  <div class="container">
+    <div class="section_heading text-center mb-4">
+      <h2>Food Categories</h2>
+      <p>Browse our delicious options by category</p>
+    </div>
+    
+    <div class="categories_container position-relative">
+      <!-- Horizontal scrolling container -->
+      <div class="categories_scroll">
+        <!-- Category cards will be dynamically populated from your Category model -->
+        <% if (typeof categories !== 'undefined' && categories && categories.length > 0) { %>
+          <% categories.forEach((category) => { %>
+            <div class="category_item">
+              <div class="category_box text-center">
+                <div class="category_img_box">
+                  <img src="<%= category.image %>" alt="<%= category.name %>">
+                </div>
+                <div class="category_detail_box">
+                  <h5><%= category.name %></h5>
+                  <a href="/user/category/<%= category._id %>" class="btn carousel-btn">Browse</a>
+                </div>
+              </div>
+            </div>
+          <% }); %>
+        <% } else { %>
+          <!-- Fallback for when no categories are available -->
+          <div class="category_item empty-state">
+            <p>No categories available at the moment.</p>
+          </div>
+        <% } %>
+      </div>
+      
+      <!-- Navigation buttons -->
+      <button class="scroll-btn prev-btn" id="categoryPrev">
+        <i class="fa fa-chevron-left"></i>
+      </button>
+      <button class="scroll-btn next-btn" id="categoryNext">
+        <i class="fa fa-chevron-right"></i>
+      </button>
+    </div>
+    
+    <!-- Optional: Add "View All" button
+    <div class="text-center mt-4">
+      <a href="/user/categories" class="btn carousel-btn">View All Categories</a>
+    </div> -->
+  </div>
+</section>
+
+
+
+  <!-- Add this section after the carousel section or where you prefer -->
+<section class="vendor_section py-5">
+  <div class="container">
+    <div class="section_heading text-center mb-4">
+      <h2>Our Partner Restaurants</h2>
+      <p>Choose from our trusted food partners</p>
+    </div>
+    
+    <div class="vendor_carousel">
+      <div class="row">
+        <!-- Vendor cards will be dynamically populated from your Vendor model -->
+        <% if (typeof vendors !== 'undefined' && vendors && vendors.length > 0) { %>
+          <% vendors.forEach((vendor) => { %>
+            <div class="col-md-3 col-sm-6 mb-4">
+              <div class="vendor_box text-center">
+                <div class="vendor_img_box">
+                  <i class="fa fa-cutlery restaurant-icon"></i>
+                </div>
+                <div class="vendor_detail_box p-3">
+                  <h5><%= vendor.restaurantName %></h5>
+                  <p class="vendor_address">
+                    <i class="fa fa-map-marker"></i> 
+                    <% if (vendor.location && vendor.location.latitude && vendor.location.longitude) { %>
+                      <a href="https://www.google.com/maps?q=<%= vendor.location.latitude %>,<%= vendor.location.longitude %>" 
+                         target="_blank" 
+                         title="View on Google Maps">
+                        <%= vendor.location.latitude.toFixed(4) %>, <%= vendor.location.longitude.toFixed(4) %>
+                      </a>
+                    <% } else { %>
+                      Location not available
+                    <% } %>
+                  </p>
+                  </p>
+
+                  <a href="/user/restaurant/<%= vendor._id %>" class="btn carousel-btn mt-2">View Menu</a>
+                </div>
+              </div>
+            </div>
+          <% }); %>
+        <% } else { %>
+          <!-- Fallback for when no vendors are available -->
+          <div class="col-12 text-center">
+            <p>No restaurants available at the moment. Please check back later.</p>
+          </div>
+        <% } %>
+      </div>
+    </div>
+    
+    <!-- Optional: Add navigation buttons for mobile scrolling -->
+    <div class="vendor_controls text-center mt-3 d-md-none">
+      <button class="btn btn-sm carousel-btn mx-2" id="vendorPrev">
+        <i class="fa fa-chevron-left"></i> Previous
+      </button>
+      <button class="btn btn-sm carousel-btn mx-2" id="vendorNext">
+        Next <i class="fa fa-chevron-right"></i>
+      </button>
+    </div>
+  </div>
+</section>
+
+
+
 
   <footer class="footer_section py-5">
     <div class="container">
@@ -152,11 +557,47 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
   <script>
-    $(document).ready(function(){
-      $('.navbar-toggler').click(function(){
-        $('#navbarSupportedContent').toggleClass('show');
+  document.addEventListener("DOMContentLoaded", function () {
+    
+    // CATEGORY SCROLL FUNCTIONALITY
+    const categoryScroll = document.querySelector(".categories_scroll");
+    const categoryPrev = document.getElementById("categoryPrev");
+    const categoryNext = document.getElementById("categoryNext");
+
+    if (categoryScroll) {
+      categoryPrev.addEventListener("click", () => {
+        categoryScroll.scrollBy({ left: -200, behavior: "smooth" });
       });
-    });
+
+      categoryNext.addEventListener("click", () => {
+        categoryScroll.scrollBy({ left: 200, behavior: "smooth" });
+      });
+    }
+
+    // SEARCH VALIDATION
+    const searchForm = document.getElementById("searchForm");
+    const searchInput = document.getElementById("searchInput");
+
+    if (searchForm) {
+      searchForm.addEventListener("submit", function (e) {
+        if (!searchInput.value.trim()) {
+          e.preventDefault();
+          alert("Please enter a search query.");
+        }
+      });
+    }
+
+    // MOBILE HORIZONTAL SCROLL FOR VENDORS
+    const vendorCarousel = document.querySelector(".vendor_carousel .row");
+    if (vendorCarousel) {
+      vendorCarousel.style.display = "flex";
+      vendorCarousel.style.overflowX = "auto";
+      vendorCarousel.style.scrollBehavior = "smooth";
+      vendorCarousel.style.whiteSpace = "nowrap";
+    }
+  });
+
+
   </script>
 </body>
 </html>

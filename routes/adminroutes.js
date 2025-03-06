@@ -18,6 +18,7 @@ const Product = require("../models/product");
 const Category = require("../models/category");
 const cloudinary = require("../config/cloudinary"); 
 const Banner = require("../models/banner");
+const contact =require("../models/contact")
 
 
 
@@ -187,18 +188,8 @@ router.post("/add-category", upload.single("image"), async (req, res) => {
       return res.status(400).json({ message: "Category name already exists" });
     }
 
-    // Upload image to Cloudinary if provided
-    let imageUrl = "";
-    if (req.file) {
-      const result = await new Promise((resolve, reject) => {
-        cloudinary.uploader.upload_stream({ resource_type: "image" }, (error, result) => {
-          if (error) reject(error);
-          else resolve(result);
-        }).end(req.file.buffer);
-      });
-
-      imageUrl = result.secure_url; // Fix: Use result.secure_url instead of assigning the whole result object
-    }
+    // Get Image URL from multer-storage-cloudinary
+    const imageUrl = req.file ? req.file.path : "";
 
     // Create new category
     const newCategory = new Category({ name, image: imageUrl });
@@ -230,70 +221,49 @@ router.get("/get-category/:id", async (req, res) => {
 router.put("/edit-category/:id", upload.single("image"), async (req, res) => {
   try {
     console.log("🟢 Edit request received for category ID:", req.params.id);
-    console.log("📌 Request body:", req.body);
-    console.log("📷 Uploaded file:", req.file);
 
     const { name, removeImage } = req.body;
     const category = await Category.findById(req.params.id);
 
     if (!category) {
-      console.log("🔴 Category not found!");
       return res.status(404).json({ success: false, message: "Category not found" });
     }
 
-    // Handle Image Removal
-    if (removeImage === "true" && category.imageId) {
+    // Remove image if requested
+    if (removeImage === "true" && category.image) {
       try {
-        await cloudinary.uploader.destroy(category.imageId);
-        category.image = null;
-        category.imageId = null;
+        const publicId = category.image.split('/').pop().split('.')[0];
+        await cloudinary.uploader.destroy(publicId);
+        category.image = "";
       } catch (cloudError) {
         console.error("Cloudinary error:", cloudError);
         return res.status(500).json({ success: false, message: "Error removing image" });
       }
     }
 
-    // Handle New Image Upload
+    // Upload new image if provided
     if (req.file) {
-      console.log("🔄 Uploading new image...");
+      // Delete old image if it exists
+      if (category.image) {
+        const publicId = category.image.split('/').pop().split('.')[0];
+        await cloudinary.uploader.destroy(publicId);
+      }
       
-      if (category.imageId) await cloudinary.uploader.destroy(category.imageId);
-
-      const uploadPromise = new Promise((resolve, reject) => {
-        const stream = cloudinary.uploader.upload_stream({ resource_type: "image" }, (error, result) => {
-          if (error) {
-            console.error("Cloudinary upload error:", error);
-            reject(error);
-          } else {
-            resolve(result);
-          }
-        });
-        stream.end(req.file.buffer);
-      });
-
-      const uploadResult = await uploadPromise;
-
-      category.image = uploadResult.secure_url;
-      category.imageId = uploadResult.public_id;
-    }
-
-    // Ensure Image Field Doesn't Cause Validation Error
-    if (!category.image) {
-      category.image = ""; // Ensure empty string if required in schema
+      category.image = req.file.path; // Directly use uploaded image URL
     }
 
     // Update Name
     category.name = name || category.name;
     await category.save();
 
-    console.log("✅ Category updated successfully!");
     res.json({ success: true, category });
 
   } catch (error) {
     console.error("❌ Error updating category:", error);
-    res.status(500).json({ success: false, message: "Error updating category", error });
+    res.status(500).json({ success: false, message: "Error updating category" });
   }
 });
+
 
 
 
@@ -310,8 +280,13 @@ router.delete("/delete-category/:id", async (req, res) => {
 
     const category = await Category.findById(id);
     if (!category) {
-      console.log("Category not found in DB");
       return res.status(404).json({ success: false, message: "Category not found" });
+    }
+
+    // Delete image from Cloudinary if it exists
+    if (category.image) {
+      const publicId = category.image.split('/').pop().split('.')[0];
+      await cloudinary.uploader.destroy(publicId);
     }
 
     await Category.findByIdAndDelete(id);
@@ -323,6 +298,7 @@ router.delete("/delete-category/:id", async (req, res) => {
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 });
+
 
 
 
@@ -523,5 +499,19 @@ router.post('/banners/delete/:id/:index', async (req, res) => {
   }
 });
 
+
+
+// Fetch messages
+router.get("/contact", async (req, res) => {
+  try {
+      const contactMessages = await contact.find();
+      res.render("admin/contact", { contact: contactMessages });
+  } catch (error) {
+      console.error("Error fetching messages:", error);
+      res.status(500).send("Internal Server Error");
+  }
+});
+
+  
 
 module.exports = router;
