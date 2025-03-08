@@ -246,7 +246,7 @@
         confirmButtonText: "Yes, delete it!"
       }).then((result) => {
         if (result.isConfirmed) {
-          fetch(`/admin/coupon/${id}`, { method: "DELETE" })
+          fetch(`/admin/coupon/delete/${id}`, { method: "DELETE" })
             .then(response => response.json())
             .then(data => {
               if (data.success) {

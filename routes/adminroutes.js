@@ -554,7 +554,7 @@ router.post("/add-coupon", async (req, res) => {
 });
 
 // DELETE - Delete a coupon
-router.delete("/:id", async (req, res) => {
+router.delete("/coupon/delete/:id", async (req, res) => {
   try {
     await coupon.findByIdAndDelete(req.params.id);
     res.json({ success: true });
