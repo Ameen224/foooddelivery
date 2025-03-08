@@ -19,6 +19,7 @@ const Category = require("../models/category");
 const cloudinary = require("../config/cloudinary"); 
 const Banner = require("../models/banner");
 const contact =require("../models/contact")
+const coupon=require("../models/coupon")
 
 
 
@@ -512,6 +513,55 @@ router.get("/contact", async (req, res) => {
   }
 });
 
+
+
+// GET all coupons (for displaying in the table)
+router.get("/coupon", async (req, res) => {
+  try {
+    const coupons = await coupon.find();
+    res.render("admin/coupon", { coupons });
+  } catch (err) {
+    res.status(500).send("Server error");
+  }
+});
+
+// POST - Add a new coupon
+router.post("/add-coupon", async (req, res) => {
+  try {
+    const { code, type, discount, minOrder, startDate, expiry, usageLimit, perCustomer } = req.body;
+
+    const existingCoupon = await coupon.findOne({ code });
+    if (existingCoupon) {
+      return res.status(400).send("Coupon code already exists.");
+    }
+
+    const newCoupon = new coupon({
+      code,
+      type,
+      discount,
+      minOrder,
+      startDate,
+      expiry,
+      usageLimit,
+      perCustomer,
+    });
+
+    await newCoupon.save();
+    res.redirect("/admin/coupon");
+  } catch (err) {
+    res.status(500).send("Error creating coupon");
+  }
+});
+
+// DELETE - Delete a coupon
+router.delete("/:id", async (req, res) => {
+  try {
+    await coupon.findByIdAndDelete(req.params.id);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ success: false, message: "Error deleting coupon" });
+  }
+});
   
 
 module.exports = router;

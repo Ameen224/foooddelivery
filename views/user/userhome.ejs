@@ -574,18 +574,8 @@
       });
     }
 
-    // SEARCH VALIDATION
-    const searchForm = document.getElementById("searchForm");
-    const searchInput = document.getElementById("searchInput");
-
-    if (searchForm) {
-      searchForm.addEventListener("submit", function (e) {
-        if (!searchInput.value.trim()) {
-          e.preventDefault();
-          alert("Please enter a search query.");
-        }
-      });
-    }
+    
+    
 
     // MOBILE HORIZONTAL SCROLL FOR VENDORS
     const vendorCarousel = document.querySelector(".vendor_carousel .row");
@@ -596,6 +586,8 @@
       vendorCarousel.style.whiteSpace = "nowrap";
     }
   });
+
+  
 
 
   </script>

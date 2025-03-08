@@ -5,7 +5,7 @@ const Product = require("../models/product");
 const Banner = require("../models/banner");
 const vendor = require("../models/vendor");
 const Contact = require('../models/contact');
-const Category = require("../models/category")
+const Category = require("../models/category");
 
 // Home page route
 router.get("/home", async (req, res) => {
@@ -236,6 +236,66 @@ router.get("/restaurant/:id/product/:productId?", async (req, res) => {
         res.status(500).render("error", { message: "Internal Server Error", error });
     }
 });
+
+
+
+// Search route handler
+router.get('/search', async (req, res) => {
+    try {
+      const searchQuery = req.query.q;
+      
+      if (!searchQuery) {
+        return res.redirect('/');
+      }
+      
+      // Find products matching the search query
+      const products = await Product.find({
+        $or: [
+          { name: { $regex: searchQuery, $options: 'i' } },
+          { description: { $regex: searchQuery, $options: 'i' } }
+        ]
+      }).populate('vendorId'); // Make sure this field name matches your Product schema
+      
+      // Group products by vendor/restaurant
+      const restaurantsWithMatchingProducts = {};
+      
+      products.forEach(product => {
+        // Check if vendorId exists and is populated
+        if (product.vendorId && product.vendorId._id) {
+          const vendorId = product.vendorId._id.toString();
+          
+          if (!restaurantsWithMatchingProducts[vendorId]) {
+            restaurantsWithMatchingProducts[vendorId] = {
+              vendor: product.vendorId, // Use the populated vendorId object
+              matchingProducts: []
+            };
+          }
+          
+          restaurantsWithMatchingProducts[vendorId].matchingProducts.push(product);
+        }
+      });
+      
+      // Convert the object to an array for the template
+      const results = Object.values(restaurantsWithMatchingProducts);
+      
+      res.render('user/search-results', {
+        results,
+        searchQuery,
+        totalProducts: products.length,
+        totalRestaurants: results.length
+      });
+      
+    } catch (error) {
+      console.error('Search error:', error);
+      // Since the error view is missing, provide a basic error response
+      res.status(500).send(`
+        <h1>Error</h1>
+        <p>An error occurred while searching</p>
+        <p>${process.env.NODE_ENV === 'development' ? error.message : ''}</p>
+        <a href="/">Return to Home</a>
+      `);
+    }
+  });
 
 
 module.exports = router;
