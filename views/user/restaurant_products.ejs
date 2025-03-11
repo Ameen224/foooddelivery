@@ -6,7 +6,6 @@
     <title><%= vendordata.restaurantName %> - Products</title>
     
     <!-- External CSS & Fonts -->
-    <link rel="stylesheet" href="/styles.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.css">
@@ -24,19 +23,30 @@
             font-display: swap;
         }
 
-        body {
-            font-family: 'CustomFont', sans-serif;
-            color: #222;
-            background-color: #f8f9fa;
-            margin: 0;
-            padding: 0;
+        :root {
+            --primary-color: #222831;
+            --accent-color: #ffbe33;
+            --accent-hover: #e6a62b;
+            --light-bg: #f8f9fa;
+            --text-color: #222;
+            --muted-text: #666;
+            --card-bg: #fff;
+            --card-border: #eaeaea;
         }
 
-        h1 {
-            font-family: 'Dancing Script', cursive;
-            text-align: center;
-            color: #222831;
-            margin: 20px 0;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'CustomFont', sans-serif;
+            color: var(--text-color);
+            background-color: var(--light-bg);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
 
         /* Navbar Styling */
@@ -44,162 +54,482 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            background-color: #222831;
-            padding: 15px 20px;
+            background-color: var(--primary-color);
+            padding: 1rem;
             color: white;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            background-color: #222831;
+            padding: 20px 0;
         }
 
         .navbar h2 {
-            font-size: 22px;
+            font-size: 1.5rem;
             margin: 0;
+            text-align: center;
+            flex: 1;
         }
 
         .back-button {
             background: none;
             border: none;
             color: white;
-            font-size: 20px;
+            font-size: 1rem;
             cursor: pointer;
             display: flex;
             align-items: center;
+            padding: 0.5rem;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .back-button:hover {
+            background-color: rgba(255, 255, 255, 0.1);
         }
 
         .back-button i {
-            margin-right: 5px;
+            margin-right: 8px;
         }
 
-        /* Vendor Header */
-        .vendor-header {
+        .cart-icon {
+            font-size: 1.25rem;
+            color: white;
+            margin-right: 0.5rem;
+            position: relative;
+        }
+
+        .cart-count {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background-color: var(--accent-color);
+            color: white;
+            font-size: 0.7rem;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Header Section */
+        .restaurant-header {
+            background-color: var(--accent-color);
+            padding: 2rem 1rem;
             text-align: center;
-            padding: 20px;
+            color: white;
+            position: relative;
         }
 
-        /* Product List - Vertical Layout */
+        .restaurant-header::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 0;
+            right: 0;
+            height: 30px;
+            background-color: var(--light-bg);
+            clip-path: polygon(0 0, 100% 0, 50% 100%);
+        }
+
+        .restaurant-header h1 {
+            margin: 0;
+            font-size: 2.2rem;
+            font-weight: bold;
+        }
+
+        .restaurant-description {
+            margin-top: 1rem;
+            font-size: 1rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Category Filters */
+        .category-filters {
+            display: flex;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            gap: 0.5rem;
+            padding: 1.5rem 1rem;
+            background-color: var(--light-bg);
+            margin-bottom: 1rem;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none; /* Firefox */
+        }
+
+        .category-filters::-webkit-scrollbar {
+            display: none; /* Chrome, Safari, Edge */
+        }
+
+        .category-filter {
+            padding: 0.5rem 1rem;
+            background-color: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 50px;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .category-filter.active {
+            background-color: var(--accent-color);
+            color: white;
+            border-color: var(--accent-color);
+        }
+
+        .category-filter:hover {
+            background-color: var(--accent-hover);
+            color: white;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 1rem;
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin: 1.5rem 0;
+            text-align: center;
+            color: var(--primary-color);
+            position: relative;
+        }
+
+        .section-title::after {
+            content: '';
+            display: block;
+            width: 50px;
+            height: 3px;
+            background-color: var(--accent-color);
+            margin: 0.5rem auto;
+        }
+
+        /* Product List */
         .product-list {
             display: flex;
             flex-direction: column;
-            align-items: center;
-            gap: 20px;
-            padding: 20px;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
         }
 
         .product-card {
-            border: 1px solid #ddd;
-            padding: 15px;
-            border-radius: 8px;
-            width: 100%;
-            max-width: 500px;
-            text-align: center;
-            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
-            background-color: #fff;
-            transition: transform 0.2s ease-in-out;
+            display: flex;
+            flex-direction: row;
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s, box-shadow 0.3s;
         }
 
         .product-card:hover {
-            transform: scale(1.03);
+            transform: translateY(-5px);
+            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);
         }
 
-        /* Image Carousel */
+        .product-image-container {
+            width: 40%;
+            min-width: 200px;
+            position: relative;
+        }
+
         .carousel {
-            width: 100%;
-            border-radius: 8px;
-            overflow: hidden;
+            height: 100%;
+        }
+
+        .carousel .slick-list, 
+        .carousel .slick-track {
+            height: 100%;
         }
 
         .carousel img {
             width: 100%;
-            height: 250px;
+            height: 100%;
             object-fit: cover;
-            border-radius: 5px;
         }
 
-        /* Product Details */
-        .product-card h3 {
-            margin: 10px 0;
-            font-size: 1.5em;
+        .product-details {
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
         }
 
-        .product-card p {
-            color: #666;
-        }
-
-        /* Add to Cart Button */
-        .btn {
-            display: inline-block;
-            background-color: #ffbe33;
-            color: white;
-            padding: 10px 15px;
-            border-radius: 5px;
+        .product-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            color: var(--primary-color);
             text-decoration: none;
-            transition: background 0.3s ease-in-out;
-            margin-top: 10px;
         }
 
-        .btn:hover {
-            background-color: #e6a62b;
+        .product-title:hover {
+            color: var(--accent-color);
         }
 
+        .product-price {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin: 0.75rem 0;
+            color: var(--accent-color);
+        }
+
+        .product-description {
+            margin-bottom: 1rem;
+            color: var(--muted-text);
+            line-height: 1.6;
+            flex: 1;
+        }
+
+        .product-actions {
+            display: flex;
+            align-items: center;
+            margin-top: 1rem;
+            gap: 1rem;
+        }
+
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+        }
+
+        .quantity-btn {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--light-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s;
+        }
+
+        .quantity-btn:hover {
+            background-color: var(--card-border);
+        }
+
+        .quantity-value {
+            width: 40px;
+            height: 32px;
+            text-align: center;
+            border: 1px solid var(--card-border);
+            margin: 0 0.5rem;
+            border-radius: 4px;
+        }
+
+        .add-to-cart-btn {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s;
+            flex: 1;
+        }
+
+        .add-to-cart-btn:hover {
+            background-color: var(--accent-hover);
+        }
+
+        .add-to-cart-btn i {
+            margin-right: 0.5rem;
+        }
+
+        /* Badge */
+        .badge {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            background-color: var(--accent-color);
+            color: white;
+            padding: 0.3rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            z-index: 10;
+        }
+
+        /* Footer */
+        .footer {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 2rem 1rem;
+            text-align: center;
+            margin-top: 2rem;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .footer-brand {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+
+        /* Media Queries */
         @media (max-width: 768px) {
-            .product-list {
-                padding: 0 20px;
+            .product-card {
+                flex-direction: column;
+            }
+
+            .product-image-container {
+                width: 100%;
+                height: 200px;
+            }
+
+            .carousel {
+                border-radius: 0;
+            }
+
+            .product-details {
+                padding: 1rem;
+            }
+
+            .product-actions {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .quantity-controls {
+                justify-content: center;
+                margin-bottom: 0.5rem;
+            }
+        }
+
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .product-image-container {
+                width: 35%;
             }
         }
     </style>
 </head>
 <body>
-
     <!-- Navbar with Back Button -->
     <div class="navbar">
         <button class="back-button" onclick="window.history.back()">
             <i class="fas fa-arrow-left"></i> Back
         </button>
         <h2><%= vendordata.restaurantName %></h2>
-        <div></div>
+        <div class="cart-icon">
+            <i class="fas fa-shopping-cart"></i>
+            <span class="cart-count">0</span>
+        </div>
     </div>
 
-    <!-- Vendor Header -->
-    <div class="vendor-header">
+    <!-- Restaurant Header -->
+    <div class="restaurant-header">
         <h1><%= vendordata.restaurantName %></h1>
+        <div class="restaurant-description">
+            <% if (vendordata.description) { %>
+                <p><%= vendordata.description %></p>
+            <% } else { %>
+                <p>Delicious food made fresh for you. Explore our menu and enjoy!</p>
+            <% } %>
+        </div>
     </div>
 
-    <h2 style="text-align:center;">Our Products</h2>
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Category Filters (Example) -->
+        <div class="category-filters">
+            <div class="category-filter active">All</div>
+            <div class="category-filter">Appetizers</div>
+            <div class="category-filter">Main Course</div>
+            <div class="category-filter">Desserts</div>
+            <div class="category-filter">Beverages</div>
+            <div class="category-filter">Special Deals</div>
+        </div>
 
-    <!-- Product List -->
-    <div class="product-list">
-        <% products.forEach((product) => { %>
-            <div class="product-card">
-                
-                <!-- Image Carousel (Clickable) -->
-                <a href="/user/product/<%= product._id %>">
-                    <div class="carousel">
-                        <% if (product.images && product.images.length > 0) { %>
-                            <% product.images.forEach(image => { %>
-                                <img src="<%= image %>" alt="<%= product.name %>">
-                            <% }) %>
-                        <% } else { %>
-                            <img src="/default-product-image.png" alt="<%= product.name %>">
-                        <% } %>
+        <h2 class="section-title">Our Menu</h2>
+
+        <!-- Product List -->
+        <div class="product-list">
+            <% products.forEach((product, index) => { %>
+                <div class="product-card">
+                    <% if (index % 3 === 0) { %>
+                        <div class="badge">Popular</div>
+                    <% } %>
+                    
+                    <div class="product-image-container">
+                        <div class="carousel">
+                            <% if (product.images && product.images.length > 0) { %>
+                                <% product.images.forEach(image => { %>
+                                    <div><img src="<%= image %>" alt="<%= product.name %>"></div>
+                                <% }) %>
+                            <% } else { %>
+                                <div><img src="/default-product-image.png" alt="<%= product.name %>"></div>
+                            <% } %>
+                        </div>
                     </div>
-                </a>
-
-                <!-- Clickable Product Name -->
-                <a href="/user/product/<%= product._id %>" style="text-decoration: none; color: inherit;">
-                    <h3><%= product.name %></h3>
-                </a>
-
-                <p>Price: $<%= product.price ? product.price.toFixed(2) : 'N/A' %></p>
-
-                <% if (product.description) { %>
-                    <p><%= product.description %></p>
-                <% } %>
-
-                <a href="#" class="btn">Add to Cart</a>
-            </div>
-        <% }); %>
+                    
+                    <div class="product-details">
+                        <a href="/user/product/<%= product._id %>" class="product-title">
+                            <%= product.name %>
+                        </a>
+                        
+                        <div class="product-price">
+                            $<%= product.price ? product.price.toFixed(2) : 'N/A' %>
+                        </div>
+                        
+                        <% if (product.description) { %>
+                            <div class="product-description">
+                                <%= product.description %>
+                            </div>
+                        <% } else { %>
+                            <div class="product-description">
+                                A delicious dish prepared with the finest ingredients.
+                            </div>
+                        <% } %>
+                        
+                        <div class="product-actions">
+                            <div class="quantity-controls">
+                                <button class="quantity-btn decrease">-</button>
+                                <input type="text" class="quantity-value" value="1" readonly>
+                                <button class="quantity-btn increase">+</button>
+                            </div>
+                            
+                            <button class="add-to-cart-btn" data-id="<%= product._id %>">
+                                <i class="fas fa-shopping-cart"></i> Add to Cart
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            <% }); %>
+        </div>
     </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-brand"><%= vendordata.restaurantName %></div>
+            <p>&copy; 2025 All rights reserved.</p>
+        </div>
+    </footer>
 
     <script>
         $(document).ready(function(){
+            // Initialize slick carousel
             $(".carousel").slick({
                 dots: true,
                 infinite: true,
@@ -207,10 +537,48 @@
                 slidesToShow: 1,
                 slidesToScroll: 1,
                 autoplay: true,
-                autoplaySpeed: 2000
+                autoplaySpeed: 3000,
+                arrows: false
+            });
+            
+            // Quantity controls
+            $('.increase').click(function() {
+                var input = $(this).siblings('.quantity-value');
+                var value = parseInt(input.val());
+                input.val(value + 1);
+            });
+            
+            $('.decrease').click(function() {
+                var input = $(this).siblings('.quantity-value');
+                var value = parseInt(input.val());
+                if(value > 1) {
+                    input.val(value - 1);
+                }
+            });
+            
+            // Category filters
+            $('.category-filter').click(function() {
+                $('.category-filter').removeClass('active');
+                $(this).addClass('active');
+                // Add filtering logic here if needed
+            });
+            
+            // Add to cart functionality
+            $('.add-to-cart-btn').click(function() {
+                var productId = $(this).data('id');
+                var quantity = $(this).parent().find('.quantity-value').val();
+                
+                // Example cart update logic
+                var currentCount = parseInt($('.cart-count').text());
+                $('.cart-count').text(currentCount + parseInt(quantity));
+                
+                // Show a quick notification
+                alert('Added to cart!');
+                
+                // Here you would typically make an AJAX call to update the cart
+                console.log('Added product ID: ' + productId + ' with quantity: ' + quantity);
             });
         });
     </script>
-
 </body>
 </html>

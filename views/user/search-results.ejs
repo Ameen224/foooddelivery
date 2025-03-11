@@ -3,9 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Search Results - <%= searchQuery %></title>
+    <title>FoodFinder - Restaurant Search</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
+        :root {
+            --primary-color: #222831;
+            --accent-color: #ffbe33;
+            --accent-hover: #e6a62b;
+            --light-bg: #f8f9fa;
+            --text-color: #222;
+            --card-bg: #fff;
+            --card-border: #eaeaea;
+            --muted-text: #666;
+        }
+        
         @font-face {
             font-family: 'CustomFont';
             src: url('/fonts/custom-font.woff2') format('woff2'),
@@ -13,128 +24,540 @@
             font-weight: normal;
             font-style: normal;
         }
-        body {
-            font-family: 'CustomFont', sans-serif;
-            color: #222;
-            background-color: #f8f9fa;
+        
+        * {
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
         }
+        
+        body {
+            font-family: 'CustomFont', sans-serif;
+            color: var(--text-color);
+            background-color: var(--light-bg);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* Navbar Styling */
         .navbar {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            background-color: #222831;
-            padding: 15px 20px;
+            background-color: var(--primary-color);
+            padding: 1rem;
             color: white;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            background-color: #222831;
+            padding: 20px 0;
         }
+        
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white;
+            text-decoration: none;
+        }
+        
         .back-button {
             background: none;
             border: none;
             color: white;
-            font-size: 18px;
+            font-size: 1rem;
             cursor: pointer;
             display: flex;
             align-items: center;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            transition: background-color 0.3s;
         }
+        
+        .back-button:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
         .back-button i {
-            margin-right: 5px;
+            margin-right: 8px;
         }
-        h1 {
-            font-family: 'Dancing Script', cursive;
+        
+        /* Header Section */
+        .header-section {
+            background-color: var(--accent-color);
+            padding: 2rem 1rem;
             text-align: center;
-            color: #222831;
-            margin: 20px 0;
+            color: white;
+            position: relative;
         }
-        .vendor_carousel {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
+        
+        .header-section::after {
+            content: '';
+            position: absolute;
+            bottom: -30px;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background-color: var(--light-bg);
+            clip-path: polygon(0 0, 100% 0, 50% 100%);
+        }
+        
+        .header-section h1 {
+            margin: 0;
+            font-size: 2.2rem;
+            font-weight: bold;
+        }
+        
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 2rem 1rem;
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+        }
+        
+        /* Search Form */
+        .search-form {
             max-width: 600px;
-            margin: auto;
+            margin: 0 auto 2rem auto;
         }
-        .vendor_box {
-            border: 1px solid #ddd;
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+        
+        .search-input-group {
+            display: flex;
+            border-radius: 30px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .search-input {
+            flex-grow: 1;
+            padding: 1rem 1.5rem;
+            border: none;
+            font-size: 1rem;
+            outline: none;
+        }
+        
+        .search-button {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 0 1.5rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
             display: flex;
             align-items: center;
-            background-color: #fff;
         }
-        .vendor_img_box {
-            width: 80px;
-            height: 80px;
+        
+        .search-button:hover {
+            background-color: var(--accent-hover);
+        }
+        
+        .search-button i {
+            font-size: 1.2rem;
+        }
+        
+        /* Restaurant List Styling */
+        .restaurant-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+        
+        .restaurant-card {
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            background-color: var(--card-bg);
+            transition: transform 0.3s, box-shadow 0.3s;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        
+        .restaurant-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .restaurant-header {
+            padding: 1.5rem;
+            background-color: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+        }
+        
+        .restaurant-icon {
+            width: 60px;
+            height: 60px;
             display: flex;
             align-items: center;
             justify-content: center;
             border-radius: 50%;
-            background-color: #ffbe33;
-            margin-right: 15px;
+            background-color: var(--accent-color);
+            margin-right: 1rem;
+            flex-shrink: 0;
         }
-        .restaurant-icon {
-            font-size: 24px;
+        
+        .restaurant-icon i {
+            font-size: 1.8rem;
             color: white;
         }
-        .vendor_detail_box {
-            flex-grow: 1;
-        }
-        .vendor_detail_box h5 {
-            margin: 0;
-            font-size: 18px;
+        
+        .restaurant-title {
+            font-size: 1.2rem;
             font-weight: bold;
         }
-        .vendor_address {
-            font-size: 14px;
-            color: #666;
+        
+        .restaurant-body {
+            padding: 1.5rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
         }
+        
+        .restaurant-address {
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: flex-start;
+        }
+        
+        .restaurant-address i {
+            color: var(--accent-color);
+            margin-right: 0.5rem;
+            margin-top: 3px;
+        }
+        
+        .location-link {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+        
+        .location-link:hover {
+            color: var(--accent-color);
+            text-decoration: underline;
+        }
+        
+        .restaurant-footer {
+            margin-top: auto;
+            padding: 0 1.5rem 1.5rem 1.5rem;
+        }
+        
         .btn {
-            background-color: #ffbe33;
-            color: #fff;
-            padding: 8px 12px;
-            border-radius: 5px;
+            display: block;
+            width: 100%;
+            background-color: var(--accent-color);
+            color: white;
+            padding: 0.8rem 1rem;
+            border-radius: 8px;
             text-decoration: none;
             transition: background 0.3s;
+            text-align: center;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
         }
+        
         .btn:hover {
-            background-color: #e6a62b;
+            background-color: var(--accent-hover);
+        }
+        
+        /* Empty state and list view */
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            grid-column: 1 / -1;
+        }
+        
+        .empty-state i {
+            font-size: 3rem;
+            color: var(--accent-color);
+            margin-bottom: 1rem;
+        }
+        
+        .empty-state p {
+            font-size: 1.2rem;
+            color: var(--muted-text);
+        }
+        
+        .list-view {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .restaurant-list-item {
+            display: flex;
+            align-items: center;
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 1rem;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .restaurant-list-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+        }
+        
+        .list-item-icon {
+            width: 70px;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background-color: var(--accent-color);
+            margin-right: 1rem;
+            flex-shrink: 0;
+        }
+        
+        .list-item-icon i {
+            font-size: 1.5rem;
+            color: white;
+        }
+        
+        .list-item-details {
+            flex-grow: 1;
+        }
+        
+        .list-item-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        
+        .list-item-address {
+            display: flex;
+            align-items: center;
+            color: var(--muted-text);
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .list-item-address i {
+            color: var(--accent-color);
+            margin-right: 0.5rem;
+        }
+        
+        .list-item-action {
+            margin-left: 1rem;
+        }
+        
+        /* View Toggles */
+        .view-toggle {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 1rem;
+        }
+        
+        .view-toggle-btn {
+            background-color: var(--card-bg);
+            border: 1px solid var(--card-border);
+            padding: 0.5rem;
+            border-radius: 5px;
+            margin-left: 0.5rem;
+            cursor: pointer;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        
+        .view-toggle-btn:hover, .view-toggle-btn.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        /* Footer */
+        .footer {
+            background-color: var(--primary-color);
+            color: white;
+            text-align: center;
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+        
+        /* Media Queries */
+        @media (max-width: 768px) {
+            .restaurant-list {
+                grid-template-columns: 1fr;
+            }
+            
+            .header-section h1 {
+                font-size: 1.8rem;
+            }
+            
+            .restaurant-list-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .list-item-icon {
+                margin-bottom: 1rem;
+            }
+            
+            .list-item-action {
+                margin-left: 0;
+                margin-top: 1rem;
+                width: 100%;
+            }
+        }
+        
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .restaurant-list {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
     </style>
 </head>
 <body>
+    <!-- Navbar -->
     <nav class="navbar">
         <button class="back-button" onclick="history.back()">
             <i class="fas fa-arrow-left"></i> Back
         </button>
+        <a href="/" class="navbar-brand">FoodFinder</a>
+        <div></div> <!-- Empty div for flex spacing -->
     </nav>
-    <h1>Search Results for "<%= searchQuery %>"</h1>
-    <div class="vendor_carousel">
-        <% if (results.length === 0) { %>
-            <p class="text-center">No restaurants found for this search.</p>
-        <% } else { %>
-            <% results.forEach(result => { %>
-                <div class="vendor_box">
-                    <div class="vendor_img_box">
-                        <i class="fa fa-utensils restaurant-icon"></i>
-                    </div>
-                    <div class="vendor_detail_box">
-                        <h5><%= result.vendor.restaurantName %></h5>
-                        <p class="vendor_address">
-                            <i class="fa fa-map-marker"></i>
-                            <% if (result.vendor.location) { %>
-                                <a href="https://www.google.com/maps?q=<%= result.vendor.location.latitude %>,<%= result.vendor.location.longitude %>" 
-                                   target="_blank" title="View on Google Maps">
-                                    View Location
-                                </a>
-                            <% } else { %>
-                                Location not available
-                            <% } %>
-                        </p>
-                        <a href="/user/restaurant/<%= result.vendor._id %><% if (result.matchingProducts.length > 0) { %>/product/<%= result.matchingProducts[0]._id %><% } %>?searchQuery=<%= searchQuery %>" class="btn">View Products</a>
-                    </div>
-                </div>
-            <% }); %>
-        <% } %>
+
+    <!-- Header Section -->
+    <div class="header-section">
+        <h1>Find Your Perfect Meal</h1>
     </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        
+        
+        <!-- View Toggle -->
+        <div class="view-toggle">
+            <button class="view-toggle-btn" id="grid-view-btn">
+                <i class="fas fa-th"></i>
+            </button>
+            <button class="view-toggle-btn active" id="list-view-btn">
+                <i class="fas fa-list"></i>
+            </button>
+        </div>
+        
+        <!-- Restaurant Grid View (Hidden by default) -->
+        <div class="restaurant-list" id="grid-view" style="display: none;">
+            <% if (!results || results.length === 0) { %>
+                <div class="empty-state">
+                    <i class="fas fa-utensils"></i>
+                    <p>No restaurants found for this search.</p>
+                </div>
+            <% } else { %>
+                <% results.forEach(result => { %>
+                    <div class="restaurant-card">
+                        <div class="restaurant-header">
+                            <div class="restaurant-icon">
+                                <i class="fa fa-utensils"></i>
+                            </div>
+                            <h5 class="restaurant-title"><%= result.vendor.restaurantName %></h5>
+                        </div>
+                        <div class="restaurant-body">
+                            <div class="restaurant-address">
+                                <i class="fa fa-map-marker-alt"></i>
+                                <div>
+                                    <% if (result.vendor.location && result.vendor.location.latitude && result.vendor.location.longitude) { %>
+                                        <a href="https://www.google.com/maps?q=<%= result.vendor.location.latitude %>,<%= result.vendor.location.longitude %>" 
+                                           class="location-link"
+                                           target="_blank" 
+                                           title="View on Google Maps">
+                                            View on Google Maps
+                                        </a>
+                                    <% } else { %>
+                                        <span>Location not available</span>
+                                    <% } %>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="restaurant-footer">
+                            <a href="/user/restaurant/<%= result.vendor._id %><% if (result.matchingProducts && result.matchingProducts.length > 0) { %>/product/<%= result.matchingProducts[0]._id %><% } %>?searchQuery=<%= searchQuery %>" class="btn">
+                                <i class="fas fa-utensils"></i> View Menu
+                            </a>
+                        </div>
+                    </div>
+                <% }); %>
+            <% } %>
+        </div>
+        
+        <!-- Restaurant List View -->
+        <div class="list-view" id="list-view">
+            <% if (!results || results.length === 0) { %>
+                <div class="empty-state">
+                    <i class="fas fa-utensils"></i>
+                    <p>No restaurants found for this search.</p>
+                </div>
+            <% } else { %>
+                <% results.forEach(result => { %>
+                    <div class="restaurant-list-item">
+                        <div class="list-item-icon">
+                            <i class="fa fa-utensils"></i>
+                        </div>
+                        <div class="list-item-details">
+                            <h3 class="list-item-title"><%= result.vendor.restaurantName %></h3>
+                            <div class="list-item-address">
+                                <i class="fa fa-map-marker-alt"></i>
+                                <% if (result.vendor.location && result.vendor.location.latitude && result.vendor.location.longitude) { %>
+                                    <a href="https://www.google.com/maps?q=<%= result.vendor.location.latitude %>,<%= result.vendor.location.longitude %>" 
+                                       class="location-link"
+                                       target="_blank" 
+                                       title="View on Google Maps">
+                                        View on Google Maps
+                                    </a>
+                                <% } else { %>
+                                    <span>Location not available</span>
+                                <% } %>
+                            </div>
+                        </div>
+                        <div class="list-item-action">
+                            <a href="/user/restaurant/<%= result.vendor._id %><% if (result.matchingProducts && result.matchingProducts.length > 0) { %>/product/<%= result.matchingProducts[0]._id %><% } %>?searchQuery=<%= searchQuery %>" class="btn">
+                                View Menu
+                            </a>
+                        </div>
+                    </div>
+                <% }); %>
+            <% } %>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2025 FoodFinder. All rights reserved.</p>
+    </footer>
+
+    <!-- JavaScript for Toggle View -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const gridViewBtn = document.getElementById('grid-view-btn');
+            const listViewBtn = document.getElementById('list-view-btn');
+            const gridView = document.getElementById('grid-view');
+            const listView = document.getElementById('list-view');
+            
+            gridViewBtn.addEventListener('click', function() {
+                gridView.style.display = 'grid';
+                listView.style.display = 'none';
+                gridViewBtn.classList.add('active');
+                listViewBtn.classList.remove('active');
+            });
+            
+            listViewBtn.addEventListener('click', function() {
+                gridView.style.display = 'none';
+                listView.style.display = 'flex';
+                listViewBtn.classList.add('active');
+                gridViewBtn.classList.remove('active');
+            });
+        });
+    </script>
 </body>
 </html>

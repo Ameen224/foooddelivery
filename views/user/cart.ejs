@@ -1,0 +1,330 @@
+<!-- views/cart.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping Cart</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f8f9fa;
+            color: #212529;
+        }
+        
+        .navbar {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            background-color: #ffffff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .back-button {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            color: #0d6efd;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+        
+        .page-title {
+            margin-left: 1rem;
+            font-size: 1.25rem;
+            font-weight: bold;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+        
+        .cart-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        
+        @media (min-width: 768px) {
+            .cart-container {
+                flex-direction: row;
+            }
+            
+            .products-section {
+                flex: 2;
+            }
+            
+            .order-summary {
+                flex: 1;
+            }
+        }
+        
+        .section-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .cart-item {
+            display: flex;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .item-image {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 4px;
+            background-color: #e9ecef;
+        }
+        
+        .item-details {
+            flex: 1;
+            margin-left: 1rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        
+        .item-name {
+            font-weight: bold;
+            margin-bottom: 0.25rem;
+        }
+        
+        .item-price {
+            color: #212529;
+            font-weight: bold;
+        }
+        
+        .item-actions {
+            display: flex;
+            align-items: center;
+            margin-top: 0.5rem;
+        }
+        
+        .quantity-control {
+            display: flex;
+            align-items: center;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .quantity-btn {
+            background: none;
+            border: none;
+            width: 30px;
+            height: 30px;
+            font-size: 1rem;
+            cursor: pointer;
+            background-color: #f8f9fa;
+        }
+        
+        .quantity-input {
+            width: 40px;
+            height: 30px;
+            text-align: center;
+            border: none;
+            border-left: 1px solid #dee2e6;
+            border-right: 1px solid #dee2e6;
+        }
+        
+        .remove-btn {
+            margin-left: 1rem;
+            color: #dc3545;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        
+        .order-summary {
+            background-color: #ffffff;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            height: fit-content;
+        }
+        
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.75rem;
+        }
+        
+        .summary-total {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #dee2e6;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+        
+        .checkout-btn {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: #0d6efd;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 1.5rem;
+            transition: background-color 0.2s;
+        }
+        
+        .checkout-btn:hover {
+            background-color: #0b5ed7;
+        }
+        
+        .empty-cart {
+            text-align: center;
+            padding: 2rem;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <div class="navbar">
+        <button class="back-button" onclick="window.history.back()">← Back</button>
+        <div class="page-title">Shopping Cart</div>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="container">
+        <div class="cart-container">
+            <!-- Products Section -->
+            <div class="products-section">
+                <h2 class="section-title">Cart Items (<%= cartItems.length %>)</h2>
+                
+                <% if (cartItems.length === 0) { %>
+                    <div class="empty-cart">
+                        <h3>Your cart is empty</h3>
+                        <p>Add some products to your cart to see them here.</p>
+                    </div>
+                <% } else { %>
+                    <% cartItems.forEach(item => { %>
+                        <div class="cart-item">
+                            <img src="<%= item.image %>" alt="<%= item.name %>" class="item-image">
+                            <div class="item-details">
+                                <div>
+                                    <div class="item-name"><%= item.name %></div>
+                                    <% if (item.variant) { %>
+                                        <div class="item-variant"><%= item.variant %></div>
+                                    <% } %>
+                                </div>
+                                <div class="item-price">$<%= item.price.toFixed(2) %></div>
+                                <div class="item-actions">
+                                    <div class="quantity-control">
+                                        <button class="quantity-btn" onclick="updateQuantity('<%= item.id %>', <%= item.quantity - 1 %>)">-</button>
+                                        <input type="text" class="quantity-input" value="<%= item.quantity %>" readonly>
+                                        <button class="quantity-btn" onclick="updateQuantity('<%= item.id %>', <%= item.quantity + 1 %>)">+</button>
+                                    </div>
+                                    <button class="remove-btn" onclick="removeItem('<%= item.id %>')">Remove</button>
+                                </div>
+                            </div>
+                        </div>
+                    <% }); %>
+                <% } %>
+            </div>
+            
+            <!-- Order Summary -->
+            <div class="order-summary">
+                <h2 class="section-title">Order Summary</h2>
+                <div class="summary-row">
+                    <span>Subtotal</span>
+                    <span>$<%= subtotal.toFixed(2) %></span>
+                </div>
+                <div class="summary-row">
+                    <span>Shipping</span>
+                    <span>$<%= shipping.toFixed(2) %></span>
+                </div>
+                <div class="summary-row">
+                    <span>Tax</span>
+                    <span>$<%= tax.toFixed(2) %></span>
+                </div>
+                <div class="summary-total">
+                    <span>Total</span>
+                    <span>$<%= total.toFixed(2) %></span>
+                </div>
+                <button class="checkout-btn" onclick="proceedToCheckout()">Proceed to Checkout</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function updateQuantity(itemId, newQuantity) {
+            if (newQuantity < 1) return;
+            
+            fetch('/cart/update', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    itemId: itemId,
+                    quantity: newQuantity
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.reload();
+                }
+            })
+            .catch(error => {
+                console.error('Error updating cart:', error);
+            });
+        }
+        
+        function removeItem(itemId) {
+            fetch('/cart/remove', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    itemId: itemId
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.reload();
+                }
+            })
+            .catch(error => {
+                console.error('Error removing item:', error);
+            });
+        }
+        
+        function proceedToCheckout() {
+            window.location.href = '/checkout';
+        }
+    </script>
+</body>
+</html>
