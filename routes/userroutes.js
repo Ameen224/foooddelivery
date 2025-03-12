@@ -13,6 +13,8 @@ const Vendor = require("../models/vendor");
 const Contact = require('../models/contact');
 const Category = require("../models/category");
 const User = require('../models/user');
+const Cart = require('../models/cart');
+
 
 // Nodemailer configuration
 const transporter = nodemailer.createTransport({
@@ -56,8 +58,9 @@ async function sendOTP(email, otp) {
 const isAuthenticated = (req, res, next) => {
     if (!req.session?.user) {
         console.log("User not authenticated");
-        return res.redirect('/login');
+        return res.redirect('/user/login');
     }
+    req.user = { ...req.session.user, _id: req.session.user.id }; // Ensure _id is available
     next();
 };
 
@@ -187,6 +190,7 @@ router.get("/category/:id", async (req, res) => {
 });
 
 // Restaurant products route
+
 router.get("/restaurant/:id/product/:productId?", async (req, res) => {
     try {
         const vendorId = req.params.id;
@@ -602,7 +606,126 @@ router.post("/profile/address/delete", isAuthenticated, async (req, res) => {
 });
 
 // Logout route
-router.get('/logout', (req, res) => {
-    req.session.destroy(() => res.redirect('/home'));
+router.post('/logout', (req, res) => {
+    req.session.destroy((err) => {
+        if (err) {
+            console.error('Logout Error:', err);
+            return res.json({ success: false, message: 'Logout failed!' });
+        }
+        res.json({ success: true });
+    });
 });
+
+
+
+// Get Cart Items
+router.get('/cart', isAuthenticated, async (req, res) => {
+    const userId = req.user._id;  // Assume user is logged in
+    let cart = await Cart.findOne({ userId });
+
+
+    // Ensure cart is always an object with default values
+    if (!cart) {
+        cart = { items: [], subtotal: 0, shipping: 5, tax: 0, total: 0 };
+    }
+
+
+    res.render('user/cart', { cart });
+});
+
+
+// Add Item to Cart
+router.post('/cart/add', isAuthenticated, async (req, res) => {
+    try {
+        const { productId, quantity } = req.body;
+        const userId = req.user._id;
+
+        // Find the product to get its details
+        const product = await Product.findById(productId);
+        if (!product) {
+            return res.status(404).json({ success: false, message: 'Product not found' });
+        }
+
+        let cart = await Cart.findOne({ userId });
+
+        if (!cart) {
+            cart = new Cart({ userId, items: [] });
+        }
+
+        const itemIndex = cart.items.findIndex(item => item.productId.toString() === productId);
+
+        if (itemIndex > -1) {
+            // If item exists, update quantity
+            cart.items[itemIndex].quantity += quantity;
+        } else {
+            // If item doesn't exist, add new item with all required fields
+            cart.items.push({
+                productId: product._id,
+                name: product.name,
+                image: product.images[0], // Use first image as cart thumbnail
+                price: product.price,
+                quantity: quantity
+            });
+        }
+
+        // Recalculate cart totals
+        cart.subtotal = cart.items.reduce((total, item) => {
+            return total + (item.price * item.quantity);
+        }, 0);
+        
+        // Calculate tax (e.g., 10%)
+        cart.tax = cart.subtotal * 0.1;
+        
+        // Calculate total
+        cart.total = cart.subtotal + cart.tax + cart.shipping;
+
+        await cart.save();
+
+        res.json({ success: true, cart });
+    } catch (error) {
+        console.error('Error adding to cart:', error);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+});
+
+
+
+// Update Quantity
+router.post('/cart/update',isAuthenticated, async (req, res) => {
+    const { itemId, quantity } = req.body;
+    const userId = req.user._id;
+    
+    const cart = await Cart.findOne({ userId });
+    if (!cart) return res.json({ success: false, message: "Cart not found" });
+    
+    const item = cart.items.find(item => item._id.toString() === itemId);
+    if (item) item.quantity = quantity;
+    
+    cart.subtotal = cart.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    cart.tax = cart.subtotal * 0.1;
+    cart.total = cart.subtotal + cart.shipping + cart.tax;
+    
+    await cart.save();
+    res.json({ success: true });
+});
+
+// Remove Item
+router.post('/cart/remove',isAuthenticated, async (req, res) => {
+    const { itemId } = req.body;
+    const userId = req.user._id;
+    
+    const cart = await Cart.findOne({ userId });
+    if (!cart) return res.json({ success: false, message: "Cart not found" });
+    
+    cart.items = cart.items.filter(item => item._id.toString() !== itemId);
+    
+    cart.subtotal = cart.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    cart.tax = cart.subtotal * 0.1;
+    cart.total = cart.subtotal + cart.shipping + cart.tax;
+    
+    await cart.save();
+    res.json({ success: true });
+});
+
+
 module.exports = router;

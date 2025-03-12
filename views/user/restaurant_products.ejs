@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick-theme.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         /* Custom Font */
         @font-face {
@@ -431,10 +431,7 @@
             <i class="fas fa-arrow-left"></i> Back
         </button>
         <h2><%= vendordata.restaurantName %></h2>
-        <div class="cart-icon">
-            <i class="fas fa-shopping-cart"></i>
-            <span class="cart-count">0</span>
-        </div>
+        
     </div>
 
     <!-- Restaurant Header -->
@@ -451,15 +448,7 @@
 
     <!-- Main Content -->
     <div class="main-content">
-        <!-- Category Filters (Example) -->
-        <div class="category-filters">
-            <div class="category-filter active">All</div>
-            <div class="category-filter">Appetizers</div>
-            <div class="category-filter">Main Course</div>
-            <div class="category-filter">Desserts</div>
-            <div class="category-filter">Beverages</div>
-            <div class="category-filter">Special Deals</div>
-        </div>
+        
 
         <h2 class="section-title">Our Menu</h2>
 
@@ -509,7 +498,7 @@
                                 <button class="quantity-btn increase">+</button>
                             </div>
                             
-                            <button class="add-to-cart-btn" data-id="<%= product._id %>">
+                            <button class="add-to-cart-btn" onclick="addToCart('<%= product._id %>')">
                                 <i class="fas fa-shopping-cart"></i> Add to Cart
                             </button>
                         </div>
@@ -541,44 +530,81 @@
                 arrows: false
             });
             
-            // Quantity controls
-            $('.increase').click(function() {
-                var input = $(this).siblings('.quantity-value');
-                var value = parseInt(input.val());
-                input.val(value + 1);
-            });
             
-            $('.decrease').click(function() {
-                var input = $(this).siblings('.quantity-value');
-                var value = parseInt(input.val());
-                if(value > 1) {
-                    input.val(value - 1);
+        });
+
+        function addToCart(productId) {
+            const quantity = parseInt(document.querySelector('.quantity-value').value);
+            
+            fetch('/user/cart/add', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ productId, quantity: quantity })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Show success message with item details
+                    const addedItem = data.cart.items.find(item => item.productId === productId);
+                    const itemName = addedItem ? addedItem.name : 'Item';
+                    
+                    if (sweetAlertLoaded) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Added to Cart!',
+                            text: `${itemName} has been added successfully.`,
+                            showConfirmButton: false,
+                            timer: 1500
+                        });
+                    } else {
+                        alert(`${itemName} has been added to cart!`);
+                    }
+                    
+                    // Update cart UI elements
+                    updateCartUI(data.cart);
+                } else {
+                    if (sweetAlertLoaded) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Oops!',
+                            text: data.message || 'Failed to add item to cart.',
+                        });
+                    } else {
+                        alert(data.message || 'Failed to add item to cart.');
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error adding item to cart:', error);
+                
+                if (sweetAlertLoaded) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error!',
+                        text: 'Something went wrong. Please try again.',
+                    });
+                } else {
+                    alert('Something went wrong. Please try again.');
                 }
             });
+        }
+
+        function updateCartUI(cart) {
+            // Update cart count - count total quantity, not just number of items
+            const cartCountElement = document.querySelector('.cart-count');
+            if (cartCountElement) {
+                const totalQuantity = cart.items.reduce((total, item) => total + item.quantity, 0);
+                cartCountElement.innerText = totalQuantity;
+            }
             
-            // Category filters
-            $('.category-filter').click(function() {
-                $('.category-filter').removeClass('active');
-                $(this).addClass('active');
-                // Add filtering logic here if needed
-            });
-            
-            // Add to cart functionality
-            $('.add-to-cart-btn').click(function() {
-                var productId = $(this).data('id');
-                var quantity = $(this).parent().find('.quantity-value').val();
-                
-                // Example cart update logic
-                var currentCount = parseInt($('.cart-count').text());
-                $('.cart-count').text(currentCount + parseInt(quantity));
-                
-                // Show a quick notification
-                alert('Added to cart!');
-                
-                // Here you would typically make an AJAX call to update the cart
-                console.log('Added product ID: ' + productId + ' with quantity: ' + quantity);
-            });
-        });
+            // Update cart total if you have that element
+            const cartTotalElement = document.getElementById('cart-total');
+            if (cartTotalElement) {
+                cartTotalElement.innerText = `$${cart.total.toFixed(2)}`;
+            }
+        }
     </script>
 </body>
 </html>

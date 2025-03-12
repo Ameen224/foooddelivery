@@ -7,6 +7,8 @@
   <title>Product Details</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Add SweetAlert CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/11.7.32/sweetalert2.min.css">
   <style>
     body {
       font-family: 'Poppins', sans-serif;
@@ -105,6 +107,32 @@
       background: #e68900;
     }
 
+    /* Custom alert styles */
+    .custom-alert {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 15px 20px;
+      border-radius: 5px;
+      color: white;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      z-index: 9999;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    
+    .custom-alert.success {
+      background-color: #4CAF50;
+    }
+    
+    .custom-alert.error {
+      background-color: #f44336;
+    }
+    
+    .custom-alert.show {
+      opacity: 1;
+    }
+
     @media (max-width: 768px) {
       .product-content {
         flex-direction: column;
@@ -122,7 +150,6 @@
         </div>
     </nav>
     
-
   <div class="container">
     <div class="product-content">
       <div class="product-image">
@@ -160,17 +187,110 @@
           <input type="number" id="quantity" value="1" min="1" max="10">
         </div>
 
-        <button class="add-to-cart-btn">Add to Cart</button>
+        <button class="add-to-cart-btn" onclick="addToCart('<%= product._id %>')">Add to Cart</button>
       </div>
     </div>
   </div>
 
+  <!-- Custom alert container -->
+  <div id="customAlert" class="custom-alert"></div>
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+  <!-- Load SweetAlert with correct version and use onload to verify it loaded -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/11.7.32/sweetalert2.min.js"></script>
   <script>
-    document.querySelector('.add-to-cart-btn').addEventListener('click', function() {
-      const quantity = document.getElementById('quantity').value;
-      alert(`${quantity} item(s) added to your cart!`);
-    });
+    // Check if SweetAlert loaded successfully
+    let sweetAlertLoaded = typeof Swal !== 'undefined';
+    
+    // Custom alert function as a fallback
+    function showCustomAlert(message, type, duration = 3000) {
+      const alertElement = document.getElementById('customAlert');
+      alertElement.textContent = message;
+      alertElement.className = `custom-alert ${type}`;
+      
+      // Show the alert
+      setTimeout(() => {
+        alertElement.classList.add('show');
+      }, 10);
+      
+      // Hide after duration
+      setTimeout(() => {
+        alertElement.classList.remove('show');
+      }, duration);
+    }
+
+    function addToCart(productId) {
+      const quantity = parseInt(document.getElementById('quantity').value);
+      
+      fetch('/user/cart/add', {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ productId, quantity: quantity })
+      })
+      .then(response => response.json())
+      .then(data => {
+          if (data.success) {
+              // Show success message with item details
+              const addedItem = data.cart.items.find(item => item.productId === productId);
+              const itemName = addedItem ? addedItem.name : 'Item';
+              
+              if (sweetAlertLoaded) {
+                  Swal.fire({
+                      icon: 'success',
+                      title: 'Added to Cart!',
+                      text: `${itemName} has been added successfully.`,
+                      showConfirmButton: false,
+                      timer: 1500
+                  });
+              } else {
+                  showCustomAlert(`${itemName} has been added to cart!`, 'success');
+              }
+              
+              // Update cart UI elements
+              updateCartUI(data.cart);
+          } else {
+              if (sweetAlertLoaded) {
+                  Swal.fire({
+                      icon: 'error',
+                      title: 'Oops!',
+                      text: data.message || 'Failed to add item to cart.',
+                  });
+              } else {
+                  showCustomAlert(data.message || 'Failed to add item to cart.', 'error');
+              }
+          }
+      })
+      .catch(error => {
+          console.error('Error adding item to cart:', error);
+          
+          if (sweetAlertLoaded) {
+              Swal.fire({
+                  icon: 'error',
+                  title: 'Error!',
+                  text: 'Something went wrong. Please try again.',
+              });
+          } else {
+              showCustomAlert('Something went wrong. Please try again.', 'error');
+          }
+      });
+    }
+
+    function updateCartUI(cart) {
+        // Update cart count - count total quantity, not just number of items
+        const cartCountElement = document.getElementById('cart-count');
+        if (cartCountElement) {
+            const totalQuantity = cart.items.reduce((total, item) => total + item.quantity, 0);
+            cartCountElement.innerText = totalQuantity;
+        }
+        
+        // Update cart total if you have that element
+        const cartTotalElement = document.getElementById('cart-total');
+        if (cartTotalElement) {
+            cartTotalElement.innerText = `$${cart.total.toFixed(2)}`;
+        }
+    }
   </script>
 </body>
 

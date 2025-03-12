@@ -674,6 +674,7 @@
 
 
 // Confirm logout function
+
 function confirmLogout() {
     Swal.fire({
         title: 'Are you sure?',
@@ -685,10 +686,23 @@ function confirmLogout() {
         confirmButtonText: 'Yes, logout'
     }).then((result) => {
         if (result.isConfirmed) {
-            window.location.href = '/user/logout'; // Redirect to logout route
+            fetch('/user/logout', { method: 'POST' })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = '/user/home'; // Redirect to home page after logout
+                } else {
+                    Swal.fire({ icon: 'error', title: 'Error', text: 'Logout failed!' });
+                }
+            })
+            .catch(error => {
+                console.error('Logout Error:', error);
+                Swal.fire({ icon: 'error', title: 'Error', text: 'Something went wrong!' });
+            });
         }
     });
 }
+
 
     </script>
 </body>
