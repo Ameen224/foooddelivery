@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order History</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> 
+    <style>
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f9f9f9;
+    margin: 0;
+    padding: 0;
+}
+
+.navbar {
+    background-color: #ffffff;
+    padding: 15px;
+    text-align: center;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    border-radius: 0 0 8px 8px;
+}
+
+.navbar a {
+    text-decoration: none;
+    color: #343a40;
+    font-size: 16px;
+    font-weight: bold;
+    margin: 0 15px;
+    padding: 10px 15px;
+    border-radius: 4px;
+    background-color: #ffcc00;
+    transition: background 0.3s;
+}
+
+.navbar a:hover {
+    background-color: #e6b800;
+}
+
+.container {
+    width: 90%;
+    margin: 30px auto;
+    text-align: center;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+th, td {
+    padding: 12px;
+    border-bottom: 1px solid #ddd;
+    vertical-align: middle;
+}
+
+th {
+    background-color: #ffcc00;
+    color: #333;
+}
+
+.product-details {
+    display: flex;
+    align-items: center;
+}
+
+.product-image {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    margin-right: 15px;
+    border-radius: 4px;
+}
+
+.status-badge {
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-weight: bold;
+}
+
+.order-items-list {
+    text-align: left;
+}
+
+.order-item {
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+    border-bottom: 1px dashed #eee;
+}
+
+.order-item:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+.status-pending { background-color: orange; color: white; }
+.status-processing { background-color: blue; color: white; }
+.status-cancelled { background-color: red; color: white; }
+
+.action-buttons button {
+    padding: 8px 12px;
+    font-size: 14px;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.3s;
+    margin: 5px;
+}
+
+.approve-btn {
+    background-color: #28a745;
+}
+
+.approve-btn:hover {
+    background-color: #218838;
+}
+
+.decline-btn {
+    background-color: #dc3545;
+}
+
+.decline-btn:hover {
+    background-color: #c82333;
+}
+
+.assign-btn {
+    background-color: #007bff;
+}
+
+.assign-btn:hover {
+    background-color: #0069d9;
+}
+
+.status-placed { background-color: orange; color: white; }
+.status-processing { background-color: blue; color: white; }
+.status-outfordelivery { background-color: purple; color: white; }
+.status-delivered { background-color: green; color: white; }
+.status-cancelled { background-color: red; color: white; }
+
+/* Modal styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.4);
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 10% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 50%;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.close-modal {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close-modal:hover {
+    color: black;
+}
+
+.delivery-partner-list {
+    max-height: 300px;
+    overflow-y: auto;
+    margin: 20px 0;
+}
+
+.delivery-partner-item {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+}
+
+.delivery-partner-item:hover {
+    background-color: #f8f9fa;
+}
+
+.delivery-partner-item.selected {
+    background-color: #e2f0ff;
+}
+
+.delivery-partner-item img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    margin-right: 15px;
+    object-fit: cover;
+}
+
+.partner-info {
+    flex-grow: 1;
+    text-align: left;
+}
+
+.partner-name {
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.partner-details {
+    font-size: 14px;
+    color: #666;
+}
+
+.modal-actions {
+    text-align: right;
+    margin-top: 20px;
+}
+
+.modal-actions button {
+    padding: 8px 16px;
+    margin-left: 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.assign-partner-btn {
+    background-color: #28a745;
+    color: white;
+}
+
+.assign-partner-btn:hover {
+    background-color: #218838;
+}
+
+.cancel-btn {
+    background-color: #6c757d;
+    color: white;
+}
+
+.cancel-btn:hover {
+    background-color: #5a6268;
+}
+
+.loading {
+    text-align: center;
+    padding: 20px;
+}
+
+.loading-spinner {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #3498db;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    animation: spin 2s linear infinite;
+    margin: 10px auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+</style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <a href="/vendor/home">Products</a>
+        <a href="/vendor/orders">Orders</a>
+        <a href="/vendor/profile">Profile</a>
+    </nav>
+
+    <!-- Order List -->
+<div class="container">
+    <table>
+        <thead>
+            <tr>
+                <th>Order ID</th>
+                <th>Product Details</th>
+                <th>Customer</th>
+                <th>Total</th>
+                <th>Payment</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% 
+            // Group orders by order ID
+            const groupedOrders = {};
+            orders.forEach(order => {
+                if (!groupedOrders[order._id]) {
+                    groupedOrders[order._id] = {
+                        _id: order._id,
+                        orderNumber: order.orderNumber,
+                        orderDetails: order.orderDetails,
+                        items: [],
+                        totalAmount: 0
+                    };
+                }
+                // Add items to the grouped order
+                order.items.forEach(item => {
+                    groupedOrders[order._id].items.push(item);
+                    groupedOrders[order._id].totalAmount += item.total;
+                });
+            });
+            
+            // Now iterate over the grouped orders
+            Object.values(groupedOrders).forEach(order => { 
+            %>
+                <tr>
+                    <td><%= order.orderNumber %></td>
+                    <td>
+                        <div class="order-items-list">
+                            <% order.items.forEach(item => { %>
+                                <div class="order-item">
+                                    <strong><%= item.productId.name %></strong><br>
+                                    Quantity: <%= item.quantity %>
+                                </div>
+                            <% }); %>
+                        </div>
+                    </td>
+                    <td><%= (order.orderDetails && order.orderDetails.customerId && order.orderDetails.customerId.name) ? order.orderDetails.customerId.name : 'Unknown Customer' %></td>
+                    <td>₹<%= order.totalAmount.toFixed(2) %></td>
+                    <td><%= order.orderDetails && order.orderDetails.paymentStatus ? order.orderDetails.paymentStatus : 'Unknown' %></td>
+                    <td>
+                        <span class="status-badge status-<%= order.orderDetails && order.orderDetails.orderStatus ? order.orderDetails.orderStatus.toLowerCase() : 'unknown' %>">
+                            <%= order.orderDetails && order.orderDetails.orderStatus ? order.orderDetails.orderStatus : 'Unknown' %>
+                        </span>
+                    </td>
+                    <td class="action-buttons">
+                        <% if (order.orderDetails.orderStatus === "Placed") { %>
+                            <button class="approve-btn" onclick="confirmOrder('<%= order._id %>')">Approve</button>
+                            <button class="decline-btn" onclick="cancelOrder('<%= order._id %>')">Decline</button>
+                        <% } else if (order.orderDetails.orderStatus === "Processing") { %>
+                            <button class="assign-btn" onclick="showDeliveryPartnerModal('<%= order._id %>')">Assign Delivery Partner</button>
+                        <% } else { %>
+                            <span>Action not available</span>
+                        <% } %>
+                    </td>
+                </tr>
+            <% }); %>
+        </tbody>
+    </table>
+</div>
+
+<!-- Delivery Partner Modal -->
+<div id="deliveryPartnerModal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal" onclick="closeModal()">&times;</span>
+        <h3>Assign Delivery Partner</h3>
+        <div id="deliveryPartnerContent">
+            <!-- Content will be loaded here -->
+            <div class="loading">
+                <div class="loading-spinner"></div>
+                <p>Loading available delivery partners...</p>
+            </div>
+        </div>
+        <div class="modal-actions">
+            <button class="cancel-btn" onclick="closeModal()">Cancel</button>
+            <button class="assign-partner-btn" id="assignPartnerBtn" disabled>Assign Partner</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Existing functions
+    function confirmOrder(orderId) {
+        Swal.fire({
+            title: "Are you sure?",
+            text: `You are about to mark Order #${orderId} as Processing.`,
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Yes, proceed!",
+            cancelButtonText: "Cancel",
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                try {
+                    const response = await fetch("/vendor/orders/update", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ orderId, status: 'Processing' }),
+                    });
+
+                    if (!response.ok) throw new Error("Failed to update order");
+
+                    Swal.fire("Updated!", `Order status changed to Processing.`, "success")
+                        .then(() => location.reload());
+
+                } catch (error) {
+                    Swal.fire("Error!", "Failed to update the order.", "error");
+                    console.error(error);
+                }
+            }
+        });
+    }
+
+    function cancelOrder(orderId) {
+        Swal.fire({
+            title: "Are you sure?",
+            text: `You are about to mark Order #${orderId} as Cancelled.`,
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Yes, proceed!",
+            cancelButtonText: "Cancel",
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                try {
+                    const response = await fetch("/vendor/orders/update", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ orderId, status: 'Cancelled' }),
+                    });
+
+                    if (!response.ok) throw new Error("Failed to update order");
+
+                    Swal.fire("Updated!", `Order status changed to Cancelled.`, "success")
+                        .then(() => location.reload());
+
+                } catch (error) {
+                    Swal.fire("Error!", "Failed to update the order.", "error");
+                    console.error(error);
+                }
+            }
+        });
+    }
+
+    // New functions for delivery partner assignment
+    let currentOrderId = null;
+    let selectedPartnerId = null;
+
+    function showDeliveryPartnerModal(orderId) {
+        currentOrderId = orderId;
+        document.getElementById('deliveryPartnerModal').style.display = 'block';
+        fetchAvailableDeliveryPartners();
+    }
+
+    function closeModal() {
+        document.getElementById('deliveryPartnerModal').style.display = 'none';
+        currentOrderId = null;
+        selectedPartnerId = null;
+        document.getElementById('assignPartnerBtn').disabled = true;
+    }
+
+    async function fetchAvailableDeliveryPartners() {
+        const contentDiv = document.getElementById('deliveryPartnerContent');
+        contentDiv.innerHTML = `
+            <div class="loading">
+                <div class="loading-spinner"></div>
+                <p>Loading available delivery partners...</p>
+            </div>
+        `;
+
+        try {
+            // Call your API endpoint to get available delivery partners
+            const response = await fetch('/vendor/delivery-partners/available');
+            
+            if (!response.ok) {
+                throw new Error('Failed to fetch delivery partners');
+            }
+
+            const partners = await response.json();
+            
+            if (partners.length === 0) {
+                contentDiv.innerHTML = `<p>No delivery partners are currently available. Please try again later.</p>`;
+                return;
+            }
+
+            // Build the UI with the returned partners
+            let partnerListHTML = `<div class="delivery-partner-list">`;
+            
+            partners.forEach(partner => {
+                partnerListHTML += `
+                    <div class="delivery-partner-item" data-id="${partner._id}" onclick="selectDeliveryPartner('${partner._id}')">
+                        <img src="${partner.profileImage || '/images/default-avatar.png'}" alt="${partner.name}">
+                        <div class="partner-info">
+                            <div class="partner-name">${partner.name}</div>
+                            <div class="partner-details">
+                                <span>📱 ${partner.phone}</span> • 
+                                <span>${partner.averageRating ? '⭐ ' + partner.averageRating.toFixed(1) : 'New partner'}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            partnerListHTML += `</div>`;
+            contentDiv.innerHTML = partnerListHTML;
+            
+        } catch (error) {
+            console.error('Error fetching delivery partners:', error);
+            contentDiv.innerHTML = `<p>Error loading delivery partners. Please try again.</p>`;
+        }
+    }
+
+    function selectDeliveryPartner(partnerId) {
+        // Remove selection from previously selected partner
+        const previouslySelected = document.querySelector('.delivery-partner-item.selected');
+        if (previouslySelected) {
+            previouslySelected.classList.remove('selected');
+        }
+        
+        // Add selection to newly selected partner
+        const partnerElement = document.querySelector(`.delivery-partner-item[data-id="${partnerId}"]`);
+        if (partnerElement) {
+            partnerElement.classList.add('selected');
+            selectedPartnerId = partnerId;
+            document.getElementById('assignPartnerBtn').disabled = false;
+        }
+    }
+
+    async function assignDeliveryPartner() {
+        if (!currentOrderId || !selectedPartnerId) {
+            return;
+        }
+
+        try {
+            const response = await fetch('/vendor/orders/assign-delivery', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    orderId: currentOrderId, 
+                    deliveryPartnerId: selectedPartnerId 
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to assign delivery partner');
+            }
+
+            const result = await response.json();
+            
+            closeModal();
+            
+            Swal.fire({
+                title: 'Success!',
+                text: 'Delivery partner has been assigned successfully. Order status updated to Out For Delivery.',
+                icon: 'success'
+            }).then(() => {
+                location.reload();
+            });
+            
+        } catch (error) {
+            console.error('Error assigning delivery partner:', error);
+            
+            Swal.fire({
+                title: 'Error!',
+                text: 'Failed to assign delivery partner. Please try again.',
+                icon: 'error'
+            });
+        }
+    }
+
+    // Add event listener to assign button
+    document.getElementById('assignPartnerBtn').addEventListener('click', assignDeliveryPartner);
+</script>
+
+</body>
+</html>

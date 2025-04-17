@@ -94,6 +94,7 @@
         }
         .signup-container { display: none; }
         .otp-container { display: none; }
+        .login-otp-container { display: none; }
         
         /* OTP Input Styles */
         .otp-inputs {
@@ -124,23 +125,48 @@
 </head>
 <body>
     <div class="navbar">Signup & Login</div>
-    <a  href="/user/home"  class="back-btn">&larr; Back</a> 
+    <a href="/user/home" class="back-btn">&larr; Back</a> 
     <div class="container">
         <div id="login-form">
             <h2>Login</h2>
-            <form onsubmit="handleLogin(event)">
+            <form onsubmit="requestLoginOTP(event)">
                 <div class="form-group">
-                    <label>Email or Phone</label>
-                    <input type="text" id="login-identifier" required>
+                    <label>Email</label>
+                    <input type="email" id="login-email" required>
                 </div>
-                <div class="form-group">
-                    <label>Password</label>
-                    <input type="password" id="login-password" required>
-                </div>
-                <button type="submit">Login</button>
+                <button type="submit">Send OTP</button>
             </form>
             <div class="switch-form">
-                <p>Don't have an account? <a onclick="switchForm('signup')">Sign up</a></p>
+                <p>Don't have an account? <a href="javascript:void(0)" onclick="switchForm('signup')">Sign up</a></p>
+            </div>
+        </div>
+        
+        <div id="login-otp-form" class="login-otp-container">
+            <h2>Login Verification</h2>
+            <p>We've sent a verification code to <span id="login-user-email" style="font-weight: bold;"></span></p>
+            
+            <form onsubmit="verifyLoginOTP(event)">
+                <div class="form-group">
+                    <label>Enter 6-digit OTP</label>
+                    <div class="otp-inputs">
+                        <input type="text" class="otp-input" maxlength="1" id="login-otp-1" onkeyup="moveToNext(this, 'login-otp-2')" required>
+                        <input type="text" class="otp-input" maxlength="1" id="login-otp-2" onkeyup="moveToNext(this, 'login-otp-3')" required>
+                        <input type="text" class="otp-input" maxlength="1" id="login-otp-3" onkeyup="moveToNext(this, 'login-otp-4')" required>
+                        <input type="text" class="otp-input" maxlength="1" id="login-otp-4" onkeyup="moveToNext(this, 'login-otp-5')" required>
+                        <input type="text" class="otp-input" maxlength="1" id="login-otp-5" onkeyup="moveToNext(this, 'login-otp-6')" required>
+                        <input type="text" class="otp-input" maxlength="1" id="login-otp-6" required>
+                    </div>
+                </div>
+                <div class="timer" id="login-otp-timer">Resend OTP in <span id="login-countdown">01:30</span></div>
+                <button type="submit">Login</button>
+            </form>
+            
+            <div>
+                <a href="javascript:void(0)" class="resend-link" id="login-resend-btn" style="display: none;" onclick="resendLoginOTP()">Resend OTP</a>
+            </div>
+            
+            <div class="switch-form">
+                <p>Changed your mind? <a href="javascript:void(0)" onclick="switchForm('login')">Back to Login</a></p>
             </div>
         </div>
         
@@ -170,7 +196,7 @@
                 <button type="submit">Sign Up</button>
             </form>
             <div class="switch-form">
-                <p>Already have an account? <a onclick="switchForm('login')">Login</a></p>
+                <p>Already have an account? <a href="javascript:void(0)" onclick="switchForm('login')">Login</a></p>
             </div>
         </div>
         
@@ -195,11 +221,11 @@
             </form>
             
             <div>
-                <a class="resend-link" id="resend-btn" style="display: none;" onclick="resendOTP()">Resend OTP</a>
+                <a href="javascript:void(0)" class="resend-link" id="resend-btn" style="display: none;" onclick="resendOTP()">Resend OTP</a>
             </div>
             
             <div class="switch-form">
-                <p>Changed your mind? <a onclick="switchForm('login')">Back to Login</a></p>
+                <p>Changed your mind? <a href="javascript:void(0)" onclick="switchForm('signup')">Back to Signup</a></p>
             </div>
         </div>
     </div>
@@ -207,12 +233,20 @@
     <script>
         // Current email for OTP verification
         let currentEmail = '';
+        let loginEmail = '';
         let countdownTimer;
+        let loginCountdownTimer;
+        
+        // Initialize the form display on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            switchForm('login');
+        });
         
         function switchForm(form) {
             document.getElementById('login-form').style.display = 'none';
             document.getElementById('signup-form').style.display = 'none';
             document.getElementById('otp-form').style.display = 'none';
+            document.getElementById('login-otp-form').style.display = 'none';
             
             if (form === 'login') {
                 document.getElementById('login-form').style.display = 'block';
@@ -221,6 +255,9 @@
             } else if (form === 'otp') {
                 document.getElementById('otp-form').style.display = 'block';
                 startCountdown();
+            } else if (form === 'login-otp') {
+                document.getElementById('login-otp-form').style.display = 'block';
+                startLoginCountdown();
             }
         }
         
@@ -255,78 +292,65 @@
             }, 1000);
         }
         
-        async function handleLogin(event) {
-            event.preventDefault();
-            const identifier = document.getElementById('login-identifier').value.trim();
-            const password = document.getElementById('login-password').value;
-
-            if (!identifier || !password) {
-                Swal.fire('Error', 'Please enter your email/phone and password.', 'error');
-                return;
+        function startLoginCountdown() {
+            let timeLeft = 90; // 1:30 in seconds
+            document.getElementById('login-resend-btn').style.display = 'none';
+            document.getElementById('login-otp-timer').style.display = 'block';
+            
+            if (loginCountdownTimer) {
+                clearInterval(loginCountdownTimer);
             }
-
-            try {
-                const response = await fetch('/user/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ identifier, password })
-                });
-
-                const data = await response.json();
-
-                if (!response.ok) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Login Failed',
-                        text: data.message || 'Invalid credentials!'
-                    });
-                } else {
-                    // Store user details in localStorage (or sessionStorage)
-                    localStorage.setItem('user', JSON.stringify(data.user));
-
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Login Successful',
-                        text: 'Redirecting...',
-                        timer: 2000,
-                        showConfirmButton: false
-                    });
-
-                    setTimeout(() => {
-                        window.location.href = '/user/profile';
-                    }, 2000);
+            
+            loginCountdownTimer = setInterval(function() {
+                const minutes = Math.floor(timeLeft / 60);
+                let seconds = timeLeft % 60;
+                seconds = seconds < 10 ? '0' + seconds : seconds;
+                
+                document.getElementById('login-countdown').textContent = minutes + ':' + seconds;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(loginCountdownTimer);
+                    document.getElementById('login-otp-timer').style.display = 'none';
+                    document.getElementById('login-resend-btn').style.display = 'inline-block';
                 }
-            } catch (error) {
-                Swal.fire('Error', 'Server error! Please try again later.', 'error');
-            }
+                timeLeft--;
+            }, 1000);
         }
-
+        
         async function handleSignup(event) {
             event.preventDefault();
-            const name = document.getElementById('name').value;
-            const email = document.getElementById('signup-email').value;
-            const phone = document.getElementById('signup-phone').value;
+            
+            const name = document.getElementById('name').value.trim();
+            const email = document.getElementById('signup-email').value.trim();
+            const phone = document.getElementById('signup-phone').value.trim();
             const password = document.getElementById('signup-password').value;
             const confirmPassword = document.getElementById('confirm-password').value;
-
-            if (password !== confirmPassword) {
-                Swal.fire('Error', 'Passwords do not match!', 'error');
+            
+            // Basic validation
+            if (!name || !email || !password || !confirmPassword) {
+                Swal.fire('Error', 'Please fill in all required fields.', 'error');
                 return;
             }
-
+            
+            if (password !== confirmPassword) {
+                Swal.fire('Error', 'Passwords do not match.', 'error');
+                return;
+            }
+            
             try {
                 const response = await fetch('/user/signup', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ name, email, phone, password })
                 });
+                
                 const data = await response.json();
-
+                
                 if (!response.ok) {
                     Swal.fire({
                         icon: 'error',
                         title: 'Signup Failed',
-                        text: data.message
+                        text: data.message || 'Failed to create account.'
                     });
                 } else {
                     // Store email for OTP verification
@@ -335,8 +359,8 @@
                     
                     Swal.fire({
                         icon: 'success',
-                        title: 'OTP Sent',
-                        text: 'Please check your email for the verification code',
+                        title: 'Registration Successful',
+                        text: 'Please verify your email with the OTP sent to your inbox.',
                         timer: 2000,
                         showConfirmButton: false
                     });
@@ -346,7 +370,7 @@
                     }, 2000);
                 }
             } catch (error) {
-                Swal.fire('Error', 'Something went wrong. Try again.', 'error');
+                Swal.fire('Error', 'Server error! Please try again later.', 'error');
             }
         }
         
@@ -376,7 +400,7 @@
                     Swal.fire({
                         icon: 'error',
                         title: 'Verification Failed',
-                        text: data.message
+                        text: data.message || 'Invalid OTP.'
                     });
                 } else {
                     Swal.fire({
@@ -395,38 +419,203 @@
                 Swal.fire('Error', 'Server error! Please try again later.', 'error');
             }
         }
-        
-        async function resendOTP() {
-            try {
-                const response = await fetch('/user/resend-otp', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email: currentEmail })
-                });
-                
-                const data = await response.json();
+
+    async function requestLoginOTP(event){
+        event.preventDefault();
+
+    const email = document.getElementById('login-email').value.trim();
+    console.log("email:",email);
+    
+    
+    if(!email){
+        Swal.fire('Error', 'Please fill in all required fields.', 'error');
+                return;
+    }
+
+    try {
+        const response = await fetch("/user/request-login-otp",{
+            method : 'post',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({email})
+
+        })
+
+        const data = await response.json();
                 
                 if (!response.ok) {
                     Swal.fire({
                         icon: 'error',
-                        title: 'Failed to Resend OTP',
-                        text: data.message
+                        title: 'login  Failed',
+                        text: data.message || 'Failed to login.'
                     });
                 } else {
+                    // Store email for OTP verification
+                    loginEmail = email;
+                    document.getElementById('login-email').textContent = email;
+                    
                     Swal.fire({
-                        icon: 'success',
-                        title: 'OTP Resent',
-                        text: 'Please check your email for the new verification code',
+                        text: 'Please verify your email with the OTP sent to your inbox.',
                         timer: 2000,
                         showConfirmButton: false
                     });
                     
-                    startCountdown();
+                    setTimeout(() => {
+                        switchForm('login-otp');
+                    }, 2000);
                 }
-            } catch (error) {
-                Swal.fire('Error', 'Server error! Please try again later.', 'error');
+    } catch (error) {
+        Swal.fire('Error', 'Server error! Please try again later.', 'error');
+    }
+
+
+    }
+        
+        async function verifyLoginOTP(event) {
+    event.preventDefault();
+    
+    // Collect OTP digits
+    const otp = [1, 2, 3, 4, 5, 6]
+        .map(num => document.getElementById(`login-otp-${num}`).value)
+        .join('');
+        
+    if (otp.length !== 6) {
+        Swal.fire('Error', 'Please enter all 6 digits of the OTP.', 'error');
+        return;
+    }
+    
+    try {
+        const response = await fetch('/user/verify-login-otp', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: loginEmail, otp })
+        });
+        
+        const data = await response.json();
+        
+        if (!response.ok) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Login Failed',
+                text: data.message || 'Invalid OTP.'
+            });
+        } else {
+            Swal.fire({
+                icon: 'success',
+                title: 'Login Successful',
+                text: 'You have been logged in successfully!',
+                timer: 2000,
+                showConfirmButton: false
+            });
+            
+            // Save authentication token if provided
+            if (data.token) {
+                localStorage.setItem('authToken', data.token);
             }
+            
+            // Redirect to dashboard or home page after successful login
+            setTimeout(() => {
+                window.location.href = '/user/profile';
+            }, 2000);
         }
-    </script>
+    } catch (error) {
+        Swal.fire('Error', 'Server error! Please try again later.', 'error');
+    }
+}
+
+async function resendLoginOTP() {
+    try {
+        const response = await fetch('/user/resend-login-otp', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: loginEmail })
+        });
+        
+        const data = await response.json();
+        
+        if (!response.ok) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Failed to Resend OTP',
+                text: data.message || 'Please try again later.'
+            });
+        } else {
+            Swal.fire({
+                icon: 'success',
+                title: 'OTP Resent',
+                text: 'Please check your email for the new verification code',
+                timer: 2000,
+                showConfirmButton: false
+            });
+            
+            startLoginCountdown();
+        }
+    } catch (error) {
+        Swal.fire('Error', 'Server error! Please try again later.', 'error');
+    }
+}
+
+async function resendOTP() {
+    try {
+        const response = await fetch('/user/resend-otp', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: currentEmail })
+        });
+        
+        const data = await response.json();
+        
+        if (!response.ok) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Failed to Resend OTP',
+                text: data.message || 'Please try again later.'
+            });
+        } else {
+            Swal.fire({
+                icon: 'success',
+                title: 'OTP Resent',
+                text: 'Please check your email for the new verification code',
+                timer: 2000,
+                showConfirmButton: false
+            });
+            
+            startCountdown();
+        }
+    } catch (error) {
+        Swal.fire('Error', 'Server error! Please try again later.', 'error');
+    }
+}
+
+// Handle backspace in OTP inputs to go to previous input
+function setupOTPInputs() {
+    const loginOTPInputs = document.querySelectorAll('#login-otp-form .otp-input');
+    const signupOTPInputs = document.querySelectorAll('#otp-form .otp-input');
+    
+    function handleBackspace(e, inputs, index) {
+        if (e.key === 'Backspace' && e.target.value === '' && index > 0) {
+            inputs[index - 1].focus();
+        }
+    }
+    
+    loginOTPInputs.forEach((input, index) => {
+        input.addEventListener('keydown', (e) => {
+            handleBackspace(e, loginOTPInputs, index);
+        });
+    });
+    
+    signupOTPInputs.forEach((input, index) => {
+        input.addEventListener('keydown', (e) => {
+            handleBackspace(e, signupOTPInputs, index);
+        });
+    });
+}
+
+// Initialize OTP input behavior on page load
+document.addEventListener('DOMContentLoaded', function() {
+    switchForm('login');
+    setupOTPInputs();
+});
+
+</script>    
 </body>
 </html>

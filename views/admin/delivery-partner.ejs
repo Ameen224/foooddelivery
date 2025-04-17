@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel - Coupon</title>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> 
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #f9d423, #ff4e50);
+      color: #333;
+    }
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.9);
+      padding: 15px 30px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      border-radius: 0 0 12px 12px;
+    }
+    .navbar .brand {
+      color: #333;
+      font-size: 24px;
+      font-weight: bold;
+      text-decoration: none;
+    }
+    .nav-buttons button {
+      background-color: #ffcc00;
+      border: none;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 25px;
+      color: #333;
+      font-weight: bold;
+      transition: background-color 0.3s ease;
+      margin-right: 10px;
+    }
+    .nav-buttons button:hover {
+      background-color: #e6b800;
+    }
+    .container {
+      background: rgba(255, 255, 255, 0.9);
+      padding: 20px;
+      margin: 20px;
+      border-radius: 12px;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+      background-color: #fff;
+      border: 2px solid black;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    table th, table td {
+      border: 2px solid black;
+      padding: 12px;
+      text-align: left;
+    }
+    table th {
+      background-color: #ffcc00;
+      color: #333;
+      font-weight: bold;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    .form-group input, .form-group select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+    .form-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+    .form-row .form-group {
+      flex: 1;
+      min-width: 200px;
+    }
+    .submit-btn {
+      background-color: #ffcc00;
+      border: none;
+      padding: 12px 30px;
+      font-size: 18px;
+      cursor: pointer;
+      border-radius: 25px;
+      color: #333;
+      font-weight: bold;
+      transition: background-color 0.3s ease;
+      margin-top: 10px;
+    }
+    .submit-btn:hover {
+      background-color: #e6b800;
+    }
+    .delete-btn {
+      background-color: #ff4e4e;
+      color: white;
+      border: none;
+      padding: 8px 15px;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    .delete-btn:hover {
+      background-color: #e63939;
+    }
+    .section-title {
+      font-size: 24px;
+      margin-bottom: 20px;
+      color: #333;
+      border-bottom: 2px solid #ffcc00;
+      padding-bottom: 10px;
+    }
+    .block-btn {
+      background-color: orange;
+      padding: 8px 15px;
+      border-radius: 20px;
+      border: none;
+      cursor: pointer;
+    }
+    .unblock-btn {
+      background-color: green;
+      padding: 8px 15px;
+      border-radius: 20px;
+      border: none;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="navbar">
+    <a href="#" class="brand">Delivery partner</a>
+    <div class="nav-buttons">
+      <button onclick="window.location.href='/admin/home'">Vendors</button>
+      <button onclick="window.location.href='/admin/pending-vendors'">Pending Vendors</button>
+      <button onclick="window.location.href='/admin/category-list'">Category</button>
+      <button onclick="window.location.href='/admin/banner'">Banners</button>
+      <button onclick="window.location.href='/admin/contact'">Messages</button>
+      <button onclick="window.location.href='/admin/coupon'">Coupon</button>
+      <button onclick="window.location.href='/admin/users'">Users</button>
+      <button onclick="window.location.href='/admin/orders'">Orders</button>
+      <button onclick="window.location.href='/admin/delivery-partner'">Deliveries</button>
+    </div>
+  </div>
+
+  <div class="container">
+    <h2 class="section-title">Add New Delivery Partner</h2>
+    <form id="partnerForm" action="/admin/add-delivery-partner" method="POST">
+        <div class="form-row">
+            <div class="form-group">
+                <label for="name">Name</label>
+                <input type="text" id="name" name="name" placeholder="Enter name" required>
+            </div>
+            <div class="form-group">
+                <label for="phone">Phone Number</label>
+                <input type="text" id="phone" name="phone" placeholder="Enter phone number" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Gmail</label>
+                <input type="email" id="email" name="email" placeholder="Enter email" required>
+            </div>
+        </div>
+        <button type="submit" class="submit-btn">Add Delivery Partner</button>
+    </form>
+</div>
+
+<div class="container">
+    <h2 class="section-title">Existing Delivery Partners</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Phone</th>
+                <th>Email</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% partners.forEach(partner => { %>
+                <tr>
+                    <td><%= partner.name %></td>
+                    <td><%= partner.phone %></td>
+                    <td><%= partner.email %></td>
+                    <td><%= partner.isBlocked ? 'Blocked' : 'Active' %></td>
+                    <td>
+                        <% if (partner.isBlocked) { %>
+                            <button class="unblock-btn" onclick="changeStatus('<%= partner._id %>', false)">Unblock</button>
+                        <% } else { %>
+                            <button class="block-btn" onclick="changeStatus('<%= partner._id %>', true)">Block</button>
+                        <% } %>
+                        <button class="delete-btn" onclick="deletePartner('<%= partner._id %>')">Delete</button>
+                    </td>
+                </tr>
+            <% }); %>
+        </tbody>
+    </table>
+</div>
+
+<script>
+    function changeStatus(id, status) {
+        Swal.fire({
+            title: "Are you sure?",
+            text: status ? "This partner will be blocked!" : "This partner will be unblocked!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#3085d6",
+            confirmButtonText: status ? "Yes, block it!" : "Yes, unblock it!"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch(`/admin/delivery-partner/status/${id}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ isBlocked: status })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire("Updated!", data.message, "success").then(() => window.location.reload());
+                    } else {
+                        Swal.fire("Error!", data.message, "error");
+                    }
+                })
+                .catch(() => Swal.fire("Error!", "Operation failed.", "error"));
+            }
+        });
+    }
+
+    function deletePartner(id) {
+        Swal.fire({
+            title: "Are you sure?",
+            text: "This delivery partner will be permanently deleted!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#3085d6",
+            confirmButtonText: "Yes, delete it!"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch(`/admin/delivery-partner/delete/${id}`, { method: "DELETE" })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire("Deleted!", "Delivery partner has been removed.", "success").then(() => window.location.reload());
+                    } else {
+                        Swal.fire("Error!", data.message, "error");
+                    }
+                })
+                .catch(() => Swal.fire("Error!", "Deletion failed.", "error"));
+            }
+        });
+    }
+</script>
+</body>
+</html>

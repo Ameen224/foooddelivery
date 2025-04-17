@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f5f5f5;
+            font-family: Arial, sans-serif;
+        }
+        
+        .container {
+            width: 380px;
+            padding: 30px;
+            text-align: center;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            background-color: white;
+        }
+        
+        h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        .form-group input:focus {
+            border-color: #FFD700;
+            outline: none;
+        }
+        
+        button {
+            width: 100%;
+            padding: 14px;
+            background-color: #FFD700;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: bold;
+            color: #333;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #F4C430;
+        }
+        
+        .otp-container {
+            display: none;
+        }
+        
+        .otp-inputs {
+            display: flex;
+            justify-content: space-between;
+            margin: 25px 0;
+        }
+        
+        .otp-input {
+            width: 50px;
+            height: 55px;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        
+        .otp-input:focus {
+            border-color: #FFD700;
+            outline: none;
+        }
+        
+        .resend-section {
+            margin-top: 20px;
+            font-size: 14px;
+        }
+        
+        .timer {
+            color: #666;
+            margin-bottom: 10px;
+        }
+        
+        .resend-link {
+            color: #FFD700;
+            text-decoration: underline;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        p {
+            margin-bottom: 15px;
+            color: #666;
+        }
+        
+        #login-user-email {
+            font-weight: bold;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Login Form -->
+        <div id="login-form">
+            <h2>Login</h2>
+            <form onsubmit="requestLoginOTP(event)">
+                <div class="form-group">
+                    <label for="login-email">Email</label>
+                    <input type="email" id="login-email" required>
+                </div>
+                <button type="submit">Send OTP</button>
+            </form>
+        </div>
+
+        <!-- OTP Verification Form -->
+        <div id="login-otp-form" class="otp-container">
+            <h2>Verify OTP</h2>
+            <p>We've sent a verification code to <span id="login-user-email"></span></p>
+            <form onsubmit="verifyLoginOTP(event)">
+                <div class="otp-inputs">
+                    <input type="text" class="otp-input" maxlength="1" id="otp-1" onkeyup="moveToNext(this, 'otp-2')">
+                    <input type="text" class="otp-input" maxlength="1" id="otp-2" onkeyup="moveToNext(this, 'otp-3')">
+                    <input type="text" class="otp-input" maxlength="1" id="otp-3" onkeyup="moveToNext(this, 'otp-4')">
+                    <input type="text" class="otp-input" maxlength="1" id="otp-4" onkeyup="moveToNext(this, 'otp-5')">
+                    <input type="text" class="otp-input" maxlength="1" id="otp-5" onkeyup="moveToNext(this, 'otp-6')">
+                    <input type="text" class="otp-input" maxlength="1" id="otp-6">
+                </div>
+                <button type="submit">Login</button>
+            </form>
+            <div class="resend-section">
+                <div id="login-otp-timer" class="timer">
+                    Resend OTP in <span id="login-countdown">1:30</span>
+                </div>
+                <a href="javascript:void(0)" id="resend-otp-btn" class="resend-link" onclick="resendLoginOTP()" style="display: none;">Resend OTP</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let loginEmail = '';
+        let loginCountdownTimer;
+
+        function startLoginCountdown() {
+            let timeLeft = 90; // 1:30 in seconds
+            document.getElementById('resend-otp-btn').style.display = 'none';
+            document.getElementById('login-otp-timer').style.display = 'block';
+            
+            if (loginCountdownTimer) {
+                clearInterval(loginCountdownTimer);
+            }
+            
+            loginCountdownTimer = setInterval(function() {
+                const minutes = Math.floor(timeLeft / 60);
+                let seconds = timeLeft % 60;
+                seconds = seconds < 10 ? '0' + seconds : seconds;
+                
+                document.getElementById('login-countdown').textContent = minutes + ':' + seconds;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(loginCountdownTimer);
+                    document.getElementById('login-otp-timer').style.display = 'none';
+                    document.getElementById('resend-otp-btn').style.display = 'inline-block';
+                }
+                timeLeft--;
+            }, 1000);
+        }
+
+        function moveToNext(current, nextId) {
+            if (current.value.length >= current.maxLength) {
+                document.getElementById(nextId)?.focus();
+            }
+        }
+
+        async function requestLoginOTP(event) {
+            event.preventDefault();
+            const email = document.getElementById('login-email').value.trim();
+            if (!email) return Swal.fire('Error', 'Enter your email.', 'error');
+
+            try {
+                const response = await fetch("/delivery/request-login-otp", {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+
+                const data = await response.json();
+                if (!response.ok) return Swal.fire('Error', data.message || 'Failed to send OTP.', 'error');
+
+                loginEmail = email;
+                document.getElementById('login-user-email').textContent = email;
+                Swal.fire('Success', 'OTP sent to your email.', 'success');
+                document.getElementById('login-form').style.display = 'none';
+                document.getElementById('login-otp-form').style.display = 'block';
+                startLoginCountdown(); // Start countdown timer
+            } catch (error) {
+                Swal.fire('Error', 'Server error! Try again.', 'error');
+            }
+        }
+
+        async function verifyLoginOTP(event) {
+            event.preventDefault();
+            const otp = [...Array(6).keys()].map(i => document.getElementById(`otp-${i + 1}`).value).join('');
+            if (otp.length !== 6) return Swal.fire('Error', 'Enter all 6 digits of OTP.', 'error');
+
+            try {
+                const response = await fetch('/delivery/verify-login-otp', { // Fixed route
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: loginEmail, otp })
+                });
+
+                const data = await response.json();
+                if (!response.ok) return Swal.fire('Error', data.message || 'Invalid OTP.', 'error');
+
+                Swal.fire('Success', 'Login successful!', 'success');
+                setTimeout(() => window.location.href = '/delivery/home', 2000);
+            } catch (error) {
+                Swal.fire('Error', 'Server error! Try again.', 'error');
+            }
+        }
+
+        async function resendLoginOTP() {
+            try {
+                const response = await fetch('/delivery/resend-login-otp', { // Fixed route
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: loginEmail })
+                });
+
+                const data = await response.json();
+                if (!response.ok) return Swal.fire('Error', data.message || 'Failed to resend OTP.', 'error');
+
+                Swal.fire('Success', 'OTP resent. Check your email.', 'success');
+                startLoginCountdown(); // Restart countdown timer
+            } catch (error) {
+                Swal.fire('Error', 'Server error! Try again.', 'error');
+            }
+        }
+    </script>
+</body>
+</html>

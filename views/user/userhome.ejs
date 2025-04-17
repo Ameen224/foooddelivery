@@ -367,7 +367,7 @@
               
               <a href="/user/profile" class="ml-3"><i class="fa fa-user"></i></a>
               <a href="/user/cart" class="ml-3"><i class="fa fa-shopping-cart"></i></a>
-              <a href="/orderstatus" class="ml-3"><i class="fa fa-list-alt"></i></a>
+              <a href="/user/orderstatus" class="ml-3"><i class="fa fa-list-alt"></i></a>
             </div>     
           </div>
         </nav>
@@ -384,7 +384,7 @@
                 <div class="carousel-caption">
                   <h1><%= banner.title %></h1>
                   <p><%= banner.description %></p>
-                  <a href="/menu" class="btn btn-primary carousel-btn">Order Now</a>
+                  <a href="/user/category/<%= banner.category._id %>" class="btn btn-primary carousel-btn">Order Now</a>
                 </div>
               </div>
             <% }); %>
@@ -454,10 +454,7 @@
       </button>
     </div>
     
-    <!-- Optional: Add "View All" button
-    <div class="text-center mt-4">
-      <a href="/user/categories" class="btn carousel-btn">View All Categories</a>
-    </div> -->
+    
   </div>
 </section>
 

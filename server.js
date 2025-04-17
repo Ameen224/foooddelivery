@@ -23,15 +23,21 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "public"))); // Serve static files
 
+// GLOBAL SESSION CONFIGURATION - Use this one configuration for all routes
 app.use(
   session({
-    secret: "your-secret-key",
+    secret: process.env.SESSION_SECRET || "your-secret-key", // Use environment variable
     resave: false,
-    saveUninitialized: true,
-    cookie: { secure: false }, // Set to true if using HTTPS
-    store: store, // Save session to MongoDB
+    saveUninitialized: false, // Changed to false for better security
+    cookie: { 
+      secure: process.env.NODE_ENV === 'production', // Secure in production
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+      httpOnly: true // Better security
+    },
+    store: store,
   })
 );
+
 
 // Set EJS as View Engine
 app.set("view engine", "ejs");
@@ -45,6 +51,10 @@ app.use("/vendor", require("./routes/vendorroutes"));
 
 // Routes user
 app.use("/user",require("./routes/userroutes"))
+
+// Routes delivery
+app.use("/delivery", require("./routes/deliveryroutes"));
+
 
 // Start the Server
 const PORT = process.env.PORT || 3000;

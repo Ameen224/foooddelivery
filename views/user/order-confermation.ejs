@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Order Confirmation</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --primary-yellow: #FFD700;
+      /* --secondary-yellow: #FFF4B8; */
+      --text-color: #333;
+      --background-white: #FFFFFF;
+      --border-color: #E0E0E0;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    }
+
+    body {
+      background-color: var(--secondary-yellow);
+      color: var(--text-color);
+      line-height: 1.6;
+    }
+
+    .order-confirmation {
+      max-width: 900px;
+      margin: 2rem auto;
+      background-color: var(--background-white);
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      padding: 2rem;
+      border: 2px solid var(--primary-yellow);
+    }
+
+    .success-message {
+      background-color: var(--primary-yellow);
+      color: var(--text-color);
+      padding: 1.5rem;
+      border-radius: 8px;
+      text-align: center;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .success-message i {
+      margin-right: 1rem;
+      font-size: 2rem;
+    }
+
+    .order-details, .shipping-address {
+      background-color: var(--secondary-yellow);
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      border: 1px solid var(--primary-yellow);
+    }
+
+    .order-details h3, .shipping-address h3 {
+      border-bottom: 2px solid var(--primary-yellow);
+      padding-bottom: 0.5rem;
+      margin-bottom: 1rem;
+      color: var(--text-color);
+    }
+
+    .order-item {
+      display: flex;
+      align-items: center;
+      padding: 1rem 0;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .order-item-image {
+      width: 80px;
+      height: 80px;
+      margin-right: 1rem;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 2px solid var(--primary-yellow);
+    }
+
+    .order-item-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .order-total-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.5rem 0;
+    }
+
+    .order-total-row.final {
+      font-weight: bold;
+      border-top: 2px solid var(--primary-yellow);
+      padding-top: 1rem;
+      margin-top: 1rem;
+    }
+
+    .action-buttons {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-top: 2rem;
+      text-align: center;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 24px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: bold;
+      transition: all 0.3s ease;
+      gap: 0.5rem;
+    }
+
+    .btn-secondary {
+      background-color: var(--text-color);
+      color: var(--primary-yellow);
+      border: 2px solid var(--primary-yellow);
+    }
+
+    .btn-secondary:hover {
+      background-color: var(--primary-yellow);
+      color: var(--text-color);
+    }
+
+    .payment-info {
+      background-color: var(--secondary-yellow);
+      border-left: 4px solid var(--primary-yellow);
+      padding: 1rem;
+      border-radius: 8px;
+    }
+
+    @media (max-width: 768px) {
+      .order-confirmation {
+        margin: 1rem;
+        padding: 1rem;
+      }
+
+      .btn {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="order-confirmation">
+    <div class="success-message">
+      <i class="fas fa-check-circle"></i>
+      <div>
+        <h2>Thank You for Your Order!</h2>
+        <p>Your order has been successfully placed and is being processed.</p>
+      </div>
+    </div>
+    
+    <div class="order-details">
+      <h3>Order Details</h3>
+      <div class="order-meta">
+        <div class="order-meta-item">
+          <strong>Order ID:</strong>
+          <span>#<%= order._id.toString().slice(-8).toUpperCase() %></span>
+        </div>
+        <div class="order-meta-item">
+          <strong>Order Date:</strong>
+          <span><%= new Date(order.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %></span>
+        </div>
+        <div class="order-meta-item">
+          <strong>Order Status:</strong>
+          <span class="status-<%= order.status %>"><%= order.status.charAt(0).toUpperCase() + order.status.slice(1) %></span>
+        </div>
+        <div class="order-meta-item">
+          <strong>Payment Method:</strong>
+          <span>Razorpay</span>
+        </div>
+      </div>
+      
+      <div class="order-items">
+        <h4>Order Items</h4>
+        <% order.items.forEach(item => { %>
+          <div class="order-item">
+            <div class="order-item-image">
+              <img src="<%= item.image %>" alt="<%= item.name %>">
+            </div>
+            <div class="order-item-details">
+              <div class="item-name"><%= item.name %></div>
+              <div class="item-variant"><%= item.variant %></div>
+              <div class="item-quantity">Qty: <%= item.quantity %></div>
+            </div>
+            <div class="order-item-price">
+              ₹<%= item.price.toFixed(2) %>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+      
+      <div class="order-totals">
+        <div class="order-total-row">
+          <span>Subtotal:</span>
+          <span>₹<%= order.subtotal.toFixed(2) %></span>
+        </div>
+        <div class="order-total-row">
+          <span>Shipping:</span>
+          <span>₹<%= order.shipping.toFixed(2) %></span>
+        </div>
+       
+        <% if (order.discount > 0) { %>
+          <div class="order-total-row">
+            <span>Discount:</span>
+            <span>-₹<%= order.discount.toFixed(2) %></span>
+          </div>
+        <% } %>
+        <div class="order-total-row final">
+          <span>Total:</span>
+          <span>₹<%= order.total.toFixed(2) %></span>
+        </div>
+      </div>
+      
+      <div class="payment-info">
+        <h4>Payment Information</h4>
+        <p><strong>Payment ID:</strong> <%= order.paymentId %></p>
+        <p><strong>Payment Status:</strong> <%= order.payment.status%></p>
+      </div>
+    </div>
+    <div class="shipping-address">
+      <h3>Shipping Address</h3>
+      <p><strong><%= order.address.addressnames %></strong></p>
+      <p><%= order.address.addressphone %></p>
+      <p><%= order.address.street %></p>
+      <p><%= order.address.city %>, <%= order.address.state %> <%= order.address.zip %></p>
+    </div>
+    
+    <div class="action-buttons">
+      <a href="/user/home" class="btn btn-secondary">
+        <i class="fas fa-home"></i> Go to Home
+      </a>
+    </div>
+  </div>
+</body>
+</html>

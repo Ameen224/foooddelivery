@@ -280,6 +280,22 @@
             background-color: #D2E3FC;
             transform: translateY(-2px);
         }
+
+
+        .default-badge {
+    background-color: #4CAF50;
+    color: white;
+    font-size: 0.75rem;
+    padding: 2px 6px;
+    border-radius: 12px;
+    margin-left: 8px;
+}
+
+.default-indicator {
+    color: #4CAF50;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
         
         /* Address form styles */
         .address-form {
@@ -339,6 +355,146 @@
             background-color: #e5e5e5;
         }
         
+
+
+        /* Order history styles */
+        .order-history-container {
+            background: white;
+            width: 80%;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        .order-list {
+            width: 100%;
+        }
+        .order-item {
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 5px solid #FFD700;
+        }
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .order-number {
+            font-weight: bold;
+            font-size: 18px;
+            color: #222831;
+        }
+        .order-date {
+            color: #777;
+        }
+        .order-status {
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .status-delivered {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .status-shipped {
+            background-color: #2196F3;
+            color: white;
+        }
+        .status-processing {
+            background-color: #FF9800;
+            color: white;
+        }
+        .status-cancelled {
+            background-color: #F44336;
+            color: white;
+        }
+        .order-details {
+            margin-bottom: 15px;
+        }
+        .order-products {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .product-item {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            width: 100%;
+        }
+        .product-image {
+            width: 60px;
+            height: 60px;
+            background-color: #eee;
+            border-radius: 5px;
+            margin-right: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .product-image img{
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .product-info {
+            flex: 1;
+        }
+        .product-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .product-price {
+            color: #666;
+        }
+        .product-quantity {
+            color: #888;
+            font-size: 14px;
+        }
+        .order-total {
+            font-weight: bold;
+            font-size: 18px;
+            text-align: right;
+            margin-top: 10px;
+            color: #222831;
+        }
+        .order-actions {
+            margin-top: 15px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        .order-action-btn {
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        .order-details-btn {
+            background-color: #E8F0FE;
+            color: #1A73E8;
+            border: 1px solid #1A73E8;
+        }
+        .track-order-btn {
+            background-color: #FFD700;
+            color: #222831;
+            border: none;
+        }
+        .order-action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
         /* Responsive adjustments */
         @media (max-width: 768px) {
             .navbar {
@@ -443,9 +599,12 @@
                 <% user.addresses.forEach(function(address) { %>
                     <div class="address-item">
                         <div class="address-item-header">
-                            <span class="address-type"><%= address.type %></span>
+                            <span class="address-type">
+                                <%= address.type %>
+                                <% if (address.isDefault) { %><span class="default-badge">Default</span><% } %>
+                            </span>
                             <div class="address-actions">
-                                <button class="action-btn" onclick="editAddress('<%= address._id %>', '<%= address.type %>', '<%= address.street %>', '<%= address.city %>', '<%= address.state %>', '<%= address.zip %>', '<%= address.country %>')">
+                                <button class="action-btn" onclick="editAddress('<%= address._id %>', '<%= address.type %>', '<%= address.street %>', '<%= address.city %>', '<%= address.state %>', '<%= address.zip %>', '<%= address.country %>', '<%= address.addressnames %>', '<%= address.addressphone %>', '<%= address.isDefault %>')">
                                     <i class="fas fa-edit"></i>
                                 </button>
                                 <button class="action-btn" onclick="deleteAddress('<%= address._id %>')">
@@ -454,7 +613,9 @@
                             </div>
                         </div>
                         <div class="address-details">
-                            <%= address.street %>, <%= address.city %>, <%= address.state %> <%= address.zip %>, <%= address.country %>
+                            <% if (address.addressnames) { %><strong><%= address.addressnames %></strong><br><% } %>
+                            <% if (address.addressphone) { %><%= address.addressphone %><br><% } %>
+                            <%= address.street %>, <%= address.city %>, <%= address.state %> <%= address.zip %>
                         </div>
                     </div>
                 <% }) %>
@@ -476,6 +637,15 @@
                     </select>
                 </div>
                 <div class="form-group">
+                    <label for="name">Full Name:</label>
+                    <input type="text" id="address-name" name="name" placeholder="Enter your name" class="form-control" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="number">Phone Number </label>
+                     <input type="number" id="address-number" class="form-control" placeholder="Number">
+                </div>
+                <div class="form-group">
                     <label for="street">Street Address</label>
                     <input type="text" id="street" class="form-control" placeholder="Street">
                 </div>
@@ -492,9 +662,12 @@
                     <input type="text" id="zip" class="form-control" placeholder="ZIP">
                 </div>
                 <div class="form-group">
-                    <label for="country">Country</label>
-                    <input type="text" id="country" class="form-control" placeholder="Country">
+                    <label for="default-address">
+                        <input type="checkbox" id="default-address"> Set as Default Address
+                    </label>
                 </div>
+                
+                
                 <div class="form-buttons">
                     <button class="cancel-btn" onclick="hideAddressForm()">Cancel</button>
                     <button class="save-btn" onclick="saveAddress()">Save Address</button>
@@ -502,6 +675,54 @@
             </div>
         </div>
     </div>
+
+
+    <!-- Order History Section (Below User Info) -->
+<div class="section-header" style="max-width: 1000px;">
+    <h2>Order History</h2>
+</div>
+
+<div class="order-history-container">
+    <div class="order-list">
+        <% if (orders.length > 0) { %>
+            <% orders.forEach(order => { %>
+                <div class="order-item">
+                    <div class="order-header">
+                        <div>
+                            <div class="order-number">Order #<%= order.orderNumber %></div>
+                            <div class="order-date"><%= order.orderDate %></div>
+                        </div>
+                        <span class="order-status <%= order.status === 'Delivered' ? 'status-delivered' : 'status-shipped' %>">
+                            <%= order.status %>
+                        </span>
+                    </div>
+                    <div class="order-products">
+                        <% order.items.forEach(product => { %>
+                            <div class="product-item">
+                                <div class="product-image">
+                                    <img src="<%= product.image %>" alt="">
+                                </div>
+                                <div class="product-info">
+                                    <div class="product-name"><%= product.name %></div>
+                                    <div class="product-price">$<%= product.price %></div>
+                                    <div class="product-quantity">Qty: <%= product.quantity %></div>
+                                </div>
+                            </div>
+                        <% }) %>
+                    </div>
+                    <div class="order-total">Total: $<%= order.total %></div>
+                    <div class="order-actions">
+                        <button class="order-action-btn order-details-btn">View Details</button>
+                        <button class="order-action-btn track-order-btn">Track Order</button>
+                    </div>
+                </div>
+            <% }) %>
+        <% } else { %>
+            <p>No orders found.</p>
+        <% } %>
+    </div>
+</div>
+
 
     <div class="footer">
         <p>&copy; 2025 Your Company. All rights reserved.</p>
@@ -564,7 +785,8 @@
             document.getElementById('city').value = '';
             document.getElementById('state').value = '';
             document.getElementById('zip').value = '';
-            document.getElementById('country').value = '';
+            document.getElementById('address-name').value = '';
+            document.getElementById('address-number').value = '';
         }
 
         function hideAddressForm() {
@@ -572,56 +794,79 @@
         }
 
         // Edit address - populate form with existing data
-        function editAddress(id, type, street, city, state, zip, country) {
-            document.getElementById('address-id').value = id;
-            document.getElementById('address-type').value = type;
-            document.getElementById('street').value = street;
-            document.getElementById('city').value = city;
-            document.getElementById('state').value = state;
-            document.getElementById('zip').value = zip;
-            document.getElementById('country').value = country;
-            
-            document.getElementById('address-form').style.display = 'block';
-        }
+        function editAddress(id, type, street, city, state, zip, country, addressnames, addressphone, isDefault) {
+    document.getElementById('address-id').value = id;
+    document.getElementById('address-type').value = type;
+    document.getElementById('street').value = street;
+    document.getElementById('city').value = city;
+    document.getElementById('state').value = state;
+    document.getElementById('zip').value = zip;
+    document.getElementById('address-name').value = addressnames;
+    document.getElementById('address-number').value = addressphone;
+    document.getElementById('default-address').checked = isDefault;
 
-        // Save address
+    // Ensure form exists before modifying its style
+    const form = document.getElementById('address-form');
+    if (form) {
+        form.style.display = 'block';
+    } else {
+        console.error("Address form not found");
+    }
+}
+
         function saveAddress() {
-    let addressId = document.getElementById('address-id').value;
-    let addressData = {
+       // Get the address ID if it exists (for editing)
+    const addressId = document.getElementById('address-id').value;
+
+    const addressData = {
         type: document.getElementById('address-type').value,
+        // name: document.getElementById('name').value,
+        addressphone: document.getElementById('address-number').value,
         street: document.getElementById('street').value,
         city: document.getElementById('city').value,
         state: document.getElementById('state').value,
         zip: document.getElementById('zip').value,
-        country: document.getElementById('country').value
+        isDefault: document.getElementById('default-address').checked,
+       addressnames : document.getElementById('address-name').value.trim()
     };
-
+        
+    // Only add the ID if it exists (for editing)
     if (addressId) {
-        addressData.id = addressId; // Only include ID if updating
+        addressData.id = addressId;
     }
+
+
+    console.log(JSON.stringify(addressData));
 
     fetch('/user/profile/address', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+            'Content-Type': 'application/json'
+        },
         body: JSON.stringify(addressData)
     })
     .then(response => response.json())
     .then(data => {
-        console.log("Server Response:", data);
-        if (data.success) {
-            Swal.fire({ icon: 'success', title: 'Success', text: data.message, timer: 1500 }).then(() => {
-                location.reload();
-            });
-        } else {
-            Swal.fire({ icon: 'error', title: 'Error', text: data.message });
-        }
-    })
-    .catch(error => {
-        console.error('Fetch Error:', error);
-        Swal.fire({ icon: 'error', title: 'Error', text: 'Failed to save address. Please try again.' });
-    });
+    if (data.success) {
+        Swal.fire({
+            icon: 'success',
+            title: 'Success',
+            text: 'Address saved successfully!',
+            timer: 1500
+        }).then(() => {
+            hideAddressForm();
+            location.reload();  // Refresh to show updated addresses
+        });
+    } else {
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Error saving address.'
+        });
+    }
+})
+    .catch(error => console.error('Error:', error));
 }
-
 
  // Delete address with confirmation
         function deleteAddress(id) {

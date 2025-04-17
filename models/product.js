@@ -16,6 +16,13 @@ const productSchema = new mongoose.Schema(
       required: true,
       min: 0 // Ensures price is non-negative
     },
+    order: {
+      type: Number,
+      required: true,
+      min: 0 ,// Ensures price is non-negative
+      default: 0 // ✅ This ensures `order` always has a value
+
+    },
     category: [{
       type: mongoose.Schema.Types.ObjectId,
       ref: "Category",
@@ -49,7 +56,8 @@ const productSchema = new mongoose.Schema(
       ref: "Vendor",
       required: true,
       index: true
-    }
+    },
+  
   },
   { timestamps: true } // Automatically adds createdAt and updatedAt fields
 );

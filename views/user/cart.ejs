@@ -30,13 +30,15 @@
             top: 0;
             z-index: 100;
             color: white;
+            position: relative;
         }
-        
+
         .nav-left {
             display: flex;
             align-items: center;
+            flex-grow: 1;
         }
-        
+
         .back-button {
             background: none;
             border: none;
@@ -47,33 +49,22 @@
             align-items: center;
             transition: color 0.2s;
         }
-        
+
         .back-button:hover {
             color: #FFEB3B;
         }
-        
+
+        .nav-center {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
         .page-title {
-            margin-left: 1rem;
             font-size: 1.4rem;
             font-weight: bold;
+            text-align: center;
             color: white;
-        }
-        
-        .nav-right {
-            display: flex;
-            align-items: center;
-            gap: 1.5rem;
-        }
-        
-        .nav-link {
-            color: white;
-            text-decoration: none;
-            font-weight: 500;
-            transition: color 0.2s;
-        }
-        
-        .nav-link:hover {
-            color: #FFC107;
         }
         
         .container {
@@ -302,27 +293,120 @@
         .continue-shopping:hover {
             background-color: #FFEB3B;
         }
+
+        /* Coupon styles */
+        .coupon-section {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .coupon-toggle {
+            background: none;
+            border: none;
+            color: #FFC107;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0;
+            margin-bottom: 1rem;
+        }
+
+        .coupon-toggle:hover {
+            color: #FFEB3B;
+        }
+
+        .coupon-content {
+            display: none;
+        }
+
+        .coupon-form {
+            display: flex;
+            margin-bottom: 1rem;
+        }
+
+        .coupon-input {
+            flex: 1;
+            padding: 0.75rem;
+            border: 1px solid #dee2e6;
+            border-radius: 6px 0 0 6px;
+            font-size: 1rem;
+        }
+
+        .apply-coupon {
+            padding: 0.75rem 1.5rem;
+            background-color: #FFC107;
+            color: #222831;
+            border: none;
+            border-radius: 0 6px 6px 0;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .apply-coupon:hover {
+            background-color: #FFEB3B;
+        }
+
+        .active-coupons {
+            margin-top: 1rem;
+        }
+
+        .coupon-tag {
+            display: inline-flex;
+            align-items: center;
+            background-color: #f8f9fa;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+            border: 1px solid #dee2e6;
+        }
+
+        .coupon-code {
+            font-weight: bold;
+            margin-right: 0.5rem;
+        }
+
+        .coupon-remove {
+            background: none;
+            border: none;
+            color: #dc3545;
+            cursor: pointer;
+            font-size: 1.2rem;
+            line-height: 1;
+            padding: 0;
+            margin-left: 0.5rem;
+        }
+
+        .discount-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            font-size: 1.05rem;
+            color: #28a745;
+            font-weight: bold;
+        }
     </style>
 </head>
-<body>
-    <div class="navbar">
+ <body>
+   <div class="navbar">
         <div class="nav-left">
             <button class="back-button" onclick="window.history.back()">← Back</button>
-            <div class="page-title">Shopping Cart</div>
         </div>
-        <div class="nav-right">
-            <a href="/" class="nav-link">Home</a>
-            <a href="/products" class="nav-link">Products</a>
-            <a href="/account" class="nav-link">My Account</a>
+        <div class="nav-center">
+            <div class="page-title">Shopping Cart</div>
         </div>
     </div>
     
     <div class="container">
         <div class="cart-container">
             <div class="products-section">
-                <h2 class="section-title">Cart Items (<%= cart.items.length %>)</h2>
+                <h2 class="section-title">Cart Items (<%= cart && cart.items ? cart.items.length : 0 %>)</h2>
                 
-                <% if (cart.items.length === 0) { %>
+                <% if (!cart || !cart.items || cart.items.length === 0) { %>
                     <div class="empty-cart">
                         <h3>Your cart is empty</h3>
                         <p>Add some products to your cart to see them here.</p>
@@ -331,19 +415,19 @@
                 <% } else { %>
                     <% cart.items.forEach(item => { %>
                         <div class="cart-item">
-                            <img src="<%= item.image %>" alt="<%= item.name %>" class="item-image">
+                            <img src="<%= item.image || '/img/placeholder.jpg' %>" alt="<%= item.name || 'Product' %>" class="item-image">
                             <div class="item-details">
                                 <div>
-                                    <div class="item-name"><%= item.name %></div>
+                                    <div class="item-name"><%= item.name || 'Product' %></div>
                                     <% if (item.variant) { %>
                                         <div class="item-variant"><%= item.variant %></div>
                                     <% } %>
-                                </div>
-                                <div class="item-price">$<%= item.price.toFixed(2) %></div>
+                               </div>
+                                <div class="item-price">₹<%= (item.price || 0).toFixed(2) %></div>
                                 <div class="item-actions">
                                     <div class="quantity-control">
                                         <button class="quantity-btn" onclick="updateQuantity('<%= item.id %>', <%= item.quantity - 1 %>)">-</button>
-                                        <input type="text" class="quantity-input" value="<%= item.quantity %>" readonly>
+                                        <input type="text" class="quantity-input" value="<%= item.quantity || 1 %>" readonly>
                                         <button class="quantity-btn" onclick="updateQuantity('<%= item.id %>', <%= item.quantity + 1 %>)">+</button>
                                     </div>
                                     <button class="remove-btn" onclick="removeItem('<%= item.id %>')">
@@ -362,98 +446,270 @@
             
             <div class="order-summary">
                 <h2 class="section-title">Order Summary</h2>
+                
+                <% if (cart && cart.items && cart.items.length > 0) { %>
+                    <!-- Coupon Section -->
+                    <div class="coupon-section">
+                        <button class="coupon-toggle" onclick="toggleCoupon()">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5z"/>
+                                <path d="M2.5 4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5H3a.5.5 0 0 1-.5-.5V4z"/>
+                            </svg>
+                            Add Coupon Code
+                        </button>
+                        <div id="couponContent" class="coupon-content">
+                            <div class="coupon-form">
+                                <input type="text" class="coupon-input" id="couponCode" placeholder="Enter coupon code">
+                                <button class="apply-coupon" onclick="applyCoupon()">Apply</button>
+                            </div>
+                            
+                            <% if (cart && cart.coupon && cart.coupon.code) { %>
+                                <div class="active-coupons">
+                                    <div class="coupon-tag">
+                                        <span class="coupon-code"><%= cart.coupon.code %></span>
+                                        <% if (cart.coupon.discount) { %>
+                                            <% if (cart.coupon.type === 'percent') { %>
+                                                <span><%= cart.coupon.discount %>% off</span>
+                                            <% } else { %>
+                                                <span>₹<%= cart.coupon.discount.toFixed(2) %> off</span>
+                                            <% } %>
+                                            <button class="coupon-remove" onclick="removeCoupon()">×</button>
+                                        <% } %>                                        
+                                    </div>
+                                </div>
+                            <% } %>
+                        </div>
+                    </div>
+                <% } %>
+                
                 <div class="summary-row">
                     <span>Subtotal</span>
-                    <span>$<%= cart.subtotal.toFixed(2) %></span>
+                    <span>₹<%= (cart && cart.subtotal ? cart.subtotal : 0).toFixed(2) %></span>
                 </div>
+                
+                <% if (cart && cart.discount && cart.discount > 0) { %>
+                    <div class="discount-row">
+                        <span>Discount</span>
+                        <span>-₹<%= cart.discount.toFixed(2) %></span>
+                    </div>
+                <% } %>
+                
                 <div class="summary-row">
                     <span>Shipping</span>
-                    <span>$<%= cart.shipping.toFixed(2) %></span>
+                    <span>₹<%= (cart && cart.shipping ? cart.shipping : 0).toFixed(2) %></span>
                 </div>
                 <div class="summary-row">
                     <span>Tax</span>
-                    <span>$<%= cart.tax.toFixed(2) %></span>
+                    <span>₹<%= (cart && cart.tax ? cart.tax : 0).toFixed(2) %></span>
                 </div>
                 <div class="summary-total">
                     <span>Total</span>
-                    <span>$<%= cart.total.toFixed(2) %></span>
+                    <span>₹<%= (cart && cart.total ? cart.total : 0).toFixed(2) %></span>
                 </div>
-                <button class="checkout-btn" onclick="proceedToCheckout()">Proceed to Checkout</button>
+                <button class="checkout-btn" onclick="proceedToCheckout()" <%= (!cart || !cart.items || cart.items.length === 0) ? 'disabled' : '' %>>Proceed to Checkout</button>
             </div>
         </div>
     </div>
 
     <script>
-       function updateQuantity(itemId, newQuantity) {
-    if (newQuantity < 1) return;
+        //function for updating the quantity
+        function updateQuantity(itemId, newQuantity) {
+            if (isNaN(newQuantity) || newQuantity < 1 || newQuantity > 100) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Invalid Quantity',
+                    text: 'Please enter a valid quantity between 1 and 100.'
+                });
+                return;
+            }
 
-    fetch('/user/cart/update', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            itemId: itemId,
-            quantity: newQuantity
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            Swal.fire({
-                icon: 'success',
-                title: 'Cart Updated!',
-                text: 'Item quantity has been updated.',
-                timer: 1500,
-                showConfirmButton: false
-            }).then(() => {
-                window.location.reload();
-            });
-        } else {
-            Swal.fire({
-                icon: 'error',
-                title: 'Update Failed',
-                text: data.message || 'Unable to update item quantity.'
-            });
-        }
-    })
-    .catch(error => {
-        console.error('Error updating cart:', error);
-        Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: 'Something went wrong. Please try again.'
-        });
-    });
-}
-
-function removeItem(itemId) {
-    Swal.fire({
-        title: 'Are you sure?',
-        text: 'This item will be removed from your cart.',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#3085d6',
-        confirmButtonText: 'Yes, remove it!'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            fetch('/user/cart/remove', {
+            fetch('/user/cart/update', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    itemId: itemId
+                    itemId: itemId,
+                    quantity: newQuantity
                 })
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
             .then(data => {
                 if (data.success) {
                     Swal.fire({
                         icon: 'success',
-                        title: 'Item Removed',
-                        text: 'The item has been successfully removed from your cart.',
+                        title: 'Cart Updated!',
+                        text: 'Item quantity has been updated.',
+                        timer: 1500,
+                        showConfirmButton: false
+                    }).then(() => {
+                        window.location.reload();
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Update Failed',
+                        text: data.message || 'Unable to update item quantity.'
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error updating cart:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Something went wrong. Please try again.'
+                });
+            });
+        }
+// function for removing the item
+        function removeItem(itemId) {
+            if (!itemId) {
+                console.error('Invalid item ID');
+                return;
+            }
+            
+            Swal.fire({
+                title: 'Are you sure?',
+                text: 'This item will be removed from your cart.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, remove it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch('/user/cart/remove', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            itemId: itemId
+                        })
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Item Removed',
+                                text: 'The item has been successfully removed from your cart.',
+                                timer: 1500,
+                                showConfirmButton: false
+                            }).then(() => {
+                                window.location.reload();
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Removal Failed',
+                                text: data.message || 'Unable to remove item.'
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error removing item:', error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Something went wrong. Please try again.'
+                        });
+                    });
+                }
+            });
+        }
+// function for toggle the coupon
+        function toggleCoupon() {
+            const couponContent = document.getElementById('couponContent');
+            if (couponContent) {
+                couponContent.style.display = couponContent.style.display === 'block' ? 'none' : 'block';
+            }
+        }
+// function for applying the coupon
+function applyCoupon() {
+    const couponCodeElement = document.getElementById('couponCode');
+    const couponCode = couponCodeElement.value.trim();
+    
+    console.log("Attempting to apply coupon:", couponCode);
+    
+    fetch('/user/cart/apply-coupon', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            code: couponCode
+        })
+    })
+    .then(response => response.json()) // Convert response to JSON
+    .then(data => {
+        console.log("Server Response:", data); // Log response to debug
+                if (data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'coupon applied ',
+                        text: 'applyed succecfully',
+                        timer: 1500,
+                        showConfirmButton: false
+                    }).then(() => {
+                        window.location.reload();
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'coupon Failed',
+                        text: data.message || 'unable to apply coupon'
+                    });
+                }
+            })
+    .catch(error => {
+        console.error('Error applying coupon:', error);
+        // Error handling
+    });
+}
+                                                                    
+
+ // function for removing the coupon       
+function removeCoupon() {
+    Swal.fire({
+        title: 'Remove Coupon?',
+        text: 'This will remove the applied coupon from your cart.',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Yes, remove it'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch('/user/cart/remove-coupon', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Coupon Removed',
+                        text: 'Coupon has been removed from your cart.',
                         timer: 1500,
                         showConfirmButton: false
                     }).then(() => {
@@ -463,12 +719,12 @@ function removeItem(itemId) {
                     Swal.fire({
                         icon: 'error',
                         title: 'Removal Failed',
-                        text: data.message || 'Unable to remove item.'
+                        text: data.message || 'Unable to remove coupon.'
                     });
                 }
             })
             .catch(error => {
-                console.error('Error removing item:', error);
+                console.error('Error removing coupon:', error);
                 Swal.fire({
                     icon: 'error',
                     title: 'Error',
@@ -479,7 +735,20 @@ function removeItem(itemId) {
     });
 }
 
+
+// function for the checkout
 function proceedToCheckout() {
+    // Check if cart is empty
+    const cartItems = document.querySelectorAll('.cart-item');
+    if (cartItems.length === 0) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Empty Cart',
+            text: 'Your cart is empty. Add some items before checking out.',
+        });
+        return;
+    }
+
     Swal.fire({
         title: 'Proceed to Checkout?',
         text: 'Make sure your cart is ready before checking out.',
@@ -490,11 +759,57 @@ function proceedToCheckout() {
         confirmButtonText: 'Yes, proceed'
     }).then((result) => {
         if (result.isConfirmed) {
-            window.location.href = '/checkout';
+            // Show loading state
+            Swal.fire({
+                title: 'Processing...',
+                text: 'Please wait while we prepare your checkout.',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            // Navigate to checkout page
+            window.location.href = '/user/checkout';
         }
     });
 }
 
-    </script>
+// Initialize - check if there's a coupon to show the section
+document.addEventListener('DOMContentLoaded', function() {
+    // Check if there's an applied coupon and show the coupon section
+    const hasCoupon = <%= cart && cart.coupon ? 'true' : 'false' %>;
+    if (hasCoupon) {
+        const couponContent = document.getElementById('couponContent');
+        if (couponContent) {
+            couponContent.style.display = 'block';
+        }
+    }
+    
+    // Focus trap for accessibility in coupon form
+    const couponInput = document.getElementById('couponCode');
+    const applyButton = document.querySelector('.apply-coupon');
+    
+    if (couponInput && applyButton) {
+        couponInput.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                applyCoupon();
+            }
+        });
+    }
+    
+    
+    // Add error handling for images
+    const productImages = document.querySelectorAll('.item-image');
+    productImages.forEach(img => {
+        img.onerror = function() {
+            this.src = '/img/placeholder.jpg';
+            this.alt = 'Product image not available';
+        };
+    });
+});
+</script>
 </body>
 </html>

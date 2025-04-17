@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkout</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <!-- Include SweetAlert CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<style>
+  /* Global Styles with Yellow and White Color Scheme */
+  :root {
+    --primary-color: #FFD700;  /* Vibrant Gold */
+    --secondary-color: #FFFAF0;  /* Soft Cream White */
+    --accent-color: #333;  /* Dark gray for text */
+    --navbar-bg: #FFF7D6;  /* Light yellow for navbar */
+    --border-color: #FFE4B5;  /* Soft golden border */
+    --text-color: #333;
+    --hover-color: #FFC300;  /* Slightly darker gold for hover effects */
+    --success-color: #28a745;
+    --danger-color: #dc3545;
+    --light-text: #6c757d;
+  }
+  
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--secondary-color);
+    margin: 0;
+    padding: 0;
+    color: var(--text-color);
+  }
+
+  .navbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 2rem;
+            background-color: #222831;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            color: white;
+            position: relative;
+        }
+
+  .nav-center {
+    font-size: 24px;
+    font-weight: bold;
+    color: var(--accent-color);
+  }
+
+  .back-button {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            color: #FFC107;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            transition: color 0.2s;
+        }
+
+        .back-button:hover {
+            color: #FFEB3B;
+        }
+
+        .nav-center {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .page-title {
+            font-size: 1.4rem;
+            font-weight: bold;
+            text-align: center;
+            color: white;
+        }
+  .nav-links a {
+    text-decoration: none;
+    color: var(--accent-color);
+    margin: 0 10px;
+    font-weight: 500;
+    transition: color 0.3s ease;
+  }
+
+  .nav-links a:hover {
+    color: var(--hover-color);
+  }
+
+  .nav-icons a {
+    color: var(--accent-color);
+    font-size: 20px;
+    margin-left: 15px;
+    transition: color 0.3s ease;
+  }
+
+  .nav-icons a:hover {
+    color: var(--hover-color);
+  }
+
+  .checkout-container {
+    max-width: 1200px;
+    margin: 40px auto;
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(255, 215, 0, 0.1);
+  }
+
+  .checkout-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid var(--primary-color);
+  }
+  
+  .checkout-header h1 {
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--accent-color);
+  }
+  
+  .checkout-steps {
+    display: flex;
+    margin-bottom: 30px;
+    background-color: var(--secondary-color);
+    padding: 15px;
+    border-radius: 8px;
+  }
+  
+  .step {
+    flex: 1;
+    text-align: center;
+    padding: 10px;
+    position: relative;
+    color: var(--accent-color);
+  }
+  
+  .step:not(:last-child):after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: 0;
+    width: 100%;
+    height: 2px;
+    background: var(--border-color);
+    z-index: 1;
+  }
+  
+  .step-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    background: var(--primary-color);
+    color: var(--accent-color);
+    margin-bottom: 8px;
+    font-weight: bold;
+    position: relative;
+    z-index: 2;
+  }
+  
+  .step.active .step-number {
+    background: var(--hover-color);
+    color: white;
+    border-color: var(--hover-color);
+  }
+  
+  .checkout-content {
+    display: flex;
+    gap: 30px;
+  }
+
+  .left-side {
+    width: 60%;
+  }
+
+  .section {
+    margin-bottom: 30px;
+    padding: 20px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: #fff;
+    transition: all 0.3s ease;
+  }
+
+  .section h2 {
+    font-size: 20px;
+    margin-bottom: 15px;
+    color: var(--accent-color);
+    display: flex;
+    align-items: center;
+  }
+  
+  .section h2 i {
+    margin-right: 10px;
+    color: var(--primary-color);
+  }
+
+  .address-cards, .payment-methods {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .address-card, .payment-method {
+    padding: 15px;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    transition: all 0.3s ease;
+  }
+
+  .address-card input, .payment-method input {
+    display: none;
+  }
+
+  .address-card label, .payment-method label {
+    cursor: pointer;
+    width: 100%;
+  }
+  
+  .address-info {
+    flex: 1;
+  }
+  
+  .address-type {
+    font-weight: 600;
+    font-size: 16px;
+    margin-bottom: 5px;
+  }
+  
+  .address-details {
+    font-size: 14px;
+    color: var(--light-text);
+    line-height: 1.4;
+  }
+
+  .address-card.selected, .payment-method.selected {
+    border-color: var(--primary-color);
+    background: rgba(255, 215, 0, 0.05);
+  }
+
+  .radio-button {
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--border-color);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+  }
+  
+  .selected .radio-button {
+    border-color: var(--primary-color);
+  }
+  
+  .selected .radio-button:after {
+    content: '';
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--primary-color);
+  }
+
+  .payment-method img {
+    width: 60px;
+    height: auto;
+    object-fit: contain;
+  }
+  
+  .payment-method .payment-info {
+    flex: 1;
+  }
+  
+  .payment-type {
+    font-weight: 600;
+    font-size: 16px;
+  }
+  
+  .payment-details {
+    font-size: 14px;
+    color: var(--light-text);
+  }
+
+  .add-btn {
+    background: var(--primary-color);
+    color: var(--accent-color);
+    border: none;
+    padding: 12px 20px;
+    cursor: pointer;
+    border-radius: 6px;
+    margin-top: 15px;
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+  }
+  
+  .add-btn:hover {
+    background: var(--hover-color);
+  }
+
+  .form-section {
+    margin-top: 20px;
+    padding: 20px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--secondary-color);
+  }
+  
+  .form-row {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 15px;
+  }
+  
+  .form-group {
+    flex: 1;
+  }
+  
+  .form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+  }
+  
+  .form-control {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 15px;
+  }
+  
+  .form-control:focus {
+    outline: none;
+    border-color: var(--primary-color);
+  }
+
+  .order-summary {
+    width: 40%;
+  }
+  
+  .summary-box {
+    background: var(--secondary-color);
+    border-radius: 8px;
+    padding: 25px;
+    position: sticky;
+    top: 20px;
+  }
+
+  .order-items {
+    margin: 20px 0;
+  }
+
+  .order-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 15px;
+  }
+  
+  .item-details {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .item-image {
+    width: 50px;
+    height: 50px;
+    border-radius: 4px;
+    object-fit: cover;
+  }
+  
+  .item-info {
+    flex: 1;
+  }
+  
+  .item-name {
+    font-weight: 500;
+  }
+  
+  .item-price {
+    font-weight: 600;
+  }
+
+  .price-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    font-size: 15px;
+  }
+
+  .total-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 15px 0;
+    border-top: 2px solid var(--border-color);
+    font-size: 18px;
+    font-weight: bold;
+    margin-top: 10px;
+  }
+
+  .place-order-btn {
+    width: 100%;
+    background: var(--primary-color);
+    color: var(--accent-color);
+    padding: 15px;
+    border: none;
+    cursor: pointer;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 600;
+    margin-top: 20px;
+    transition: all 0.3s ease;
+  }
+
+  .place-order-btn:hover {
+    background: var(--hover-color);
+  }
+
+  .place-order-btn:disabled {
+    background: #b0b0b0;
+    cursor: not-allowed;
+  }
+  
+  .savings {
+    color: var(--success-color);
+    font-weight: 500;
+  }
+  .default-badge {
+    background-color: var(--primary-color);
+    color: var(--accent-color);
+    font-size: 0.75rem;
+    padding: 2px 6px;
+    border-radius: 12px;
+    margin-left: 8px;
+  }
+
+  .toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 15px 20px;
+    border-radius: 4px;
+    color: white;
+    font-weight: 500;
+    z-index: 9999;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .toast.success {
+    background-color: var(--success-color);
+  }
+
+  .toast.error {
+    background-color: var(--danger-color);
+  }
+
+  .toast.show {
+    opacity: 1;
+  }
+  
+  /* Responsive Adjustments */
+  @media (max-width: 900px) {
+    .navbar {
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .nav-links, .nav-icons {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .checkout-content {
+      flex-direction: column;
+    }
+    
+    .left-side, .order-summary {
+      width: 100%;
+    }
+  }
+  
+  /* Modal Styles */
+  .modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .modal-content {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 550px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    position: relative;
+  }
+  
+  .close {
+    position: absolute;
+    right: 20px;
+    top: 20px;
+    font-size: 24px;
+    cursor: pointer;
+  }
+  
+  .razor-btn {
+    background: var(--primary-color);
+    color: var(--accent-color);
+    padding: 12px 20px;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+    display: block;
+    width: 100%;
+    margin-top: 20px;
+  }
+  </style>
+</head>
+<body>
+    <div class="navbar">
+        <div class="nav-left">
+            <button class="back-button" onclick="window.history.back()">← Back</button>
+        </div>
+        <div class="nav-center">
+            <div class="page-title">Checkout</div>
+        </div>
+    </div>
+    
+  
+    
+    <!-- <div class="checkout-steps">
+      <div class="step active">
+        <div class="step-number">1</div>
+        <div class="step-title">Shipping</div>
+      </div>
+      <div class="step">
+        <div class="step-number">2</div>
+        <div class="step-title">Payment</div>
+      </div>
+      <div class="step">
+        <div class="step-number">3</div>
+        <div class="step-title">Confirmation</div>
+      </div>
+    </div> -->
+      
+    <div class="checkout-content">
+      <!-- Left Side - Shipping & Payment -->
+      <div class="left-side">
+        
+        <!-- Shipping Address -->
+        <div class="section" id="addressSection">
+          <h2><i class="fas fa-map-marker-alt"></i> Shipping Address</h2>
+          <div class="address-cards">
+            <% addresses.forEach((address, index) => { %>
+              <div class="address-card <%= index === 0 ? 'selected' : '' %>" onclick="selectAddress(<%= index %>)">
+                <div class="radio-button"></div>
+                <input type="radio" name="address" id="address<%= index %>" value="<%= index %>" <%= index === 0 ? 'checked' : '' %>>
+                <div class="address-info">
+                  <div class="address-type"><%= address.type || 'Home' %>                                  <% if (address.isDefault) { %><span class="default-badge">Default</span><% } %>
+                  </div>
+                  <div class="address-details">
+                    <p><%= address.name || address.addressnames %>, <%= address.street %></p>
+                    <p><%= address.city %>, <%= address.state %> - <%= address.zip %></p>
+                    <p>Phone: <%= address.phone || address.addressphone %></p>
+                  </div>
+                </div>
+              </div>
+            <% }); %>
+          </div>
+          <button class="add-btn" id="showAddressForm">
+            <i class="fas fa-plus"></i> Add a new address
+          </button>
+  
+          <div class="form-section" id="newAddressForm" style="display: none;">
+            <h3>Add a New Address</h3>
+            <form id="addressForm">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="type">Address Type</label>
+                  <select class="form-control" id="type" name="type" required>
+                    <option value="Home">Home</option>
+                    <option value="Work">Work</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="addressnames">Full Name</label>
+                  <input type="text" class="form-control" id="addressnames" name="addressnames" placeholder="Enter your full name" required>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="street">Street Address</label>
+                  <input type="text" class="form-control" id="street" name="street" placeholder="Enter street address" required>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="city">City</label>
+                  <input type="text" class="form-control" id="city" name="city" placeholder="Enter city" required>
+                </div>
+                <div class="form-group">
+                  <label for="state">State</label>
+                  <input type="text" class="form-control" id="state" name="state" placeholder="Enter state" required>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="zip">ZIP Code</label>
+                  <input type="text" class="form-control" id="zip" name="zip" placeholder="Enter ZIP code" required>
+                </div>
+                <div class="form-group">
+                  <label for="addressphone">Phone Number</label>
+                  <input type="text" class="form-control" id="addressphone" name="addressphone" placeholder="Enter phone number" required>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="isDefault">
+                    <input type="checkbox" id="isDefault" name="isDefault"> Set as default address
+                  </label>
+                </div>
+              </div>
+              <button type="submit" class="add-btn">Save Address</button>
+              <button type="button" class="add-btn" id="cancelAddressForm" style="background-color: #6c757d;">Cancel</button>
+            </form>
+          </div>
+        </div>
+  
+        <!-- Payment Method -->
+        <div class="section" id="paymentSection">
+          <h2><i class="fas fa-credit-card"></i> Payment Method</h2>
+          <div class="payment-methods">
+            <% payments.forEach((payment, index) => { %>
+              <div class="payment-method <%= index === 0 ? 'selected' : '' %>" onclick="selectPayment(<%= index %>)" data-payment="<%= payment.type %>">
+                <div class="radio-button"></div>
+                <input type="radio" name="payment" id="payment<%= index %>" value="<%= index %>" <%= index === 0 ? 'checked' : '' %>>
+                <div class="payment-info">
+                  <div class="payment-type"><%= payment.type %></div>
+                  <div class="payment-details"><%= payment.details %></div>
+                </div>
+              </div>
+            <% }); %>
+          </div>
+        </div>
+      </div>
+  
+      <!-- Right Side - Order Summary -->
+      <div class="order-summary">
+        <div class="summary-box">
+          <h2><i class="fas fa-shopping-cart"></i> Order Summary</h2>
+          
+          <div class="total-row">
+            <span>Total</span>
+            <span>₹<%= cart.total.toFixed(2) %></span>
+          </div>
+          
+          <div class="order-actions">
+            <button class="place-order-btn" id="placeOrderBtn">Place Order</button>
+            <div class="order-status" id="orderStatus"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Toast notification -->
+  <div id="toast" class="toast"></div>
+  
+  <!-- Razorpay Modal -->
+  <div id="razorpayModal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h2>Complete Your Payment</h2>
+      <p>You will be redirected to Razorpay to complete your payment securely.</p>
+      <div id="razorpay-container"></div>
+    </div>
+  </div>
+  
+  <script>
+    
+      // Global variables
+let selectedAddress = 0;
+let selectedPayment = 0;
+
+// DOM Elements
+const addressForm = document.getElementById('addressForm');
+const addressSection = document.getElementById('addressSection');
+const showAddressFormBtn = document.getElementById('showAddressForm');
+const newAddressForm = document.getElementById('newAddressForm');
+const cancelAddressFormBtn = document.getElementById('cancelAddressForm');
+const placeOrderBtn = document.getElementById('placeOrderBtn');
+const razorpayModal = document.getElementById('razorpayModal');
+const closeModal = document.querySelector('.close');
+const toast = document.getElementById('toast');
+
+// Function to show SweetAlert notification
+function showSweetAlert(message, type = 'success') {
+  Swal.fire({
+    icon: type,
+    text: message,
+    showConfirmButton: false,
+    timer: 3000
+  });
+}
+
+// Function to select address
+function selectAddress(index) {
+  console.log("Selected Address Index:", index);
+  const addressCards = document.querySelectorAll('.address-card');
+  addressCards.forEach((card, i) => {
+    if (i === index) {
+      card.classList.add('selected');
+      document.getElementById(`address${i}`).checked = true;
+    } else {
+      card.classList.remove('selected');
+      document.getElementById(`address${i}`).checked = false;
+    }
+  });
+  
+  selectedAddress = index;
+  updateOrderButton();
+}
+
+// Function to select payment method
+function selectPayment(index) {
+  console.log("Selected Payment Index:", index);
+  const paymentMethods = document.querySelectorAll('.payment-method');
+  paymentMethods.forEach((method, i) => {
+    if (i === index) {
+      method.classList.add('selected');
+      document.getElementById(`payment${i}`).checked = true;
+    } else {
+      method.classList.remove('selected');
+      document.getElementById(`payment${i}`).checked = false;
+    }
+  });
+  
+  selectedPayment = index;
+  updateOrderButton();
+}
+
+// Function to update order button state
+function updateOrderButton() {
+  placeOrderBtn.disabled = false;
+}
+
+// Event listeners
+showAddressFormBtn.addEventListener('click', () => {
+  newAddressForm.style.display = 'block';
+  showAddressFormBtn.style.display = 'none';
+});
+
+cancelAddressFormBtn.addEventListener('click', () => {
+  newAddressForm.style.display = 'none';
+  showAddressFormBtn.style.display = 'flex';
+  addressForm.reset();
+});
+
+// Form submission
+addressForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  const formData = new FormData(addressForm);
+  const addressData = Object.fromEntries(formData.entries());
+  console.log("data address", addressData);
+  
+  try {
+    console.log("Sending request to backend...");
+    const response = await fetch('/user/checkout/add-address', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(addressData)
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to add address');
+    }
+    
+    // Just reload the page after successful address addition
+    window.location.reload();
+  } catch (error) {
+    console.error('Error adding address:', error);
+    showSweetAlert('Failed to add address. Please try again.', 'error');
+  }
+});
+
+// Function to create address card element
+function createAddressCard(address) {
+  const addressIndex = document.querySelectorAll('.address-card').length;
+  
+  const card = document.createElement('div');
+  card.className = 'address-card';
+  card.onclick = () => selectAddress(addressIndex);
+  
+  const radioButton = document.createElement('div');
+  radioButton.className = 'radio-button';
+  
+  const input = document.createElement('input');
+  input.type = 'radio';
+  input.name = 'address';
+  input.id = `address${addressIndex}`;
+  input.value = addressIndex;
+  
+  const addressInfo = document.createElement('div');
+  addressInfo.className = 'address-info';
+  
+  const addressType = document.createElement('div');
+  addressType.className = 'address-type';
+  addressType.textContent = address.type || 'Home';
+  
+  if (address.isDefault) {
+    const defaultBadge = document.createElement('span');
+    defaultBadge.className = 'default-badge';
+    defaultBadge.textContent = 'Default';
+    addressType.appendChild(defaultBadge);
+  }
+  
+  const addressDetails = document.createElement('div');
+  addressDetails.className = 'address-details';
+  
+  const nameLine = document.createElement('p');
+  nameLine.textContent = `${address.addressnames}, ${address.street}`;
+  
+  const cityLine = document.createElement('p');
+  cityLine.textContent = `${address.city}, ${address.state} - ${address.zip}`;
+  
+  const phoneLine = document.createElement('p');
+  phoneLine.textContent = `Phone: ${address.addressphone}`;
+  
+  addressDetails.appendChild(nameLine);
+  addressDetails.appendChild(cityLine);
+  addressDetails.appendChild(phoneLine);
+  
+  addressInfo.appendChild(addressType);
+  addressInfo.appendChild(addressDetails);
+  
+  card.appendChild(radioButton);
+  card.appendChild(input);
+  card.appendChild(addressInfo);
+  
+  return card;
+}
+
+// Place order button click handler
+placeOrderBtn.addEventListener('click', async () => {
+  try {
+    console.log("Before Fetch - Selected Address:", selectedAddress);
+    console.log("Before Fetch - Selected Payment:", selectedPayment);
+    
+    if (selectedAddress === null || selectedPayment === null) {
+        showSweetAlert("Please select an address and payment method.", "error");
+        return;
+    }
+
+    const orderData = {
+      addressId: selectedAddress,
+      paymentMethod: selectedPayment
+    };
+
+    console.log("Sending Data:", orderData);
+    
+    // Disable the button to prevent multiple submissions
+    placeOrderBtn.disabled = true;
+    placeOrderBtn.textContent = 'Processing...';
+
+    const response = await fetch('/user/checkout/place-order', {  
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(orderData)
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to place order');
+    }
+
+    const result = await response.json();
+    
+    if (result.success) {
+      if (result.paymentMethod === 'razorpay') {
+        initRazorpay(result.orderId, result.amount, result.razorpayOrderId);
+      } else {
+        window.location.href = `/user/checkout/order-confirmation/${result.orderId}`;
+      }
+    } else {
+      throw new Error(result.message || 'Order placement failed');
+    }
+  } catch (error) {
+    console.error('Error placing order:', error);
+    showToast('Failed to place order. Please try again.', 'error');
+    placeOrderBtn.disabled = false;
+    placeOrderBtn.textContent = 'Place Order';
+  }
+});
+
+// Function to initialize Razorpay
+function initRazorpay(orderId, amount, razorpayOrderId) {
+  var options = {
+    "key": "<%=key_id%>", // This should be defined in your HTML template
+    "amount": amount * 100, // Convert to paise
+    "currency": "INR",
+    "name": "Your Store Name",
+    "description": "Order Payment",
+    "image": "/images/logo.png", // Your logo path
+    "order_id": razorpayOrderId, // This is crucial - use the Razorpay order ID
+    "handler": function (response) {
+      verifyPayment(response, orderId);
+    },
+    "prefill": {
+      "name": "<%=userName%>" || "", // These should be passed from the server
+      "email": "<%=userEmail%>" || "",
+      "contact": "<%=userPhone%>" || ""
+    },
+    "theme": {
+      "color": "#3399cc"
+    },
+    "modal": {
+      "ondismiss": function() {
+        // Re-enable the button if payment is dismissed
+        placeOrderBtn.disabled = false;
+        placeOrderBtn.textContent = 'Place Order';
+        showToast("Payment cancelled. Your order is saved but not confirmed.", "warning");
+      }
+    }
+  };
+
+  var rzp = new Razorpay(options);
+  rzp.on('payment.failed', function (response) {
+    console.error('Payment failed:', response.error);
+    showSweetAlert(`Payment failed: ${response.error.description}`, 'error');
+    placeOrderBtn.disabled = false;
+    placeOrderBtn.textContent = 'Place Order';
+  });
+  
+  rzp.open();
+}
+
+// Function to verify payment with backend
+async function verifyPayment(paymentResponse, orderId) {
+  try {
+    showSweetAlert('Verifying payment...', 'info');
+    
+    const response = await fetch('/user/checkout/verify-payment', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        razorpay_payment_id: paymentResponse.razorpay_payment_id,
+        razorpay_order_id: paymentResponse.razorpay_order_id,
+        razorpay_signature: paymentResponse.razorpay_signature,
+        order_id: orderId
+      })
+    });
+    
+    if (!response.ok) {
+      throw new Error('Payment verification failed');
+    }
+    
+    const result = await response.json();
+    
+    if (result.success) {
+        showSweetAlert('Payment successful! Redirecting...', 'success');
+        window.location.href = `/user/checkout/order-confirmation/${result.orderId}`;
+    } else {
+      throw new Error(result.message || 'Payment verification failed');
+    }
+  } catch (error) {
+    console.error('Error verifying payment:', error);
+    showSweetAlert('Payment verification failed. Please try again.', 'error');
+    placeOrderBtn.disabled = false;
+    placeOrderBtn.textContent = 'Place Order';
+  }
+}
+
+// Close modal when clicking on X or outside
+closeModal.addEventListener('click', () => {
+  razorpayModal.style.display = 'none';
+});
+
+window.addEventListener('click', (event) => {
+  if (event.target === razorpayModal) {
+    razorpayModal.style.display = 'none';
+  }
+});
+
+// Initialize page
+document.addEventListener('DOMContentLoaded', () => {
+  // Set default selections if available
+  if (document.querySelectorAll('.address-card').length > 0) {
+    selectAddress(0);
+  }
+  if (document.querySelectorAll('.payment-method').length > 0) {
+    selectPayment(0);
+  }
+  updateOrderButton();
+});
+ 
+ 
+ </script>
+  <!-- Include SweetAlert JS -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <!-- Include Razorpay SDK -->
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+</body>
+</html>

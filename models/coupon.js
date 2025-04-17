@@ -7,9 +7,10 @@ const couponSchema = new mongoose.Schema({
   minOrder: { type: Number, default: 0 },
   startDate: { type: Date, required: true },
   expiry: { type: Date, required: true },
-  usageLimit: { type: Number, default: null }, // Max usage of the coupon
-  perCustomer: { type: Number, required: true }, // Max use per customer
-  usedCount: { type: Number, default: 0 }, // Track the number of times the coupon is used
+  usageLimit: { type: Number, default: null },
+  perCustomer: { type: Number, required: true },
+  usedCount: { type: Number, default: 0 },
+  usedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }] // Track users who used the coupon
 }, { timestamps: true });
 
 module.exports = mongoose.model("Coupon", couponSchema);

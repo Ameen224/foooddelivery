@@ -20,6 +20,8 @@ const cloudinary = require("../config/cloudinary");
 const Banner = require("../models/banner");
 const contact =require("../models/contact")
 const coupon=require("../models/coupon")
+const deliverypartner=require("../models/delivery-partner")
+const order=require("../models/order")
 
 
 
@@ -170,7 +172,14 @@ router.patch("/unblock-vendor/:id", async (req, res) => {
 router.get("/category-list", async (req, res) => {
   try {
     const categories = await Category.find();
-    res.render("admin/category", { category: categories }); // Fix the variable name
+    
+    // Check if JSON is requested (you can use Accept header or query parameter)
+    if (req.query.format === 'json' || req.headers.accept.includes('application/json')) {
+      return res.json(categories);
+    }
+    
+    // Otherwise render the HTML page
+    res.render("admin/category", { category: categories });
   } catch (error) {
     console.error("Error fetching categories:", error);
     res.status(500).send({ message: "Failed to fetch categories." });
@@ -308,7 +317,7 @@ router.delete("/delete-category/:id", async (req, res) => {
 router.get("/banner", async (req, res) => {
   try {
     const banners = await Banner.find();
-    console.log("Fetched Banners:", JSON.stringify(banners, null, 2)); // Better debugging
+    // console.log("Fetched Banners:", JSON.stringify(banners, null, 2)); // Better debugging
     res.render("admin/adminbanner", { banners });
   } catch (error) {
     console.error("Error fetching banners:", error);
@@ -319,16 +328,6 @@ router.get("/banner", async (req, res) => {
   }
 });
 
-// Route to render banner management page
-router.get('/banner', async (req, res) => {
-  try {
-    const banners = await Banner.find({});
-    res.render('admin/banner', { banners: banners });
-  } catch (err) {
-    console.error('Error fetching banners:', err);
-    res.status(500).render('error', { message: 'Error fetching banners' });
-  }
-});
 
 // Route to upload banners
 router.post('/upload-banner', upload.array('images', 10), async (req, res) => {
@@ -339,7 +338,7 @@ router.post('/upload-banner', upload.array('images', 10), async (req, res) => {
     }
 
     // Get form data
-    const { superkey, title, description } = req.body;
+    const { superkey, title, description, category } = req.body;
     
     console.log('Files received:', req.files.length);
     console.log('Form data received:', req.body);
@@ -349,15 +348,16 @@ router.post('/upload-banner', upload.array('images', 10), async (req, res) => {
       return res.status(400).json({ success: false, message: 'Super Key is required' });
     }
 
-    // Convert title and description to arrays if they aren't already
+    // Convert title, description and category to arrays if they aren't already
     const titles = Array.isArray(title) ? title : [title];
     const descriptions = Array.isArray(description) ? description : [description];
+    const categories = Array.isArray(category) ? category : [category];
 
-    // Check if we have a title and description for each image
-    if (titles.length !== req.files.length || descriptions.length !== req.files.length) {
+    // Check if we have a title, description and category for each image
+    if (titles.length !== req.files.length || descriptions.length !== req.files.length || categories.length !== req.files.length) {
       return res.status(400).json({ 
         success: false, 
-        message: 'Title and description are required for each image' 
+        message: 'Title, description and category are required for each image' 
       });
     }
 
@@ -376,16 +376,18 @@ router.post('/upload-banner', upload.array('images', 10), async (req, res) => {
       return {
         url: result.secure_url,
         title: titles[index],
-        description: descriptions[index]
+        description: descriptions[index],
+        category: categories[index]
       };
     });
 
     const uploadResults = await Promise.all(uploadPromises);
 
-    // Create banner URLs, titles, and descriptions arrays
+    // Create banner URLs, titles, descriptions and categories arrays
     const urls = uploadResults.map(result => result.url);
     const processedTitles = uploadResults.map(result => result.title);
     const processedDescriptions = uploadResults.map(result => result.description);
+    const processedCategories = uploadResults.map(result => result.category);
 
     // Check if banner with the same superkey exists
     let banner = await Banner.findOne({ superkey: superkey });
@@ -396,22 +398,17 @@ router.post('/upload-banner', upload.array('images', 10), async (req, res) => {
         banner.images = {};
       }
       
-      if (!banner.images.url) {
-        banner.images.url = [];
-      }
-      
-      if (!banner.images.title) {
-        banner.images.title = [];
-      }
-      
-      if (!banner.images.description) {
-        banner.images.description = [];
-      }
+      // Initialize arrays if they don't exist
+      if (!banner.images.url) banner.images.url = [];
+      if (!banner.images.title) banner.images.title = [];
+      if (!banner.images.description) banner.images.description = [];
+      if (!banner.images.category) banner.images.category = [];
       
       // Append new data
       banner.images.url = [...banner.images.url, ...urls];
       banner.images.title = [...banner.images.title, ...processedTitles];
       banner.images.description = [...banner.images.description, ...processedDescriptions];
+      banner.images.category = [...banner.images.category, ...processedCategories];
       
       await banner.save();
     } else {
@@ -421,7 +418,8 @@ router.post('/upload-banner', upload.array('images', 10), async (req, res) => {
         images: {
           url: urls,
           title: processedTitles,
-          description: processedDescriptions
+          description: processedDescriptions,
+          category: processedCategories
         }
       });
       
@@ -452,6 +450,7 @@ router.post('/upload-banner', upload.array('images', 10), async (req, res) => {
     });
   }
 });
+
 // Route to delete a banner image
 router.post('/banners/delete/:id/:index', async (req, res) => {
   try {
@@ -563,5 +562,94 @@ router.delete("/coupon/delete/:id", async (req, res) => {
   }
 });
   
+
+// delivery boy display
+router.get("/delivery-partner",async(req,res)=>{
+try {
+  const partners = await deliverypartner.find()
+  res.render("admin/delivery-partner",{partners})
+} catch (error) {
+  res.status(500).send("server error")
+  console.log("erro",error);
+  
+}
+})
+
+
+// Add Delivery Partner
+router.post("/add-delivery-partner", async (req, res) => {
+  try {
+      const { name, phone, email } = req.body;
+      const newPartner = new deliverypartner({ name, phone, email, isBlocked: false });
+      await newPartner.save();
+      res.redirect("/admin/delivery-partner");
+  } catch (error) {
+      res.status(500).send("Error adding delivery partner.");
+  }
+});
+
+// Update Status (Block/Unblock)
+router.put("/delivery-partner/status/:id", async (req, res) => {
+  try {
+      const { isBlocked } = req.body;
+      await deliverypartner.findByIdAndUpdate(req.params.id, { isBlocked });
+      res.json({ success: true, message: `Partner ${isBlocked ? "blocked" : "unblocked"} successfully.` });
+  } catch (error) {
+      res.json({ success: false, message: "Error updating status." });
+  }
+});
+
+// Delete Delivery Partner
+router.delete("/delivery-partner/delete/:id", async (req, res) => {
+  try {
+      await deliverypartner.findByIdAndDelete(req.params.id);
+      res.json({ success: true });
+  } catch (error) {
+      res.json({ success: false, message: "Error deleting partner." });
+  }
+});
+
+
+
+
+// Fetch orders
+router.get("/orders", async (req, res) => {
+  try {
+    const orders = await order.find()
+      .populate('userId', 'name')
+      .populate('items.vendorId', 'restaurantName')
+      .populate('items.productId', 'name price')
+      .sort({ createdAt: -1 });
+
+    const formattedOrders = orders.map(order => {
+      // Calculate the total
+      const total = order.items.reduce((sum, item) => 
+        sum + ((item.productId?.price || 0) * item.quantity), 0);
+
+      return {
+        _id: order._id,
+        orderNumber: order.orderNumber || order._id,
+        userName: order.userId?.name || 'Unknown User', // Add null check
+        // Keep the original items array AND add the total property to it
+        items: {
+          total: total,
+          list: order.items // Store the original array as a list property
+        },
+        total: order.total,
+        paymentMethod: order.payment?.method || 'Unknown',
+        payment: { status: order.payment?.status || 'Unknown' },
+        status: order.status,
+        createdAt: order.createdAt
+      };
+    });
+
+    res.render("admin/order", { orders: formattedOrders });
+  } catch (error) {
+    console.error("Error fetching orders:", error);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+
 
 module.exports = router;

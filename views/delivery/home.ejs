@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delivery Orders</title>
+    <style>
+        /* General Styles */
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f8f8;
+        }
+
+        /* Header Styling */
+        .header {
+            background: #f4b630;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+        }
+
+        .nav a {
+            text-decoration: none;
+            color: black;
+            margin: 0 15px;
+            font-weight: bold;
+            font-size: 16px;
+            padding: 8px 15px;
+            border-radius: 10px;
+            transition: background 0.3s;
+        }
+
+        .nav a.active {
+            background: black;
+            color: white;
+        }
+
+        .nav a:hover {
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        /* Orders Section */
+        .orders {
+            padding: 20px;
+            max-width: 800px;
+            margin: auto;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .empty-state h3 {
+            color: #555;
+            margin-bottom: 10px;
+        }
+
+        /* Order Card */
+        .order-card {
+            display: flex;
+            flex-direction: column;
+            background: #fff9c4;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s;
+        }
+
+        .order-card:hover {
+            transform: scale(1.02);
+        }
+
+        /* Order Content */
+        .order-content {
+            display: flex;
+            align-items: center;
+        }
+
+        /* Order Image */
+        .order-img {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            margin-right: 15px;
+            object-fit: cover;
+        }
+
+        /* Order Details */
+        .order-details {
+            flex-grow: 1;
+        }
+
+        .order-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 0;
+        }
+
+        .order-info {
+            font-size: 14px;
+            margin: 2px 0;
+            color: #555;
+        }
+
+        /* Status Badge */
+        .order-status {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+
+        .status-placed {
+            background-color: #ffe0b2;
+            color: #e65100;
+        }
+
+        .status-processing {
+            background-color: #b3e5fc;
+            color: #0277bd;
+        }
+
+        .status-out-for-delivery {
+            background-color: #c8e6c9;
+            color: #2e7d32;
+        }
+
+        .status-delivered {
+            background-color: #c5e1a5;
+            color: #33691e;
+        }
+
+        /* Payment Status Badge */
+        .payment-status {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 5px;
+        }
+
+        .payment-pending {
+            background-color: #ffecb3;
+            color: #ff6f00;
+        }
+
+        .payment-collected {
+            background-color: #bbdefb;
+            color: #0d47a1;
+        }
+
+        .payment-paid {
+            background-color: #c8e6c9;
+            color: #1b5e20;
+        }
+
+        /* Action Buttons */
+        .order-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            justify-content: flex-end;
+        }
+
+        .action-btn {
+            padding: 8px 15px;
+            font-size: 14px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+
+        .deliver-btn {
+            background: #4caf50;
+            color: white;
+        }
+
+        .collect-btn {
+            background: #ff9800;
+            color: white;
+        }
+
+        .payment-btn {
+            background: #2196f3;
+            color: white;
+        }
+
+        .action-btn:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+        }
+
+        /* Availability Toggle Button */
+        .availability-toggle {
+            padding: 8px 15px;
+            font-size: 14px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            background: #4caf50;
+            color: white;
+            transition: background 0.3s;
+        }
+
+        .availability-toggle.unavailable {
+            background: #f44336;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Section -->
+    <header class="header">
+        <nav class="nav">
+            <a href="/delivery/home" class="active">Orders</a>
+        </nav>
+        
+        <!-- Availability Toggle Button -->
+        <button id="availability-btn" class="availability-toggle" onclick="toggleAvailability()">
+            Available
+        </button>
+    </header>
+
+    <!-- Orders Section -->
+    <div class="orders">
+        <!-- Check if orders array exists and has items -->
+        <% if (orders && orders.length > 0) { %>
+            <!-- Loop through each order -->
+            <% orders.forEach(order => { %>
+                <!-- Loop through items in each order -->
+                <% order.items.forEach(item => { %>
+                    <div class="order-card" id="order-<%= item.orderId %>">
+                        <div class="order-content">
+                            <div class="order-details">
+                                <h3 class="order-title">(<%= item.orderId %>)</h3>
+                                <h3 class="order-title"><%= item.productId.name %></h3>
+                                <p class="order-info"><strong>From:</strong> <%= item.vendorId.restaurantName || 'Unknown Restaurant' %></p>
+                                <p class="order-info"><strong>To:</strong> <%= order.address ? `${order.address.street}, ${order.address.city}` : 'Address Not Available' %></p>
+                                
+                                <!-- Payment Information -->
+                                <% const customerOrder = order.customerOrderId || {} %>
+                                <% const paymentMethod = customerOrder.payment && customerOrder.payment.method ? customerOrder.payment.method : 'N/A' %>
+                                <% const isCOD = paymentMethod.toLowerCase() === 'cod' || paymentMethod.toLowerCase() === 'cash on delivery' %>
+                                <% const paymentStatus = customerOrder.payment ? (customerOrder.payment.status || 'Pending') : 'Pending' %>
+                                
+                                <p class="order-info">
+                                    <strong>Payment Method:</strong> <%= paymentMethod %>
+                                    
+                                    <!-- Payment Status Badge -->
+                                    <% if (customerOrder.payment) { %>
+                                        <span class="payment-status payment-<%= paymentStatus.toLowerCase() %>">
+                                            <%= paymentStatus %>
+                                        </span>
+                                    <% } %>
+                                </p>
+                                
+                                <!-- Order Status Badge -->
+                                <span class="order-status status-<%= order.orderDetails && order.orderDetails.orderStatus ? order.orderDetails.orderStatus.toLowerCase().replace(/ /g, '-') : 'placed' %>">
+                                    <%= order.orderDetails && order.orderDetails.orderStatus ? order.orderDetails.orderStatus : 'Placed' %>
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="order-actions">
+                            <!-- For COD orders with pending payment, first show Collect Payment -->
+                            <% if (isCOD && paymentStatus === 'Pending' && !order.paymentCollected) { %>
+                                <button 
+                                    class="action-btn collect-btn" 
+                                    onclick="collectPayment('<%= item.orderId %>', '<%= order.customerOrderId ? order.customerOrderId._id : '' %>')"
+                                >
+                                    Collect Payment
+                                </button>
+                            <% } else if (isCOD && order.paymentCollected && order.orderDetails && order.orderDetails.paymentStatus === 'Pending') { %>
+                                <!-- After collection, show Confirm Payment button -->
+                                <button 
+                                    class="action-btn payment-btn" 
+                                    onclick="updatePaymentStatus('<%= item.orderId %>', '<%= order.customerOrderId ? order.customerOrderId._id : '' %>')"
+                                >
+                                    Confirm Payment Received
+                                </button>
+                            <% } %>
+                            
+                            <!-- Delivery Button - Only enable after payment is confirmed for COD -->
+                            <% 
+                            let isDeliveryEnabled = true;
+                            if (isCOD && paymentStatus === 'Pending') {
+                                isDeliveryEnabled = false;
+                            }
+                            const isAlreadyDelivered = order.orderDetails && order.orderDetails.orderStatus === 'Delivered';
+                            %>
+
+                            <button 
+                                class="action-btn deliver-btn" 
+                                onclick="updateOrderStatus('<%= item.orderId %>', 'Delivered')"
+                                <%= (isAlreadyDelivered || !isDeliveryEnabled) ? 'disabled' : '' %>
+                            >
+                                Mark as Delivered
+                            </button>
+                        </div>
+                    </div>
+                <% }); %>
+            <% }); %>
+        <% } else { %>
+            <!-- Empty state when no orders are available -->
+            <div class="empty-state">
+                <h3>No orders available at the moment</h3>
+                <p>Check back later for new delivery assignments.</p>
+            </div>
+        <% } %>
+    </div>
+
+    <script>
+        // Check initial availability status when page loads
+        document.addEventListener('DOMContentLoaded', async function() {
+            try {
+                const response = await fetch('/delivery/availability/status');
+                const data = await response.json();
+                
+                if (response.ok) {
+                    updateAvailabilityUI(data.available);
+                } else {
+                    console.error('Failed to fetch availability status:', data.message);
+                }
+            } catch (error) {
+                console.error('Error checking availability status:', error);
+            }
+        });
+
+        // Toggle availability function
+        async function toggleAvailability() {
+            const availabilityBtn = document.getElementById('availability-btn');
+            const isCurrentlyAvailable = !availabilityBtn.classList.contains('unavailable');
+            
+            try {
+                const response = await fetch('/delivery/availability', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        available: !isCurrentlyAvailable
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    updateAvailabilityUI(data.available);
+                    // Refresh page to update orders list
+                    location.reload();
+                } else {
+                    console.error('Failed to update availability:', data.message);
+                    alert('Failed to update availability status. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error updating availability:', error);
+                alert('An error occurred. Please try again.');
+            }
+        }
+
+        // Update UI based on availability status
+        function updateAvailabilityUI(isAvailable) {
+            const availabilityBtn = document.getElementById('availability-btn');
+            
+            if (isAvailable) {
+                availabilityBtn.textContent = 'Available';
+                availabilityBtn.classList.remove('unavailable');
+            } else {
+                availabilityBtn.textContent = 'Unavailable';
+                availabilityBtn.classList.add('unavailable');
+            }
+        }
+
+        // Function to update order status (mark as delivered)
+        async function updateOrderStatus(orderId, newStatus) {
+            try {
+                const response = await fetch('/delivery/update-order-status', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        orderId: orderId,
+                        status: newStatus
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    alert(`Order ${orderId} marked as ${newStatus}!`);
+                    
+                    // Refresh the page to reflect latest status
+                    location.reload();
+                } else {
+                    console.error('Failed to update order status:', data.message);
+                    alert(`Failed to update order status: ${data.message}`);
+                }
+            } catch (error) {
+                console.error('Error updating order status:', error);
+                alert('An error occurred. Please try again.');
+            }
+        }
+
+        // Function to collect payment
+        async function collectPayment(orderId, customerOrderId) {
+            // First confirm with the delivery partner
+            const confirmCollection = confirm("Have you collected the payment from the customer?");
+            
+            if (!confirmCollection) {
+                return; // Cancel if they haven't collected payment
+            }
+            
+            try {
+                const response = await fetch('/delivery/collect-payment', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        orderId: orderId,
+                        customerOrderId: customerOrderId
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    alert('Payment collection recorded successfully!');
+                    
+                    // Refresh the page to show updated UI with new payment status
+                    location.reload();
+                } else {
+                    console.error('Failed to record payment collection:', data.message);
+                    alert(`Failed to record payment collection: ${data.message}`);
+                }
+            } catch (error) {
+                console.error('Error recording payment collection:', error);
+                alert('An error occurred. Please try again.');
+            }
+        }
+
+        // Function to update payment status (confirm payment received)
+        async function updatePaymentStatus(orderId, customerOrderId) {
+            try {
+                const response = await fetch('/delivery/confirm-payment', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        orderId: orderId,
+                        customerOrderId: customerOrderId
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    alert('Payment confirmed successfully!');
+                    
+                    // Refresh the page to show updated UI
+                    location.reload();
+                } else {
+                    console.error('Failed to confirm payment:', data.message);
+                    alert(`Failed to confirm payment: ${data.message}`);
+                }
+            } catch (error) {
+                console.error('Error confirming payment:', error);
+                alert('An error occurred. Please try again.');
+            }
+        }
+    </script>
+</body>
+</html>

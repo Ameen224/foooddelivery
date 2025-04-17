@@ -221,6 +221,12 @@
       </div>
 
       <div class="form-group">
+        <label for="product-order">order</label>
+        <input type="number" id="product-order" name="product-order" step="0.01" value="<%= product.order %>">
+      </div>
+      
+
+      <div class="form-group">
         <label for="discount-price">Discount Price ($)</label>
         <input type="number" id="discount-price" name="discount_price" step="0.01" value="<%= product.secondprice %>">
       </div>
@@ -329,6 +335,8 @@
       formData.append("status", document.getElementById("product-status").value);
       formData.append("discount_price", document.getElementById("discount-price").value);
       formData.append("deleted_images", document.getElementById("deleted-images").value);
+      formData.append("order", document.getElementById("product-order").value);
+
 
       arrImg.forEach(file => formData.append("product_images", file));
 

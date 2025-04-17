@@ -493,12 +493,12 @@
                         
                         <div class="product-actions">
                             <div class="quantity-controls">
-                                <button class="quantity-btn decrease">-</button>
+                                <button class="quantity-btn decrease" onclick="decreaseQuantity(this)">-</button>
                                 <input type="text" class="quantity-value" value="1" readonly>
-                                <button class="quantity-btn increase">+</button>
+                                <button class="quantity-btn increase" onclick="increaseQuantity(this)">+</button>
                             </div>
                             
-                            <button class="add-to-cart-btn" onclick="addToCart('<%= product._id %>')">
+                            <button class="add-to-cart-btn" onclick="addToCart('<%= product._id %>', event)">
                                 <i class="fas fa-shopping-cart"></i> Add to Cart
                             </button>
                         </div>
@@ -529,12 +529,36 @@
                 autoplaySpeed: 3000,
                 arrows: false
             });
-            
-            
         });
 
-        function addToCart(productId) {
-            const quantity = parseInt(document.querySelector('.quantity-value').value);
+        // Function to increase quantity
+        function increaseQuantity(button) {
+            const input = button.parentElement.querySelector('.quantity-value');
+            let value = parseInt(input.value, 10);
+            
+            // Set a reasonable upper limit (e.g., 99) to prevent excessive quantities
+            if (value < 99) {
+                input.value = value + 1;
+            }
+        }
+
+        // Function to decrease quantity
+        function decreaseQuantity(button) {
+            const input = button.parentElement.querySelector('.quantity-value');
+            let value = parseInt(input.value, 10);
+            
+            // Prevent negative values
+            if (value > 1) {
+                input.value = value - 1;
+            }
+        }
+
+        function addToCart(productId, event) {
+            // Find the specific product card containing the clicked button
+            const productCard = event.target.closest('.product-card');
+            
+            // Get the quantity value specifically from this product card
+            const quantity = parseInt(productCard.querySelector('.quantity-value').value);
             
             fetch('/user/cart/add', {
                 method: 'POST',
@@ -550,7 +574,8 @@
                     const addedItem = data.cart.items.find(item => item.productId === productId);
                     const itemName = addedItem ? addedItem.name : 'Item';
                     
-                    if (sweetAlertLoaded) {
+                    // Check if SweetAlert is loaded
+                    if (typeof Swal !== 'undefined') {
                         Swal.fire({
                             icon: 'success',
                             title: 'Added to Cart!',
@@ -565,7 +590,7 @@
                     // Update cart UI elements
                     updateCartUI(data.cart);
                 } else {
-                    if (sweetAlertLoaded) {
+                    if (typeof Swal !== 'undefined') {
                         Swal.fire({
                             icon: 'error',
                             title: 'Oops!',
@@ -579,7 +604,7 @@
             .catch(error => {
                 console.error('Error adding item to cart:', error);
                 
-                if (sweetAlertLoaded) {
+                if (typeof Swal !== 'undefined') {
                     Swal.fire({
                         icon: 'error',
                         title: 'Error!',

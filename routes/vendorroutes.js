@@ -6,32 +6,21 @@ const MongoStore = require("connect-mongo");
 const multer = require("multer");
 const { CloudinaryStorage } = require("multer-storage-cloudinary");
 const mongoose = require("mongoose");
+const nodemailer = require('nodemailer');
+
 
 const Vendor = require("../models/vendor");
 const Product = require("../models/product");
 const Category = require("../models/category");
+const order=require("../models/order")
+const VendorOrder = require("../models/vendorOrders");
 const cloudinary = require("../config/cloudinary"); // Import Cloudinary config
+const delivery= require("../models/delivery-partner")
 const { log } = require("util");
 
 const router = express.Router();
 
-/**
- * ==========================
- * Session Configuration
- * ==========================
- */
-router.use(
-  session({
-    secret: process.env.SESSION_SECRET || "supersecretkey",
-    resave: false,
-    saveUninitialized: false,
-    cookie: { secure: false, maxAge: 2 * 60 * 60 * 1000 }, // 2 hours
-    store: MongoStore.create({
-      mongoUrl: process.env.MONGO_URI, // Use your MongoDB URI
-      collectionName: "sessions",
-    }),
-  })
-);
+
 
 /**
  * ==========================
@@ -97,6 +86,26 @@ router.post("/signup", async (req, res) => {
 
 
 
+// Vendor authentication middleware
+const isVendorAuthenticated = (req, res, next) => {
+  console.log("Vendor Session Data:", req.session.vendor);
+  
+  if (!req.session?.vendor || !req.session.vendor.id) {
+      console.log("Vendor not authenticated - redirecting to login");
+      
+      // Return JSON for API requests
+      if (req.headers.accept && req.headers.accept.includes("application/json")) {
+          return res.status(401).json({ error: "Unauthorized" });
+      }
+      
+      return res.redirect('/vendor/login');
+  }
+  
+  next();
+};
+
+
+
 // Vendor Login
 router.post("/login", async (req, res) => {
   try {
@@ -115,12 +124,30 @@ router.post("/login", async (req, res) => {
       return res.status(403).json({ message: "Your account has been blocked. Contact admin." });
     }
 
-    req.session.vendorId = vendor._id.toString();
-    res.status(200).json({ message: "Login successful", redirect: "/vendor/home" });
-  } catch (err) {
-    res.status(500).json({ message: "Server error", error: err.message });
-  }
+
+  // CONSISTENT SESSION FORMAT - Store vendor data under vendor key
+  req.session.vendor = {
+      id: vendor._id.toString(),
+      name: vendor.restaurantName || vendor.name,
+      email: vendor.email,
+      role: "vendor"
+  };
+  
+  req.session.save(err => {
+      if (err) {
+          console.error("Session save error:", err);
+          return res.status(500).json({ message: "Session error" });
+      }
+      res.status(200).json({ 
+          message: "Login successful", 
+          redirect: "/vendor/home" 
+      });
+  });
+} catch (err) {
+res.status(500).json({ message: "Server error", error: err.message });
+}
 });
+
 
 /**
  * ==========================
@@ -129,8 +156,8 @@ router.post("/login", async (req, res) => {
  */
 
 // Vendor Home
-router.get("/home", async (req, res) => {
-  if (!req.session.vendorId) {
+router.get("/home",isVendorAuthenticated, async (req, res) => {
+  if (!req.session.vendor.id) {
     // If request is from API (JSON expected), return 401
     if (req.headers.accept && req.headers.accept.includes("application/json")) {
       return res.status(401).json({ error: "Unauthorized" });
@@ -139,7 +166,7 @@ router.get("/home", async (req, res) => {
   }
 
   try {
-    const products = await Product.find({ vendorId: req.session.vendorId });
+    const products = await Product.find({ vendorId: req.session.vendor.id });
     
 
 
@@ -159,13 +186,13 @@ router.get("/home", async (req, res) => {
 
 
 // Vendor Profile
-router.get("/profile", async (req, res) => {
+router.get("/profile",isVendorAuthenticated, async (req, res) => {
   try {
-    if (!req.session.vendorId) {
+    if (!req.session.vendor.id) {
       return res.status(401).redirect("/vendor/login");
     }
     
-    const vendor = await Vendor.findById(new mongoose.Types.ObjectId(req.session.vendorId));
+    const vendor = await Vendor.findById(new mongoose.Types.ObjectId(req.session.vendor.id));
     if (!vendor) return res.status(404).send("Vendor not found");
 
     res.render("vendor/vendorprofile", { vendor });
@@ -183,7 +210,7 @@ router.post("/update-profile", async (req, res) => {
       return res.status(400).json({ message: "Restaurant name and phone number are required" });
     }
 
-    if (!req.session.vendorId) {
+    if (!req.session.vendor.id) {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
@@ -202,7 +229,7 @@ router.post("/update-profile", async (req, res) => {
     }
 
     const updatedVendor = await Vendor.findByIdAndUpdate(
-      req.session.vendorId,
+      req.session.vendor.id,
       updateData,
       { new: true }
     );
@@ -222,8 +249,7 @@ router.post("/update-profile", async (req, res) => {
  */
 
 // Render Add Product Page
-router.get("/add", async(req, res) => {
-  if (!req.session.vendor) return res.redirect("/vendor/login");
+router.get("/add",isVendorAuthenticated, async(req, res) => {
   try {
     const categories= await Category.find()
     res.render("vendor/vendorprosuctadd", { vendor: req.session.vendor ,categories});
@@ -236,13 +262,13 @@ router.get("/add", async(req, res) => {
 
 // Add New Product
 router.post("/api/products/add", upload.array("product_images", 5), async (req, res) => {
-  if (!req.session.vendorId) return res.status(403).json({ message: "Unauthorized" });
+  if (!req.session.vendor.id) return res.status(403).json({ message: "Unauthorized" });
 
   try {
     console.log("Received Request Body:", req.body);
     console.log("Uploaded Files:", req.files);
 
-    let { product_name, category, product_description, product_price, stock, status, discount_price, isVeg } = req.body;
+    let { product_name, category, product_description, product_price, stock, status, second_price, isVeg,order } = req.body;
 
     // Ensure category is an array
     if (!Array.isArray(category)) {
@@ -275,9 +301,10 @@ router.post("/api/products/add", upload.array("product_images", 5), async (req, 
       price: product_price,
       stock: parseInt(stock, 10), // Ensure stock is a number
       status: status,
-      secondprice: discount_price || 0, // Match frontend field name
+      secondprice: second_price || 0, // Match frontend field name
       isVeg: isVeg === "true", // Convert string to boolean
       images: imageUrls,
+      order:order,
       vendorId: req.session.vendorId,
     });
 
@@ -343,7 +370,7 @@ router.put("/api/products/edit/:id", upload.array("product_images", 5), async (r
     console.log("Existing Product:", product);
 
     // Extract form data
-    const { product_name, category, product_description, product_price, discount_price, stock, status, isVeg, deleted_images } = req.body;
+    const { product_name, category, product_description, product_price, discount_price, stock, status, order,isVeg, deleted_images } = req.body;
     console.log("Parsed Request Fields:", req.body);
 
     // Handle Image Deletions
@@ -393,6 +420,7 @@ router.put("/api/products/edit/:id", upload.array("product_images", 5), async (r
     product.status = status;
     product.isVeg = isVeg === "true";
     product.updatedAt = new Date();
+    product.order = order;
 
     // Save updated product
     await product.save();
@@ -438,4 +466,205 @@ router.use((error, req, res, next) => {
 
 
 
+// GET Orders for Vendor
+router.get("/orders",isVendorAuthenticated, async (req, res) => {
+  try {
+    const vendorId = req.session.vendor.id;
+    let orders = await VendorOrder.find({ vendorId })
+      .populate("orderDetails.customerId")
+      .populate("items.productId");
+    
+    // Process orders to ensure null values don't cause errors
+    orders = orders.map(order => {
+      // Make sure each order has the required properties
+      if (!order.orderDetails) {
+        order.orderDetails = {};
+      }
+      
+      // If customerId is null or not populated, provide a default
+      if (!order.orderDetails.customerId) {
+        order.orderDetails.customerId = { name: 'Unknown Customer' };
+      }
+      
+      // Ensure other required properties exist
+      if (!order.orderDetails.paymentStatus) {
+        order.orderDetails.paymentStatus = 'Unknown';
+      }
+      
+      if (!order.orderDetails.orderStatus) {
+        order.orderDetails.orderStatus = 'Unknown';
+      }
+      
+      return order;
+    });
+    
+    res.render("vendor/vendororder", { orders });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Server Error");
+  }
+});
+
+
+// Route to update order status (approve/decline)
+router.post("/orders/update", async (req, res) => {
+  try {
+    const { orderId, status } = req.body;
+    const vendorId = req.session.vendor.id;
+    
+    // Validate inputs
+    if (!orderId || !status) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "Order ID and status are required" 
+      });
+    }
+    
+    // Ensure status is valid
+    const validStatuses = ["Processing", "Cancelled"];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "Invalid status" 
+      });
+    }
+    
+    // Find and update the order
+    const order = await VendorOrder.findOneAndUpdate(
+      { _id: orderId, vendorId: vendorId },
+      { "orderDetails.orderStatus": status },
+      { new: true }
+    );
+    
+    if (!order) {
+      return res.status(404).json({ 
+        success: false, 
+        message: "Order not found or you don't have permission to update it" 
+      });
+    }
+    
+    res.json({ 
+      success: true, 
+      message: `Order status updated to ${status}` 
+    });
+    
+  } catch (error) {
+    console.error("Error updating order status:", error);
+    res.status(500).json({ 
+      success: false, 
+      message: "Failed to update order status" 
+    });
+  }
+});
+
+
+// Route to get available delivery partners
+router.get("/delivery-partners/available", async (req, res) => {
+  try {
+    // Find all delivery partners who are available and not blocked
+    const availablePartners = await require("../models/delivery-partner").find({
+      available: true,
+      isBlocked: false
+    });
+
+    res.json(availablePartners);
+  } catch (error) {
+    console.error("Error fetching available delivery partners:", error);
+    res.status(500).json({ 
+      success: false, 
+      message: "Failed to fetch delivery partners" 
+    });
+  }
+});
+
+// Route to assign delivery partner to an order
+router.post("/orders/assign-delivery", async (req, res) => {
+  try {
+    const { orderId, deliveryPartnerId } = req.body;
+    
+    // Validate inputs
+    if (!orderId || !deliveryPartnerId) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "Order ID and delivery partner ID are required" 
+      });
+    }
+
+    // Find the order
+    const order = await VendorOrder.findById(orderId).populate('orderDetails.customerId');
+        if (!order) {
+      return res.status(404).json({ 
+        success: false, 
+        message: "Order not found" 
+      });
+    }
+
+    // Find the delivery partner
+    const deliveryPartner = await delivery.findById(deliveryPartnerId);
+    if (!deliveryPartner) {
+      return res.status(404).json({ 
+        success: false, 
+        message: "Delivery partner not found" 
+      });
+    }
+
+    // Ensure the delivery partner is available
+    if (!deliveryPartner.available) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "This delivery partner is no longer available" 
+      });
+    }
+
+    // Update the order with the delivery partner and change status to "Out for Delivery"
+    await VendorOrder.findByIdAndUpdate(
+      orderId,
+      {
+        deliveryPartner: deliveryPartnerId,
+        "orderDetails.orderStatus": "Out for Delivery"
+      }
+    );
+
+    // Send email notification to user
+    const userEmail = order.orderDetails.customerId.email; // Assuming email is on the customer object
+    const orderNumber = order.orderNumber || order._id; // Use order number or ID
+    
+    // Configure and send email using Nodemailer
+    const transporter = nodemailer.createTransport({
+      service: 'gmail', // e.g., 'gmail'
+      auth: {
+        user: process.env.EMAIL_USER, 
+        pass: process.env.EMAIL_PASS    
+      }
+    });
+
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: userEmail,
+      subject: `Your Order #${orderNumber} is Out for Delivery`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2>Your Order is On the Way!</h2>
+          <p>Good news! Your order #${orderNumber} has been picked up by our delivery partner and is on its way to you.</p>
+          <p>Estimated delivery time: Within the next few hours</p>
+          <p>Delivery Partner: ${deliveryPartner.name}</p>
+          <p>Thank you for shopping with us!</p>
+        </div>
+      `
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    res.json({ 
+      success: true, 
+      message: "Delivery partner assigned successfully and customer notified" 
+    });
+  } catch (error) {
+    console.error("Error assigning delivery partner:", error);
+    res.status(500).json({ 
+      success: false, 
+      message: "Failed to assign delivery partner" 
+    });
+  }
+});
 module.exports = router;

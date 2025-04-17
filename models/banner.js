@@ -10,7 +10,14 @@ const bannerSchema = new mongoose.Schema({
   images: {
     url: [String],
     title: [String],
-    description: [String]
+    description: [String],
+    category: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Category",
+      required: true,
+      index: true
+    }]
+
   },
   createdAt: {
     type: Date,
