@@ -1316,6 +1316,9 @@ router.post('/checkout/place-order', isUserAuthenticated, async (req, res) => {
 // Verify Razorpay payment
 router.post('/checkout/verify-payment', isUserAuthenticated, async (req, res) => {
     try {
+        console.log("Authenticated user session:", req.session.user);  // Log user session data to confirm authentication
+
+
       const {
         razorpay_payment_id,
         razorpay_order_id,
@@ -1335,6 +1338,12 @@ router.post('/checkout/verify-payment', isUserAuthenticated, async (req, res) =>
         console.error('Invalid signature');
         return res.status(400).json({ success: false, message: 'Invalid payment signature' });
       }
+
+      // Check if user is authenticated and session user is set correctly
+      if (!req.session?.user || !req.session.user.id) {
+        console.error("User not authenticated or session data is missing");
+        return res.status(401).json({ success: false, message: 'User not authenticated' });
+    }
   
       // Update order payment status
       const order = await Order.findById(order_id);
@@ -1357,7 +1366,7 @@ router.post('/checkout/verify-payment', isUserAuthenticated, async (req, res) =>
   
       // Also update payment status in all associated vendor orders
       await VendorOrder.updateMany(
-        { 'orderDetails.customerId': req.user.id, 
+        { 'orderDetails.customerId': req.session.user.id, 
           createdAt: { $gte: new Date(Date.now() - 5 * 60 * 1000) } // Orders created in the last 5 minutes
         },
         { 'orderDetails.paymentStatus': 'Paid' }
