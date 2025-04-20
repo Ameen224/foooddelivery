@@ -1488,6 +1488,17 @@ router.get("/orderstatus", isUserAuthenticated, async (req, res) => {
       }
   
       await order.save();
+
+       // Find the VendorOrder related to this order and update the status
+    const vendorOrder = await VendorOrder.findOne({ customerOrderId: orderId });
+
+    if (vendorOrder) {
+      // Update the vendor order's orderStatus to 'Cancelled'
+      vendorOrder.orderDetails.orderStatus = "Cancelled";
+
+      // Save the updated vendor order
+      await vendorOrder.save();
+    }
   
       return res.json({
         success: true,

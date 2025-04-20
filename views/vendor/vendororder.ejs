@@ -344,7 +344,9 @@ th {
                         </span>
                     </td>
                     <td class="action-buttons">
-                        <% if (order.orderDetails.orderStatus === "Placed") { %>
+                        <% if (order.orderDetails.orderStatus === "Cancelled") { %>
+                            <span>Order cancelled</span>
+                        <% } else if (order.orderDetails.orderStatus === "Placed") { %>
                             <button class="approve-btn" onclick="confirmOrder('<%= order._id %>')">Approve</button>
                             <button class="decline-btn" onclick="cancelOrder('<%= order._id %>')">Decline</button>
                         <% } else if (order.orderDetails.orderStatus === "Processing") { %>
