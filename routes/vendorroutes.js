@@ -305,7 +305,7 @@ router.post("/api/products/add", upload.array("product_images", 5), async (req, 
       isVeg: isVeg === "true", // Convert string to boolean
       images: imageUrls,
       order:order,
-      vendorId: req.session.vendor.Id,
+      vendorId: req.session.vendor.id,
     });
 
     await newProduct.save();
