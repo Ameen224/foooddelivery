@@ -55,6 +55,12 @@ app.use("/user",require("./routes/userroutes"))
 // Routes delivery
 app.use("/delivery", require("./routes/deliveryroutes"));
 
+// Default route - Redirect to user home
+app.get("/", (req, res) => {
+  res.redirect("/user/home"); // Or change to "/user/home" if needed
+});
+
+
 
 // Start the Server
 const PORT = process.env.PORT || 3000;
