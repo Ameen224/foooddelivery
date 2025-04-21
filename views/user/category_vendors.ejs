@@ -54,6 +54,16 @@
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
         }
         
+        .navbar-left {
+            display: flex;
+            align-items: center;
+        }
+        
+        .navbar-right {
+            display: flex;
+            align-items: center;
+        }
+        
         .navbar-brand {
             font-size: 1.5rem;
             font-weight: bold;
@@ -80,6 +90,25 @@
         
         .back-button i {
             margin-right: 8px;
+        }
+        
+        .cart-link {
+            color: white;
+            font-size: 1.3rem;
+            margin-left: 1rem;
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: background-color 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            width: 40px;
+            height: 40px;
+        }
+        
+        .cart-link:hover {
+            background-color: var(--accent-color);
         }
         
         /* Header Section */
@@ -120,7 +149,7 @@
         /* Vendor List Styling */
         .vendor-list {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             gap: 1.5rem;
             margin-top: 2rem;
         }
@@ -254,10 +283,41 @@
             margin-top: 2rem;
         }
         
-        /* Media Queries */
-        @media (max-width: 768px) {
+        /* Media Queries for Better Responsiveness */
+        @media (max-width: 480px) {
             .vendor-list {
                 grid-template-columns: 1fr;
+            }
+            
+            .header-section h1 {
+                font-size: 1.5rem;
+            }
+            
+            .vendor-header {
+                padding: 1rem;
+            }
+            
+            .vendor-icon {
+                width: 45px;
+                height: 45px;
+            }
+            
+            .vendor-icon i {
+                font-size: 1.3rem;
+            }
+            
+            .vendor-title {
+                font-size: 1rem;
+            }
+            
+            .vendor-body, .vendor-footer {
+                padding: 1rem;
+            }
+        }
+        
+        @media (min-width: 481px) and (max-width: 768px) {
+            .vendor-list {
+                grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
             }
             
             .header-section h1 {
@@ -275,9 +335,16 @@
 <body>
     <!-- Navbar -->
     <nav class="navbar">
-        <button class="back-button" onclick="history.back()">
-            <i class="fas fa-arrow-left"></i> Back to Categories
-        </button>
+        <div class="navbar-left">
+            <button class="back-button" onclick="history.back()">
+                <i class="fas fa-arrow-left"></i> Back to Categories
+            </button>
+        </div>
+        <div class="navbar-right">
+            <a href="/user/cart" class="cart-link">
+                <i class="fa fa-shopping-cart"></i>
+            </a>
+        </div>
     </nav>
 
     <!-- Header Section -->

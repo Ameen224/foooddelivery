@@ -19,7 +19,18 @@
 
     .navbar {
       background-color: #222831;
-      padding: 20px 0;
+      padding: 15px 0;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .navbar-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      padding: 0 15px;
     }
 
     .navbar .back-button {
@@ -33,57 +44,111 @@
     .navbar .back-button:hover {
       color: #e6e6e6;
     }
+    
+    .cart-icon {
+      color: white;
+      text-decoration: none;
+      position: relative;
+      display: block;
+      padding: 8px;
+    }
+    
+    .cart-icon i {
+      font-size: 20px;
+    }
+    
+    .cart-icon:hover {
+      color: #ffbe33;
+    }
+    
+    .cart-count {
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      background-color: #ffbe33;
+      color: #222831;
+      font-size: 12px;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-weight: bold;
+    }
 
     .container {
-      max-width: 800px;
-      margin: 30px auto;
+      max-width: 900px;
+      margin: 20px auto;
       background: #fff;
       padding: 20px;
       border-radius: 10px;
       box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-      display: flex;
-      flex-direction: column;
     }
 
     .product-content {
       display: flex;
       flex-direction: row;
+      gap: 20px;
     }
 
     .product-image {
       flex: 1;
-      padding: 20px;
+      min-width: 0; /* Important for responsive flex items */
     }
 
     .carousel-inner {
       border-radius: 10px;
       overflow: hidden;
     }
+    
+    .carousel-item img {
+      width: 100%;
+      height: auto;
+      object-fit: cover;
+      aspect-ratio: 1/1;
+    }
 
     .product-details {
       flex: 1;
-      padding: 20px;
+      min-width: 0; /* Important for responsive flex items */
     }
 
     .product-details h2 {
       color: #333;
       font-size: 1.8rem;
+      margin-bottom: 15px;
     }
 
     .product-details p {
       color: #666;
       font-size: 1rem;
+      margin-bottom: 20px;
+      line-height: 1.6;
     }
 
     .product-price {
       font-size: 1.5rem;
       font-weight: bold;
       color: #ff9800;
+      margin-bottom: 20px;
+    }
+
+    .product-quantity {
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .product-quantity label {
+      margin-bottom: 0;
+      font-weight: 500;
     }
 
     .product-quantity input {
-      width: 60px;
-      padding: 5px;
+      width: 80px;
+      padding: 8px;
       font-size: 1rem;
       text-align: center;
       border: 1px solid #ccc;
@@ -101,6 +166,10 @@
       cursor: pointer;
       transition: background 0.3s;
       margin-top: 15px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
     }
 
     .add-to-cart-btn:hover {
@@ -133,9 +202,48 @@
       opacity: 1;
     }
 
+    /* Responsive styles */
+    @media (max-width: 992px) {
+      .container {
+        max-width: 95%;
+      }
+    }
+
     @media (max-width: 768px) {
       .product-content {
         flex-direction: column;
+      }
+      
+      .product-image,
+      .product-details {
+        width: 100%;
+      }
+      
+      .product-details h2 {
+        font-size: 1.6rem;
+        margin-top: 15px;
+      }
+    }
+    
+    @media (max-width: 576px) {
+      .container {
+        padding: 15px;
+      }
+      
+      .product-details h2 {
+        font-size: 1.4rem;
+      }
+      
+      .product-price {
+        font-size: 1.3rem;
+      }
+      
+      .navbar .back-button span {
+        display: none;
+      }
+      
+      .navbar .back-button i {
+        font-size: 18px;
       }
     }
   </style>
@@ -144,9 +252,15 @@
 <body>
     <nav class="navbar">
         <div class="container-fluid">
-            <a href="javascript:void(0);" class="back-button" onclick="window.history.back()">
-                <i class="fas fa-arrow-left"></i> Back to Menu
-            </a>
+            <div class="navbar-content">
+                <a href="javascript:void(0);" class="back-button" onclick="window.history.back()">
+                    <i class="fas fa-arrow-left"></i> <span>Back to Menu</span>
+                </a>
+                <a href="/user/cart" class="cart-icon">
+                    <i class="fa fa-shopping-cart"></i>
+                    <div class="cart-count" id="cart-count">0</div>
+                </a>
+            </div>
         </div>
     </nav>
     
@@ -187,7 +301,9 @@
           <input type="number" id="quantity" value="1" min="1" max="10">
         </div>
 
-        <button class="add-to-cart-btn" onclick="addToCart('<%= product._id %>')">Add to Cart</button>
+        <button class="add-to-cart-btn" onclick="addToCart('<%= product._id %>')">
+          <i class="fas fa-shopping-cart"></i> Add to Cart
+        </button>
       </div>
     </div>
   </div>
@@ -201,6 +317,21 @@
   <script>
     // Check if SweetAlert loaded successfully
     let sweetAlertLoaded = typeof Swal !== 'undefined';
+    
+    // Initialize cart count on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      // Try to get cart info from server
+      fetch('/user/cart/info')
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            updateCartUI(data.cart);
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching cart info:', error);
+        });
+    });
     
     // Custom alert function as a fallback
     function showCustomAlert(message, type, duration = 3000) {

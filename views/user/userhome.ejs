@@ -9,7 +9,6 @@
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&display=swap" rel="stylesheet">
 
-  
   <style>
     @font-face {
       font-family: 'CustomFont';
@@ -18,40 +17,82 @@
       font-weight: normal;
       font-style: normal;
     }
+    
     body {
       font-family: 'CustomFont', sans-serif;
-      color: white;
-    }
-    h1, h2, h3, h4, h5, h6 {
-     font-family: 'Dancing Script', cursive;
-    }
-
-    .header_section, .footer_section {
-      background-color: #222831;
-      padding: 20px 0;
-    }
-    .navbar-nav .nav-item .nav-link {
-      color: white;
-    }
-    .user_option a {
-      color: white;
-      margin-left: 10px;
-    }
-    .footer_section a, .footer_section p {
-      color: white;
-    }
-    .footer_social a {
-      color: white;
-      margin-right: 10px;
+      color: #333;
+      overflow-x: hidden;
     }
     
-    /* Fixed carousel styling */
+    h1, h2, h3, h4, h5, h6 {
+      font-family: 'Dancing Script', cursive;
+    }
+
+    /* Header & Footer */
+    .header_section, .footer_section {
+      background-color: #222831;
+      padding: 15px 0;
+      color: white;
+    }
+    
+    .navbar {
+      padding: 0;
+    }
+    
+    .navbar-toggler {
+      background-color: #ffbe33;
+      border: none;
+    }
+    
+    .navbar-toggler-icon {
+      background-image: url("data:image/svg+xml;charset=utf8,%3Csvg viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke='rgba(255, 255, 255, 1)' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E");
+    }
+    
+    .navbar-nav .nav-item .nav-link {
+      color: white;
+      padding: 10px 15px;
+      transition: all 0.3s ease;
+    }
+    
+    .navbar-nav .nav-item .nav-link:hover {
+      color: #ffbe33;
+    }
+    
+    .user_option a {
+      color: white;
+      margin-left: 15px;
+      font-size: 18px;
+      transition: all 0.3s ease;
+    }
+    
+    .user_option a:hover {
+      color: #ffbe33;
+    }
+    
+    #searchForm {
+      display: flex;
+      align-items: center;
+    }
+    
+    #searchInput {
+      border-radius: 20px 0 0 20px;
+      border: none;
+    }
+    
+    #searchForm button {
+      border-radius: 0 20px 20px 0;
+      background: #ffbe33;
+      border: none;
+      color: white;
+    }
+    
+    /* Carousel styling */
     .slider_section {
       position: relative;
     }
     
     .carousel-item {
-      height: 100vh;
+      height: 80vh;
       position: relative;
     }
     
@@ -61,46 +102,39 @@
       object-fit: cover;
     }
     
+    .carousel-item.no-image {
+      background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('/images/banner.jpg') no-repeat center center/cover;
+    }
+    
     .carousel-caption {
-  position: absolute;
-  top: 50%;
-  left: 10%;
-  transform: translateY(-50%);
-  text-align: left;
-  width: 40%;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: center;
-}
+      position: absolute;
+      top: 50%;
+      left: 10%;
+      transform: translateY(-50%);
+      text-align: left;
+      width: 50%;
+      max-width: 600px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: center;
+      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
+    }
     
     .carousel-caption h1 {
       font-size: 3rem;
       font-weight: bold;
       margin-bottom: 1rem;
-      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
     }
     
     .carousel-caption p {
       font-size: 1.2rem;
       margin-bottom: 1.5rem;
-      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
     }
     
-    .carousel-btn {
-      margin-top: 10px;
-      padding: 0.5rem 1.5rem;
-      font-weight: bold;
-    }
-    
-    /* Fallback background for carousel when no images */
-    .carousel-item.no-image {
-      background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('/images/banner.jpg') no-repeat center center/cover;
-    }
-    
-    /* Make carousel controls more visible */
     .carousel-control-prev, .carousel-control-next {
       width: 5%;
+      opacity: 0.8;
     }
     
     .carousel-control-prev-icon, .carousel-control-next-icon {
@@ -108,209 +142,278 @@
       padding: 20px;
       border-radius: 50%;
     }
-    .carousel-btn {
-  display: inline-block;
-  padding: 10px 45px;
-  background-color: #ffbe33;
-  color: #ffffff;
-  border-radius: 16px;
-  -webkit-transition: all 0.3s;
-  transition: all 0.3s;
-  border: none;
-  margin-top: 13px;
-  font-weight: bold;
-  text-decoration: none;
-}
-.carousel-btn:hover {
-  background-color: #e6a62b;
-  color: #fff;
-}
-
-
-.vendor_section {
-    background-color: #f8f9fa;
-    padding: 60px 0;
-  }
-  
-  .section_heading h2 {
-    font-size: 2.5rem;
-    margin-bottom: 10px;
-    color: #222831;
-  }
-  
-  .section_heading p {
-    color: #666;
-    margin-bottom: 30px;
-  }
-  
-  .vendor_box {
-    background-color: white;
-    border-radius: 15px;
-    overflow: hidden;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-    transition: all 0.3s ease;
-    height: 100%;
-  }
-  
-  .vendor_box:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 15px 30px rgba(0,0,0,0.2);
-  }
-  
-  .vendor_img_box {
-    height: 120px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    background-color: #ffbe33;
-  }
-  
-  .restaurant-icon {
-    font-size: 4rem;
-    color: white;
-  }
-  
-  .vendor_detail_box {
-    background-color: white;
-    color: #222831;
-  }
-  
-  .vendor_detail_box h5 {
-    font-weight: bold;
-    margin-bottom: 10px;
-    font-size: 1.2rem;
-  }
-  
-  .vendor_address {
-    color: #666;
-    font-size: 0.9rem;
-    margin-bottom: 15px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  
-
-  tyle>
-  /* Horizontal Categories Styling */
-  .categories_container {
-    position: relative;
-    padding: 0 30px;
-  }
-  
-  .categories_scroll {
-    display: flex;
-    overflow-x: auto;
-    scroll-behavior: smooth;
-    padding: 10px 5px;
-    scrollbar-width: none; /* Firefox */
-    -ms-overflow-style: none; /* IE/Edge */
-    gap: 15px;
-  }
-  
-  .categories_scroll::-webkit-scrollbar {
-    display: none; /* Chrome, Safari, Opera */
-  }
-  
-  .category_item {
-    flex: 0 0 auto;
-    width: 200px;
-  }
-  
-  .category_box {
-    border-radius: 15px;
-    overflow: hidden;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-    transition: all 0.3s ease;
-    height: 100%;
-    background-color: white;
-  }
-  
-  .category_box:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 15px 30px rgba(0,0,0,0.2);
-  }
-  
-  .category_img_box {
-    height: 150px;
-    overflow: hidden;
-  }
-  
-  .category_img_box img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-  
-  .category_detail_box {
-    padding: 15px;
-    text-align: center;
-  }
-  
-  .category_detail_box h5 {
-    font-family: 'Dancing Script', cursive;
-    font-weight: bold;
-    margin-bottom: 10px;
-    color: #222831;
-    font-size: 1.2rem;
-  }
-  
-  /* Navigation buttons */
-  .scroll-btn {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background-color: #ffbe33;
-    color: white;
-    border: none;
-    font-size: 1.2rem;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-    z-index: 10;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-    transition: all 0.3s ease;
-  }
-  
-  .scroll-btn:hover {
-    background-color: #e6a62b;
-  }
-  
-  .prev-btn {
-    left: 0;
-  }
-  
-  .next-btn {
-    right: 0;
-  }
-  
-  .empty-state {
-    width: 100%;
-    text-align: center;
-    padding: 30px;
-    color: #666;
-  }
-
-
-
-
     
-    /* Responsive adjustments */
-    @media (max-width: 768px) {
-      @media (max-width: 768px) {
-  .carousel-caption {
-    width: 80%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    text-align: center;
-    align-items: center;
-  }
-}
+    /* Button styling */
+    .carousel-btn {
+      display: inline-block;
+      padding: 10px 30px;
+      background-color: #ffbe33;
+      color: #ffffff;
+      border-radius: 30px;
+      transition: all 0.3s;
+      border: none;
+      font-weight: bold;
+      text-decoration: none;
+      text-align: center;
+    }
+    
+    .carousel-btn:hover {
+      background-color: #e6a62b;
+      color: #fff;
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+
+    /* Vendor Section */
+    .vendor_section {
+      background-color: #f8f9fa;
+      padding: 60px 0;
+    }
+    
+    .section_heading {
+      margin-bottom: 30px;
+    }
+    
+    .section_heading h2 {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+      color: #222831;
+    }
+    
+    .section_heading p {
+      color: #666;
+      font-size: 1.1rem;
+    }
+    
+    .vendor_box {
+      background-color: white;
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      transition: all 0.3s ease;
+      height: 100%;
+      margin-bottom: 20px;
+    }
+    
+    .vendor_box:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+    }
+    
+    .vendor_img_box {
+      height: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background-color: #ffbe33;
+    }
+    
+    .restaurant-icon {
+      font-size: 4rem;
+      color: white;
+    }
+    
+    .vendor_detail_box {
+      padding: 20px;
+      background-color: white;
+      color: #222831;
+    }
+    
+    .vendor_detail_box h5 {
+      font-weight: bold;
+      margin-bottom: 10px;
+      font-size: 1.2rem;
+    }
+    
+    .vendor_address {
+      color: #666;
+      font-size: 0.9rem;
+      margin-bottom: 15px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    /* Categories Section */
+    .categories_section {
+      background-color: #f0f0f0;
+      padding: 60px 0;
+    }
+    
+    .categories_container {
+      position: relative;
+      padding: 0 30px;
+    }
+    
+    .categories_scroll {
+      display: flex;
+      overflow-x: auto;
+      scroll-behavior: smooth;
+      padding: 10px 5px;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      gap: 15px;
+    }
+    
+    .categories_scroll::-webkit-scrollbar {
+      display: none;
+    }
+    
+    .category_item {
+      flex: 0 0 auto;
+      width: 200px;
+    }
+    
+    .category_box {
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      transition: all 0.3s ease;
+      height: 100%;
+      background-color: white;
+    }
+    
+    .category_box:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+    }
+    
+    .category_img_box {
+      height: 150px;
+      overflow: hidden;
+    }
+    
+    .category_img_box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .category_detail_box {
+      padding: 15px;
+      text-align: center;
+    }
+    
+    .category_detail_box h5 {
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: #222831;
+      font-size: 1.2rem;
+    }
+    
+    /* Scroll buttons */
+    .scroll-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: #ffbe33;
+      color: white;
+      border: none;
+      font-size: 1.2rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      z-index: 10;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      transition: all 0.3s ease;
+    }
+    
+    .scroll-btn:hover {
+      background-color: #e6a62b;
+    }
+    
+    .prev-btn {
+      left: 0;
+    }
+    
+    .next-btn {
+      right: 0;
+    }
+    
+    .empty-state {
+      width: 100%;
+      text-align: center;
+      padding: 30px;
+      color: #666;
+    }
+    
+    /* Footer styling */
+    .footer_section {
+      padding: 40px 0 20px;
+    }
+    
+    .footer_section h4 {
+      margin-bottom: 20px;
+      color: #ffbe33;
+    }
+    
+    .footer_section p {
+      color: #f1f1f1;
+      margin-bottom: 10px;
+    }
+    
+    .footer-logo h2 {
+      color: #ffbe33;
+      margin-bottom: 15px;
+    }
+    
+    .footer_social {
+      margin-top: 20px;
+    }
+    
+    .footer_social a {
+      color: white;
+      margin-right: 15px;
+      font-size: 18px;
+      transition: all 0.3s ease;
+    }
+    
+    .footer_social a:hover {
+      color: #ffbe33;
+    }
+    
+    /* Responsive Styles */
+    @media (max-width: 1199px) {
+      .carousel-caption h1 {
+        font-size: 2.5rem;
+      }
+    }
+    
+    @media (max-width: 991px) {
+      .carousel-item {
+        height: 70vh;
+      }
+      
+      .carousel-caption {
+        width: 60%;
+      }
+      
+      .user_option {
+        margin-top: 10px;
+      }
+      
+      #searchForm {
+        margin-bottom: 10px;
+      }
+    }
+    
+    @media (max-width: 767px) {
+      .carousel-item {
+        height: 60vh;
+      }
+      
+      .carousel-caption {
+        width: 80%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+        align-items: center;
+      }
       
       .carousel-caption h1 {
         font-size: 2rem;
@@ -319,28 +422,83 @@
       .carousel-caption p {
         font-size: 1rem;
       }
-    }
-
-    @media (max-width: 768px) {
-    .vendor_carousel .row {
-      display: flex;
-      overflow-x: auto;
-      flex-wrap: nowrap;
-      padding-bottom: 20px;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: none; /* Firefox */
+      
+      .vendor_carousel .row {
+        display: flex;
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        padding-bottom: 20px;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+      }
+      
+      .vendor_carousel .row::-webkit-scrollbar {
+        display: none;
+      }
+      
+      .vendor_carousel .col-md-3 {
+        flex: 0 0 80%;
+        max-width: 80%;
+        padding: 0 10px;
+      }
+      
+      .section_heading h2 {
+        font-size: 2rem;
+      }
+      
+      .footer_section .col-md-4 {
+        text-align: center !important;
+        margin-bottom: 30px;
+      }
+      
+      .navbar-nav {
+        background-color: rgba(34, 40, 49, 0.95);
+        border-radius: 0 0 10px 10px;
+        padding: 10px;
+      }
     }
     
-    .vendor_carousel .row::-webkit-scrollbar {
-      display: none; /* Chrome, Safari, Edge */
+    @media (max-width: 575px) {
+      .carousel-item {
+        height: 50vh;
+      }
+      
+      .carousel-caption h1 {
+        font-size: 1.8rem;
+      }
+      
+      .carousel-btn {
+        padding: 8px 20px;
+        font-size: 0.9rem;
+      }
+      
+      .categories_container {
+        padding: 0 25px;
+      }
+      
+      .category_item {
+        width: 160px;
+      }
+      
+      .vendor_carousel .col-md-3 {
+        flex: 0 0 90%;
+        max-width: 90%;
+      }
+      
+      .user_option {
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      
+      #searchForm {
+        width: 100%;
+        margin-bottom: 15px;
+      }
+      
+      #searchInput {
+        width: 100%;
+      }
     }
-    
-    .vendor_carousel .col-sm-6 {
-      flex: 0 0 80%;
-      max-width: 80%;
-      padding: 0 10px;
-    }
-  }
   </style>
 </head>
 <body>
@@ -348,26 +506,31 @@
     <header class="header_section">
       <div class="container">
         <nav class="navbar navbar-expand-lg">
-          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent">
+          <a class="navbar-brand text-white" href="/">
+            <h2 class="m-0">Feane</h2>
+          </a>
+          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
           </button>
           <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav mx-auto">
-              <li class="nav-item <%= activePage === 'home' ? 'active' : '' %>"><a class="nav-link" href="#">Home</a></li>
-              <li class="nav-item <%= activePage === 'about' ? 'active' : '' %>"><a class="nav-link" href="/user/about">About</a></li>
+              <li class="nav-item active"><a class="nav-link" href="#">Home</a></li>
+              <li class="nav-item"><a class="nav-link" href="/user/about">About</a></li>
             </ul>
-            <div class="user_option d-flex align-items-center ml-auto">
-              <form class="form-inline my-2 mx-lg-2" id="searchForm" action="/user/search" method="GET">
-                <input class="form-control mr-sm-2" type="search" id="searchInput" name="q" placeholder="Search for products..." aria-label="Search" required>
-                <button class="btn btn-outline-light my-2 my-sm-0" type="submit">
-                    <i class="fa fa-search"></i>
-                </button>
-            </form>
-            
-              
-              <a href="/user/profile" class="ml-3"><i class="fa fa-user"></i></a>
-              <a href="/user/cart" class="ml-3"><i class="fa fa-shopping-cart"></i></a>
-              <a href="/user/orderstatus" class="ml-3"><i class="fa fa-list-alt"></i></a>
+            <div class="user_option d-flex align-items-center">
+              <form class="form-inline my-2" id="searchForm" action="/user/search" method="GET">
+                <div class="input-group">
+                  <input class="form-control" type="search" id="searchInput" name="q" placeholder="Search..." aria-label="Search" required>
+                  <div class="input-group-append">
+                    <button class="btn" type="submit">
+                      <i class="fa fa-search"></i>
+                    </button>
+                  </div>
+                </div>
+              </form>
+              <a href="/user/profile"><i class="fa fa-user"></i></a>
+              <a href="/user/cart"><i class="fa fa-shopping-cart"></i></a>
+              <a href="/user/orderstatus"><i class="fa fa-list-alt"></i></a>
             </div>     
           </div>
         </nav>
@@ -384,7 +547,7 @@
                 <div class="carousel-caption">
                   <h1><%= banner.title %></h1>
                   <p><%= banner.description %></p>
-                  <a href="/user/category/<%= banner.category._id %>" class="btn btn-primary carousel-btn">Order Now</a>
+                  <a href="/user/category/<%= banner.category._id %>" class="carousel-btn">Order Now</a>
                 </div>
               </div>
             <% }); %>
@@ -393,7 +556,7 @@
               <div class="carousel-caption">
                 <h1>Welcome to Feane</h1>
                 <p>Delicious food for every mood</p>
-                <a href="/menu" class="btn btn-primary carousel-btn">Order Now</a>
+                <a href="/menu" class="carousel-btn">Order Now</a>
               </div>
             </div>
           <% } %>
@@ -410,128 +573,118 @@
     </section>      
   </div>
 
-
-<!-- Food Categories Section - Horizontal Layout -->
-<section class="categories_section py-5" style="background-color: #f0f0f0;">
-  <div class="container">
-    <div class="section_heading text-center mb-4">
-      <h2>Food Categories</h2>
-      <p>Browse our delicious options by category</p>
-    </div>
-    
-    <div class="categories_container position-relative">
-      <!-- Horizontal scrolling container -->
-      <div class="categories_scroll">
-        <!-- Category cards will be dynamically populated from your Category model -->
-        <% if (typeof categories !== 'undefined' && categories && categories.length > 0) { %>
-          <% categories.forEach((category) => { %>
-            <div class="category_item">
-              <div class="category_box text-center">
-                <div class="category_img_box">
-                  <img src="<%= category.image %>" alt="<%= category.name %>">
-                </div>
-                <div class="category_detail_box">
-                  <h5><%= category.name %></h5>
-                  <a href="/user/category/<%= category._id %>" class="btn carousel-btn">Browse</a>
-                </div>
-              </div>
-            </div>
-          <% }); %>
-        <% } else { %>
-          <!-- Fallback for when no categories are available -->
-          <div class="category_item empty-state">
-            <p>No categories available at the moment.</p>
-          </div>
-        <% } %>
+  <!-- Food Categories Section - Horizontal Layout -->
+  <section class="categories_section">
+    <div class="container">
+      <div class="section_heading text-center">
+        <h2>Food Categories</h2>
+        <p>Browse our delicious options by category</p>
       </div>
       
-      <!-- Navigation buttons -->
-      <button class="scroll-btn prev-btn" id="categoryPrev">
-        <i class="fa fa-chevron-left"></i>
-      </button>
-      <button class="scroll-btn next-btn" id="categoryNext">
-        <i class="fa fa-chevron-right"></i>
-      </button>
-    </div>
-    
-    
-  </div>
-</section>
-
-
-
-  <!-- Add this section after the carousel section or where you prefer -->
-<section class="vendor_section py-5">
-  <div class="container">
-    <div class="section_heading text-center mb-4">
-      <h2>Our Partner Restaurants</h2>
-      <p>Choose from our trusted food partners</p>
-    </div>
-    
-    <div class="vendor_carousel">
-      <div class="row">
-        <!-- Vendor cards will be dynamically populated from your Vendor model -->
-        <% if (typeof vendors !== 'undefined' && vendors && vendors.length > 0) { %>
-          <% vendors.forEach((vendor) => { %>
-            <div class="col-md-3 col-sm-6 mb-4">
-              <div class="vendor_box text-center">
-                <div class="vendor_img_box">
-                  <i class="fa fa-cutlery restaurant-icon"></i>
-                </div>
-                <div class="vendor_detail_box p-3">
-                  <h5><%= vendor.restaurantName %></h5>
-                  <p class="vendor_address">
-                    <i class="fa fa-map-marker"></i> 
-                    <% if (vendor.location && vendor.location.latitude && vendor.location.longitude) { %>
-                      <a href="https://www.google.com/maps?q=<%= vendor.location.latitude %>,<%= vendor.location.longitude %>" 
-                         target="_blank" 
-                         title="View on Google Maps">
-                        <%= vendor.location.latitude.toFixed(4) %>, <%= vendor.location.longitude.toFixed(4) %>
-                      </a>
-                    <% } else { %>
-                      Location not available
-                    <% } %>
-                  </p>
-                  </p>
-
-                  <a href="/user/restaurant/<%= vendor._id %>" class="btn carousel-btn mt-2">View Menu</a>
+      <div class="categories_container">
+        <!-- Horizontal scrolling container -->
+        <div class="categories_scroll">
+          <!-- Category cards will be dynamically populated from your Category model -->
+          <% if (typeof categories !== 'undefined' && categories && categories.length > 0) { %>
+            <% categories.forEach((category) => { %>
+              <div class="category_item">
+                <div class="category_box text-center">
+                  <div class="category_img_box">
+                    <img src="<%= category.image %>" alt="<%= category.name %>">
+                  </div>
+                  <div class="category_detail_box">
+                    <h5><%= category.name %></h5>
+                    <a href="/user/category/<%= category._id %>" class="carousel-btn">Browse</a>
+                  </div>
                 </div>
               </div>
+            <% }); %>
+          <% } else { %>
+            <!-- Fallback for when no categories are available -->
+            <div class="category_item empty-state">
+              <p>No categories available at the moment.</p>
             </div>
-          <% }); %>
-        <% } else { %>
-          <!-- Fallback for when no vendors are available -->
-          <div class="col-12 text-center">
-            <p>No restaurants available at the moment. Please check back later.</p>
-          </div>
-        <% } %>
+          <% } %>
+        </div>
+        
+        <!-- Navigation buttons -->
+        <button class="scroll-btn prev-btn" id="categoryPrev">
+          <i class="fa fa-chevron-left"></i>
+        </button>
+        <button class="scroll-btn next-btn" id="categoryNext">
+          <i class="fa fa-chevron-right"></i>
+        </button>
       </div>
     </div>
-    
-    <!-- Optional: Add navigation buttons for mobile scrolling -->
-    <div class="vendor_controls text-center mt-3 d-md-none">
-      <button class="btn btn-sm carousel-btn mx-2" id="vendorPrev">
-        <i class="fa fa-chevron-left"></i> Previous
-      </button>
-      <button class="btn btn-sm carousel-btn mx-2" id="vendorNext">
-        Next <i class="fa fa-chevron-right"></i>
-      </button>
+  </section>
+
+  <!-- Vendor Section -->
+  <section class="vendor_section">
+    <div class="container">
+      <div class="section_heading text-center">
+        <h2>Our Partner Restaurants</h2>
+        <p>Choose from our trusted food partners</p>
+      </div>
+      
+      <div class="vendor_carousel">
+        <div class="row">
+          <!-- Vendor cards will be dynamically populated from your Vendor model -->
+          <% if (typeof vendors !== 'undefined' && vendors && vendors.length > 0) { %>
+            <% vendors.forEach((vendor) => { %>
+              <div class="col-lg-3 col-md-4 col-sm-6 col-12">
+                <div class="vendor_box text-center">
+                  <div class="vendor_img_box">
+                    <i class="fa fa-cutlery restaurant-icon"></i>
+                  </div>
+                  <div class="vendor_detail_box">
+                    <h5><%= vendor.restaurantName %></h5>
+                    <p class="vendor_address">
+                      <i class="fa fa-map-marker"></i> 
+                      <% if (vendor.location && vendor.location.latitude && vendor.location.longitude) { %>
+                        <a href="https://www.google.com/maps?q=<%= vendor.location.latitude %>,<%= vendor.location.longitude %>" 
+                           target="_blank" 
+                           title="View on Google Maps">
+                          <%= vendor.location.latitude.toFixed(4) %>, <%= vendor.location.longitude.toFixed(4) %>
+                        </a>
+                      <% } else { %>
+                        Location not available
+                      <% } %>
+                    </p>
+                    <a href="/user/restaurant/<%= vendor._id %>" class="carousel-btn">View Menu</a>
+                  </div>
+                </div>
+              </div>
+            <% }); %>
+          <% } else { %>
+            <!-- Fallback for when no vendors are available -->
+            <div class="col-12 text-center">
+              <p>No restaurants available at the moment. Please check back later.</p>
+            </div>
+          <% } %>
+        </div>
+      </div>
+      
+      <!-- Optional: Add navigation buttons for mobile scrolling -->
+      <div class="vendor_controls text-center mt-3 d-md-none">
+        <button class="btn carousel-btn mx-2" id="vendorPrev">
+          <i class="fa fa-chevron-left"></i> Previous
+        </button>
+        <button class="btn carousel-btn mx-2" id="vendorNext">
+          Next <i class="fa fa-chevron-right"></i>
+        </button>
+      </div>
     </div>
-  </div>
-</section>
+  </section>
 
-
-
-
-  <footer class="footer_section py-5">
+  <footer class="footer_section">
     <div class="container">
       <div class="row">
-        <div class="col-md-4">
+        <div class="col-md-4 col-sm-6 mb-4">
           <h4>Contact Us</h4>
           <p><i class="fa fa-phone"></i> Call +01 1234567890</p>
           <p><i class="fa fa-envelope"></i> demo@gmail.com</p>
         </div>
-        <div class="col-md-4 text-center">
+        <div class="col-md-4 col-sm-6 mb-4 text-center">
           <a href="/" class="footer-logo"><h2>Feane</h2></a>
           <p>Necessary, making this the first true generator on the Internet.</p>
           <div class="footer_social">
@@ -542,9 +695,14 @@
             <a href="#"><i class="fa fa-pinterest"></i></a>
           </div>
         </div>
-        <div class="col-md-4 text-right">
+        <div class="col-md-4 col-sm-12 text-md-right text-center">
           <h4>Opening Hours</h4>
           <p>Everyday 10.00 AM - 10.00 PM</p>
+        </div>
+      </div>
+      <div class="row mt-4">
+        <div class="col-12 text-center">
+          <p>© 2025 All Rights Reserved By Feane</p>
         </div>
       </div>
     </div>
@@ -554,39 +712,61 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
   <script>
-  document.addEventListener("DOMContentLoaded", function () {
-    
-    // CATEGORY SCROLL FUNCTIONALITY
-    const categoryScroll = document.querySelector(".categories_scroll");
-    const categoryPrev = document.getElementById("categoryPrev");
-    const categoryNext = document.getElementById("categoryNext");
+    document.addEventListener("DOMContentLoaded", function () {
+      // CATEGORY SCROLL FUNCTIONALITY
+      const categoryScroll = document.querySelector(".categories_scroll");
+      const categoryPrev = document.getElementById("categoryPrev");
+      const categoryNext = document.getElementById("categoryNext");
 
-    if (categoryScroll) {
-      categoryPrev.addEventListener("click", () => {
-        categoryScroll.scrollBy({ left: -200, behavior: "smooth" });
+      if (categoryScroll) {
+        categoryPrev.addEventListener("click", () => {
+          categoryScroll.scrollBy({ left: -200, behavior: "smooth" });
+        });
+
+        categoryNext.addEventListener("click", () => {
+          categoryScroll.scrollBy({ left: 200, behavior: "smooth" });
+        });
+      }
+
+      // VENDOR CAROUSEL MOBILE SCROLL
+      const vendorCarousel = document.querySelector(".vendor_carousel .row");
+      const vendorPrev = document.getElementById("vendorPrev");
+      const vendorNext = document.getElementById("vendorNext");
+      
+      if (vendorCarousel && window.innerWidth < 768) {
+        vendorCarousel.style.display = "flex";
+        vendorCarousel.style.overflowX = "auto";
+        vendorCarousel.style.scrollBehavior = "smooth";
+        vendorCarousel.style.whiteSpace = "nowrap";
+        
+        if (vendorPrev && vendorNext) {
+          vendorPrev.addEventListener("click", () => {
+            vendorCarousel.scrollBy({ left: -300, behavior: "smooth" });
+          });
+          
+          vendorNext.addEventListener("click", () => {
+            vendorCarousel.scrollBy({ left: 300, behavior: "smooth" });
+          });
+        }
+      }
+      
+      // Adjust header on scroll
+      window.addEventListener("scroll", function() {
+        const header = document.querySelector(".header_section");
+        if (window.scrollY > 50) {
+          header.style.position = "fixed";
+          header.style.top = "0";
+          header.style.left = "0";
+          header.style.right = "0";
+          header.style.zIndex = "1000";
+          header.style.boxShadow = "0 2px 10px rgba(0,0,0,0.1)";
+          header.style.transition = "all 0.3s ease";
+        } else {
+          header.style.position = "";
+          header.style.boxShadow = "";
+        }
       });
-
-      categoryNext.addEventListener("click", () => {
-        categoryScroll.scrollBy({ left: 200, behavior: "smooth" });
-      });
-    }
-
-    
-    
-
-    // MOBILE HORIZONTAL SCROLL FOR VENDORS
-    const vendorCarousel = document.querySelector(".vendor_carousel .row");
-    if (vendorCarousel) {
-      vendorCarousel.style.display = "flex";
-      vendorCarousel.style.overflowX = "auto";
-      vendorCarousel.style.scrollBehavior = "smooth";
-      vendorCarousel.style.whiteSpace = "nowrap";
-    }
-  });
-
-  
-
-
+    });
   </script>
 </body>
 </html>

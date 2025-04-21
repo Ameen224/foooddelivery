@@ -387,6 +387,44 @@
             margin-bottom: 1rem;
         }
 
+        .nav-left, .nav-right {
+    display: flex;
+    align-items: center;
+    padding: 0 1rem;
+}
+
+.nav-title {
+    flex: 1;
+    text-align: center;
+    font-size: 1.5rem;
+}
+
+.cart-link {
+    color: white;
+    text-decoration: none;
+    position: relative;
+}
+
+.cart-link .cart-icon {
+    font-size: 1.5rem;
+    color: white;
+}
+
+@media (max-width: 576px) {
+    .nav-title {
+        font-size: 1.2rem;
+    }
+    .cart-link .cart-icon {
+        font-size: 1.2rem;
+    }
+    .navbar {
+        flex-wrap: wrap;
+        padding: 0.75rem;
+    }
+}
+
+
+              
         /* Media Queries */
         @media (max-width: 768px) {
             .product-card {
@@ -427,12 +465,19 @@
 <body>
     <!-- Navbar with Back Button -->
     <div class="navbar">
-        <button class="back-button" onclick="window.history.back()">
-            <i class="fas fa-arrow-left"></i> Back
-        </button>
-        <h2><%= vendordata.restaurantName %></h2>
-        
+        <div class="nav-left">
+            <button class="back-button" onclick="window.history.back()">
+                <i class="fas fa-arrow-left"></i> Back
+            </button>
+        </div>
+        <h2 class="nav-title"><%= vendordata.restaurantName %></h2>
+        <div class="nav-right">
+            <a href="/user/cart" class="cart-link">
+                <i class="fa fa-shopping-cart cart-icon"></i>
+            </a>
+        </div>
     </div>
+    
 
     <!-- Restaurant Header -->
     <div class="restaurant-header">

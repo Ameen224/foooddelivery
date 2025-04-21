@@ -17,13 +17,14 @@
         body {
             background-color: #f8f9fa;
             color: #212529;
+            min-height: 100vh;
         }
         
         .navbar {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 1rem 2rem;
+            padding: 1rem;
             background-color: #222831;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             position: sticky;
@@ -58,6 +59,8 @@
             position: absolute;
             left: 50%;
             transform: translateX(-50%);
+            width: 50%;
+            text-align: center;
         }
 
         .page-title {
@@ -65,32 +68,22 @@
             font-weight: bold;
             text-align: center;
             color: white;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         
         .container {
+            width: 100%;
             max-width: 1200px;
-            margin: 2rem auto;
+            margin: 1rem auto;
             padding: 0 1rem;
         }
         
         .cart-container {
             display: flex;
             flex-direction: column;
-            gap: 2rem;
-        }
-        
-        @media (min-width: 768px) {
-            .cart-container {
-                flex-direction: row;
-            }
-            
-            .products-section {
-                flex: 2;
-            }
-            
-            .order-summary {
-                flex: 1;
-            }
+            gap: 1.5rem;
         }
         
         .section-title {
@@ -104,8 +97,9 @@
         
         .cart-item {
             display: flex;
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
+            flex-direction: column;
+            padding: 1rem;
+            margin-bottom: 1rem;
             background-color: #ffffff;
             border-radius: 12px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
@@ -118,9 +112,14 @@
             box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
         }
         
+        .item-top {
+            display: flex;
+            margin-bottom: 1rem;
+        }
+        
         .item-image {
-            width: 120px;
-            height: 120px;
+            width: 90px;
+            height: 90px;
             object-fit: cover;
             border-radius: 8px;
             background-color: #e9ecef;
@@ -128,10 +127,9 @@
         
         .item-details {
             flex: 1;
-            margin-left: 1.5rem;
+            margin-left: 1rem;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
         }
         
         .item-name {
@@ -144,18 +142,20 @@
         .item-variant {
             color: #6c757d;
             margin-bottom: 0.5rem;
+            font-size: 0.9rem;
         }
         
         .item-price {
             color: #FFC107;
             font-weight: bold;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
+            margin-top: auto;
         }
         
         .item-actions {
             display: flex;
-            align-items: center;
-            margin-top: 1rem;
+            flex-wrap: wrap;
+            gap: 0.75rem;
         }
         
         .quantity-control {
@@ -164,6 +164,7 @@
             border: 1px solid #dee2e6;
             border-radius: 8px;
             overflow: hidden;
+            height: 35px;
         }
         
         .quantity-btn {
@@ -183,16 +184,16 @@
         }
         
         .quantity-input {
-            width: 45px;
+            width: 40px;
             height: 35px;
             text-align: center;
             border: none;
             border-left: 1px solid #dee2e6;
             border-right: 1px solid #dee2e6;
+            font-size: 0.9rem;
         }
         
         .remove-btn {
-            margin-left: 1rem;
             padding: 0.5rem 1rem;
             background-color: #222831;
             color: white;
@@ -204,6 +205,7 @@
             display: flex;
             align-items: center;
             gap: 6px;
+            height: 35px;
         }
         
         .remove-btn:hover {
@@ -218,7 +220,7 @@
         .order-summary {
             background-color: #ffffff;
             border-radius: 12px;
-            padding: 2rem;
+            padding: 1.5rem;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
             height: fit-content;
         }
@@ -227,7 +229,7 @@
             display: flex;
             justify-content: space-between;
             margin-bottom: 1rem;
-            font-size: 1.05rem;
+            font-size: 1rem;
         }
         
         .summary-total {
@@ -237,7 +239,7 @@
             padding-top: 1.5rem;
             border-top: 2px solid #FFC107;
             font-weight: bold;
-            font-size: 1.3rem;
+            font-size: 1.2rem;
             color: #222831;
         }
         
@@ -251,7 +253,7 @@
             font-size: 1.1rem;
             font-weight: bold;
             cursor: pointer;
-            margin-top: 2rem;
+            margin-top: 1.5rem;
             transition: background-color 0.2s, transform 0.2s;
         }
         
@@ -260,9 +262,16 @@
             transform: translateY(-2px);
         }
         
+        .checkout-btn:disabled {
+            background-color: #e9ecef;
+            color: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
         .empty-cart {
             text-align: center;
-            padding: 3rem;
+            padding: 2rem 1rem;
             background-color: #ffffff;
             border-radius: 12px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
@@ -312,6 +321,7 @@
             gap: 0.5rem;
             padding: 0;
             margin-bottom: 1rem;
+            font-size: 0.95rem;
         }
 
         .coupon-toggle:hover {
@@ -325,25 +335,29 @@
         .coupon-form {
             display: flex;
             margin-bottom: 1rem;
+            flex-wrap: wrap;
+            gap: 0.5rem;
         }
 
         .coupon-input {
             flex: 1;
+            min-width: 120px;
             padding: 0.75rem;
             border: 1px solid #dee2e6;
-            border-radius: 6px 0 0 6px;
-            font-size: 1rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
         }
 
         .apply-coupon {
-            padding: 0.75rem 1.5rem;
+            padding: 0.75rem 1rem;
             background-color: #FFC107;
             color: #222831;
             border: none;
-            border-radius: 0 6px 6px 0;
+            border-radius: 6px;
             font-weight: bold;
             cursor: pointer;
             transition: background-color 0.2s;
+            white-space: nowrap;
         }
 
         .apply-coupon:hover {
@@ -352,17 +366,19 @@
 
         .active-coupons {
             margin-top: 1rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
         }
 
         .coupon-tag {
             display: inline-flex;
             align-items: center;
             background-color: #f8f9fa;
-            padding: 0.5rem 1rem;
+            padding: 0.5rem;
             border-radius: 4px;
-            margin-right: 0.5rem;
-            margin-bottom: 0.5rem;
             border: 1px solid #dee2e6;
+            font-size: 0.9rem;
         }
 
         .coupon-code {
@@ -385,13 +401,132 @@
             display: flex;
             justify-content: space-between;
             margin-bottom: 1rem;
-            font-size: 1.05rem;
+            font-size: 1rem;
             color: #28a745;
             font-weight: bold;
         }
+        
+        /* Responsive adjustments */
+        @media (min-width: 576px) {
+            .cart-item {
+                padding: 1.25rem;
+            }
+            
+            .item-image {
+                width: 100px;
+                height: 100px;
+            }
+        }
+        
+        @media (min-width: 768px) {
+            .cart-container {
+                flex-direction: row;
+                align-items: flex-start;
+            }
+            
+            .products-section {
+                flex: 2;
+            }
+            
+            .order-summary {
+                flex: 1;
+                position: sticky;
+                top: 80px;
+            }
+            
+            .cart-item {
+                flex-direction: row;
+                padding: 1.5rem;
+            }
+            
+            .item-top {
+                margin-bottom: 0;
+            }
+            
+            .item-details {
+                flex: 1;
+            }
+            
+            .item-actions {
+                margin-left: auto;
+                align-self: center;
+            }
+            
+            .item-image {
+                width: 120px;
+                height: 120px;
+            }
+        }
+        
+        @media (max-width: 767px) {
+            .nav-center {
+                width: 60%;
+            }
+            
+            .coupon-form {
+                flex-direction: column;
+            }
+            
+            .coupon-input, .apply-coupon {
+                width: 100%;
+                border-radius: 6px;
+            }
+            
+            .item-actions {
+                margin-top: 1rem;
+                justify-content: space-between;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .nav-center {
+                width: 50%;
+            }
+            
+            .page-title {
+                font-size: 1.2rem;
+            }
+            
+            .back-button {
+                font-size: 1rem;
+            }
+            
+            .section-title {
+                font-size: 1.1rem;
+            }
+            
+            .item-name {
+                font-size: 1rem;
+            }
+            
+            .item-price {
+                font-size: 1rem;
+            }
+            
+            .quantity-btn, .quantity-input {
+                width: 30px;
+                height: 30px;
+            }
+            
+            .remove-btn {
+                padding: 0.4rem 0.8rem;
+                height: 30px;
+                font-size: 0.8rem;
+            }
+            
+            .trash-icon {
+                width: 14px;
+                height: 14px;
+            }
+            
+            .checkout-btn {
+                font-size: 1rem;
+                padding: 0.8rem;
+            }
+        }
     </style>
 </head>
- <body>
+<body>
    <div class="navbar">
         <div class="nav-left">
             <button class="back-button" onclick="window.history.back()">← Back</button>
@@ -415,29 +550,29 @@
                 <% } else { %>
                     <% cart.items.forEach(item => { %>
                         <div class="cart-item">
-                            <img src="<%= item.image || '/img/placeholder.jpg' %>" alt="<%= item.name || 'Product' %>" class="item-image">
-                            <div class="item-details">
-                                <div>
+                            <div class="item-top">
+                                <img src="<%= item.image || '/img/placeholder.jpg' %>" alt="<%= item.name || 'Product' %>" class="item-image">
+                                <div class="item-details">
                                     <div class="item-name"><%= item.name || 'Product' %></div>
                                     <% if (item.variant) { %>
                                         <div class="item-variant"><%= item.variant %></div>
                                     <% } %>
-                               </div>
-                                <div class="item-price">₹<%= (item.price || 0).toFixed(2) %></div>
-                                <div class="item-actions">
-                                    <div class="quantity-control">
-                                        <button class="quantity-btn" onclick="updateQuantity('<%= item.id %>', <%= item.quantity - 1 %>)">-</button>
-                                        <input type="text" class="quantity-input" value="<%= item.quantity || 1 %>" readonly>
-                                        <button class="quantity-btn" onclick="updateQuantity('<%= item.id %>', <%= item.quantity + 1 %>)">+</button>
-                                    </div>
-                                    <button class="remove-btn" onclick="removeItem('<%= item.id %>')">
-                                        <svg class="trash-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <polyline points="3 6 5 6 21 6"></polyline>
-                                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                                        </svg>
-                                        Remove
-                                    </button>
+                                    <div class="item-price">₹<%= (item.price || 0).toFixed(2) %></div>
                                 </div>
+                            </div>
+                            <div class="item-actions">
+                                <div class="quantity-control">
+                                    <button class="quantity-btn" onclick="updateQuantity('<%= item.id %>', <%= item.quantity - 1 %>)">-</button>
+                                    <input type="text" class="quantity-input" value="<%= item.quantity || 1 %>" readonly>
+                                    <button class="quantity-btn" onclick="updateQuantity('<%= item.id %>', <%= item.quantity + 1 %>)">+</button>
+                                </div>
+                                <button class="remove-btn" onclick="removeItem('<%= item.id %>')">
+                                    <svg class="trash-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="3 6 5 6 21 6"></polyline>
+                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                    </svg>
+                                    Remove
+                                </button>
                             </div>
                         </div>
                     <% }); %>
@@ -512,7 +647,7 @@
     </div>
 
     <script>
-        //function for updating the quantity
+        // Function for updating the quantity
         function updateQuantity(itemId, newQuantity) {
             if (isNaN(newQuantity) || newQuantity < 1 || newQuantity > 100) {
                 Swal.fire({
@@ -567,7 +702,8 @@
                 });
             });
         }
-// function for removing the item
+
+        // Function for removing the item
         function removeItem(itemId) {
             if (!itemId) {
                 console.error('Invalid item ID');
@@ -629,87 +765,58 @@
                 }
             });
         }
-// function for toggle the coupon
+
+        // Function to toggle the coupon
         function toggleCoupon() {
             const couponContent = document.getElementById('couponContent');
             if (couponContent) {
                 couponContent.style.display = couponContent.style.display === 'block' ? 'none' : 'block';
             }
         }
-// function for applying the coupon
-function applyCoupon() {
-    const couponCodeElement = document.getElementById('couponCode');
-    const couponCode = couponCodeElement.value.trim();
-    
-    console.log("Attempting to apply coupon:", couponCode);
-    
-    fetch('/user/cart/apply-coupon', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            code: couponCode
-        })
-    })
-    .then(response => response.json()) // Convert response to JSON
-    .then(data => {
-        console.log("Server Response:", data); // Log response to debug
-                if (data.success) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'coupon applied ',
-                        text: 'applyed succecfully',
-                        timer: 1500,
-                        showConfirmButton: false
-                    }).then(() => {
-                        window.location.reload();
-                    });
-                } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'coupon Failed',
-                        text: data.message || 'unable to apply coupon'
-                    });
-                }
-            })
-    .catch(error => {
-        console.error('Error applying coupon:', error);
-        // Error handling
-    });
-}
-                                                                    
 
- // function for removing the coupon       
-function removeCoupon() {
-    Swal.fire({
-        title: 'Remove Coupon?',
-        text: 'This will remove the applied coupon from your cart.',
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#3085d6',
-        confirmButtonText: 'Yes, remove it'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            fetch('/user/cart/remove-coupon', {
+        // Function for applying the coupon
+        function applyCoupon() {
+            const couponCodeElement = document.getElementById('couponCode');
+            const couponCode = couponCodeElement.value.trim();
+            
+            if (!couponCode) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Empty Code',
+                    text: 'Please enter a coupon code.'
+                });
+                return;
+            }
+            
+            console.log("Attempting to apply coupon:", couponCode);
+            
+            // Show loading state
+            Swal.fire({
+                title: 'Applying...',
+                text: 'Please wait while we verify your coupon.',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+            
+            fetch('/user/cart/apply-coupon', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                }
+                },
+                body: JSON.stringify({
+                    code: couponCode
+                })
             })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
+            .then(response => response.json())
             .then(data => {
+                console.log("Server Response:", data);
                 if (data.success) {
                     Swal.fire({
                         icon: 'success',
-                        title: 'Coupon Removed',
-                        text: 'Coupon has been removed from your cart.',
+                        title: 'Coupon Applied',
+                        text: 'Coupon has been applied successfully!',
                         timer: 1500,
                         showConfirmButton: false
                     }).then(() => {
@@ -718,13 +825,13 @@ function removeCoupon() {
                 } else {
                     Swal.fire({
                         icon: 'error',
-                        title: 'Removal Failed',
-                        text: data.message || 'Unable to remove coupon.'
+                        title: 'Coupon Failed',
+                        text: data.message || 'Unable to apply coupon'
                     });
                 }
             })
             .catch(error => {
-                console.error('Error removing coupon:', error);
+                console.error('Error applying coupon:', error);
                 Swal.fire({
                     icon: 'error',
                     title: 'Error',
@@ -732,48 +839,100 @@ function removeCoupon() {
                 });
             });
         }
-    });
-}
-
-
-// function for the checkout
-function proceedToCheckout() {
-    // Check if cart is empty
-    const cartItems = document.querySelectorAll('.cart-item');
-    if (cartItems.length === 0) {
-        Swal.fire({
-            icon: 'warning',
-            title: 'Empty Cart',
-            text: 'Your cart is empty. Add some items before checking out.',
-        });
-        return;
-    }
-
-    Swal.fire({
-        title: 'Proceed to Checkout?',
-        text: 'Make sure your cart is ready before checking out.',
-        icon: 'info',
-        showCancelButton: true,
-        confirmButtonColor: '#28a745',
-        cancelButtonColor: '#d33',
-        confirmButtonText: 'Yes, proceed'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            // Show loading state
+                                                                   
+        // Function for removing the coupon       
+        function removeCoupon() {
             Swal.fire({
-                title: 'Processing...',
-                text: 'Please wait while we prepare your checkout.',
-                allowOutsideClick: false,
-                allowEscapeKey: false,
-                didOpen: () => {
-                    Swal.showLoading();
+                title: 'Remove Coupon?',
+                text: 'This will remove the applied coupon from your cart.',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, remove it'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch('/user/cart/remove-coupon', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Coupon Removed',
+                                text: 'Coupon has been removed from your cart.',
+                                timer: 1500,
+                                showConfirmButton: false
+                            }).then(() => {
+                                window.location.reload();
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Removal Failed',
+                                text: data.message || 'Unable to remove coupon.'
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error removing coupon:', error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Something went wrong. Please try again.'
+                        });
+                    });
                 }
             });
-
-            // Navigate to checkout page
-            window.location.href = '/user/checkout';
         }
-    });
+
+        // Function for the checkout
+        function proceedToCheckout() {
+            // Check if cart is empty
+            const cartItems = document.querySelectorAll('.cart-item');
+            if (cartItems.length === 0) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Empty Cart',
+                    text: 'Your cart is empty. Add some items before checking out.',
+                });
+                return;
+            }
+
+            Swal.fire({
+                title: 'Proceed to Checkout?',
+                text: 'Make sure your cart is ready before checking out.',
+                icon: 'info',
+                showCancelButton: true,
+                confirmButtonColor: '#28a745',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, proceed'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                  // Loading state continued
+Swal.fire({
+    title: 'Processing...',
+    text: 'Please wait while we prepare your checkout.',
+    allowOutsideClick: false,
+    allowEscapeKey: false,
+    didOpen: () => {
+        Swal.showLoading();
+    }
+});
+
+// Navigate to checkout page
+window.location.href = '/user/checkout';
+}
+});
 }
 
 // Initialize - check if there's a coupon to show the section
@@ -800,7 +959,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    
     // Add error handling for images
     const productImages = document.querySelectorAll('.item-image');
     productImages.forEach(img => {
@@ -809,7 +967,36 @@ document.addEventListener('DOMContentLoaded', function() {
             this.alt = 'Product image not available';
         };
     });
+    
+    // Adjust layout for very small screens
+    const adjustLayout = () => {
+        const windowWidth = window.innerWidth;
+        const removeButtons = document.querySelectorAll('.remove-btn');
+        
+        if (windowWidth < 360) {
+            removeButtons.forEach(btn => {
+                const textNode = Array.from(btn.childNodes).find(node => 
+                    node.nodeType === Node.TEXT_NODE && node.nodeValue.trim() === 'Remove');
+                if (textNode) {
+                    btn.removeChild(textNode);
+                }
+            });
+        } else {
+            removeButtons.forEach(btn => {
+                if (!Array.from(btn.childNodes).some(node => 
+                    node.nodeType === Node.TEXT_NODE && node.nodeValue.trim() === 'Remove')) {
+                    const textNode = document.createTextNode(' Remove');
+                    btn.appendChild(textNode);
+                }
+            });
+        }
+    };
+    
+    // Run on load and on resize
+    adjustLayout();
+    window.addEventListener('resize', adjustLayout);
 });
+
 </script>
 </body>
 </html>
