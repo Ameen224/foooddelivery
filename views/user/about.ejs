@@ -293,6 +293,8 @@
         padding: 20px;
       }
     }
+
+
     
     @media (max-width: 575px) {
       .user_option {
@@ -323,44 +325,100 @@
       .contact_form {
         padding: 15px;
       }
+
+
     }
+
+    @media (max-width: 576px) {
+  #searchForm {
+    max-width: calc(100% - 120px); /* Adjust 120px based on your icons width */
+  }
+}
+
+@media (max-width: 991px) {
+  .user_option {
+    width: 100%;
+    margin-top: 15px;
+  }
+  
+  #searchForm {
+    min-width: 0;
+    flex-basis: 70%;
+  }
+  
+  .user_option .d-flex.align-items-center.gap-2 {
+    flex-basis: 30%;
+    justify-content: flex-end;
+  }
+}
+
+@media (max-width: 767px) {
+  #searchForm {
+    flex-basis: 60%;
+  }
+  
+  .user_option .d-flex.align-items-center.gap-2 {
+    flex-basis: 40%;
+  }
+}
+
+@media (max-width: 575px) {
+  #searchForm {
+    flex-basis: 50%;
+  }
+  
+  .user_option .d-flex.align-items-center.gap-2 {
+    flex-basis: 50%;
+  }
+  
+  .user_option {
+    gap: 8px;
+  }
+  
+  .user_option a {
+    margin-left: 8px;
+    font-size: 16px;
+  }
+}
   </style>
-</head>
-<body>
-  <div class="hero_area">
-    <header class="header_section">
-      <div class="container">
-        <nav class="navbar navbar-expand-lg">
-          <a class="navbar-brand" href="/user/home">Feane</a>
-          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-          </button>
-          <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav mx-auto">
-              <li class="nav-item"><a class="nav-link" href="/user/home">Home</a></li>
-              <li class="nav-item active"><a class="nav-link" href="/user/about">About</a></li>
-            </ul>
-            <div class="user_option d-flex align-items-center  gap-2">
-              <form class="d-flex flex-grow-1" id="searchForm">
-                <div class="input-group">
-                  <input class="form-control" type="search" id="searchInput" placeholder="Search..." aria-label="Search">
-                  <button class="btn btn-outline-secondary" type="submit">
-                    <i class="fa fa-search"></i>
-                  </button>
-                </div>
-              </form>
-            <div>
-              <a href="/login" class="ms-2"><i class="fa fa-user"></i></a>
-              <a href="/cart" class="ms-2"><i class="fa fa-shopping-cart"></i></a>
-              <a href="/orderstatus" class="ms-2"><i class="fa fa-list-alt"></i></a>
+<header class="header_section">
+  <div class="container">
+    <nav class="navbar navbar-expand-lg">
+      <a class="navbar-brand" href="/user/home">Feane</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+    
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mx-auto">
+          <li class="nav-item"><a class="nav-link" href="/user/home">Home</a></li>
+          <li class="nav-item active"><a class="nav-link" href="/user/about">About</a></li>
+        </ul>
+    
+        <div class="user_option d-flex align-items-center flex-nowrap gap-2">
+          <!-- Search Form -->
+          <form class="d-flex flex-grow-1 flex-shrink-1" id="searchForm">
+            <div class="input-group flex-nowrap">
+              <input class="form-control" type="search" id="searchInput" placeholder="Search..." aria-label="Search">
+              <button class="btn btn-outline-secondary" type="submit">
+                <i class="fa fa-search"></i>
+              </button>
             </div>
-              
-            </div>
-            
+          </form>
+        
+          <!-- Icons -->
+          <div class="d-flex align-items-center gap-2 ms-2 flex-shrink-0">
+            <a href="/login"><i class="fa fa-user"></i></a>
+            <a href="/cart"><i class="fa fa-shopping-cart"></i></a>
+            <a href="/orderstatus"><i class="fa fa-list-alt"></i></a>
           </div>
-        </nav>
+        </div>
       </div>
-    </header>
+    </nav>
+  </div>
+</header>
+
 
     <section class="about_section">
       <div class="container">
