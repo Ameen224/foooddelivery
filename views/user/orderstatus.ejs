@@ -25,9 +25,18 @@
       border-radius: 8px;
     }
     .status-Placed { background-color: #0d6efd; color: white; }
+    .status-Processing { background-color: #6c757d; color: white; }
     .status-Out-for-Delivery { background-color: #ffc107; color: #000; }
     .status-Delivered { background-color: #198754; color: white; }
     .status-Cancelled { background-color: #dc3545; color: white; }
+    
+    .vendor-section {
+      background-color: #f8f9fa;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      border-left: 4px solid #0d6efd;
+    }
   </style>
 </head>
 <body class="bg-light">
@@ -40,32 +49,54 @@
 
         <hr>
 
-        <% order.products.forEach(product => { %>
-          <div class="d-flex align-items-center mb-3">
-            <img src="<%= product.image %>" alt="Product" class="product-img me-3">
-            <div>
-              <h6 class="mb-1"><%= product.name %></h6>
-              <div>Quantity: <%= product.quantity %></div>
-              <div>Price: ₹<%= product.price.toFixed(2) %></div>
+        <% if (vendorOrders && vendorOrders.length > 0) { %>
+          <h5 class="mb-3">Order Details by Restaurant</h5>
+          
+          <% vendorOrders.forEach((vendorOrder, index) => { %>
+            <div class="vendor-section">
+              <h6><%= vendorOrder.vendorId?.name || 'Restaurant' %></h6>
+              <p class="text-muted mb-2">Order #<%= vendorOrder.orderNumber %></p>
+              
+              <% vendorOrder.items.forEach(item => { %>
+                <div class="d-flex align-items-center mb-3">
+                  <img src="<%= item.productId?.image || '/images/placeholder.png' %>" alt="Product" class="product-img me-3">
+                  <div>
+                    <h6 class="mb-1"><%= item.productId?.name || 'Product' %></h6>
+                    <div>Quantity: <%= item.quantity %></div>
+                    <div>Price: ₹<%= item.price.toFixed(2) %></div>
+                  </div>
+                </div>
+              <% }) %>
+              
+              <div class="d-flex justify-content-between align-items-center mt-3">
+                <div>
+                  <p class="mb-0"><strong>Total:</strong> ₹<%= vendorOrder.orderDetails.totalPrice.toFixed(2) %></p>
+                  <p class="mb-0">
+                    <strong>Status:</strong>
+                    <span class="status-badge status-<%= vendorOrder.orderDetails.orderStatus.replace(/\s/g, '-') %>">
+                      <%= vendorOrder.orderDetails.orderStatus %>
+                    </span>
+                  </p>
+                </div>
+                
+                <% if (vendorOrder.orderDetails.orderStatus === "Placed") { %>
+                  <button type="button" class="btn btn-danger" 
+                    onclick="confirmCancelVendorOrder('<%= vendorOrder._id %>')">
+                    Cancel Order
+                  </button>
+                <% } %>
+              </div>
             </div>
-          </div>
-        <% }) %>
+          <% }) %>
+        <% } else { %>
+          <div class="alert alert-warning">No vendor orders found for this order.</div>
+        <% } %>
 
         <hr>
 
         <h5>Order Summary</h5>
         <p><strong>Total:</strong> ₹<%= order.total.toFixed(2) %></p>
         <p><strong>Estimated Delivery:</strong> <%= order.estimatedDelivery %></p>
-        <p>
-          <strong>Status:</strong>
-          <span class="status-badge status-<%= order.status.replace(/\s/g, '-') %>">
-            <%= order.status %>
-          </span>
-        </p>
-
-        <% if (order.status === "Placed") { %>
-            <button type="button" class="btn btn-danger mt-3" onclick="confirmCancel('<%= order.orderId %>')">Cancel Order</button>
-        <% } %>
       </div>
     <% } else { %>
       <div class="alert alert-warning">No order found.</div>
@@ -86,10 +117,10 @@
   <% } %>
 
   <script>
-  function confirmCancel(orderId) {
+  function confirmCancelVendorOrder(vendorOrderId) {
     Swal.fire({
-      title: 'Are you sure?',
-      text: "This order will be cancelled.",
+      title: 'Cancel Order',
+      text: "Are you sure you want to cancel this restaurant's order?",
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#d33',
@@ -97,12 +128,12 @@
       confirmButtonText: 'Yes, cancel it!'
     }).then((result) => {
       if (result.isConfirmed) {
-        fetch('/user/cancel-order', {
+        fetch('/user/cancel-vendor-order', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({ orderId })
+          body: JSON.stringify({ vendorOrderId })
         })
         .then(res => res.json())
         .then(data => {

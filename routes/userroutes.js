@@ -71,6 +71,22 @@ const isUserAuthenticated = (req, res, next) => {
     next();
 };
 
+
+// User authentication middleware for API routes
+const isUserAuthenticatedAPI = (req, res, next) => {
+    console.log("User Session Data:", req.session.user);
+    
+    if (!req.session?.user || !req.session.user.id) {
+        console.log("User not authenticated - returning 401");
+        return res.status(401).json({ 
+            success: false, 
+            message: "user is not logged in" 
+        });
+    }
+    
+    next();
+};
+
 // Home page route
 router.get("/home", async (req, res) => {
     try {
@@ -813,10 +829,12 @@ let cart = await Cart.findOne({ userId }).populate('items.productId').populate('
 });
 
 // Add Item to Cart
-router.post('/cart/add', isUserAuthenticated, async (req, res) => {
+router.post('/cart/add', isUserAuthenticatedAPI, async (req, res) => {
     try {
         const { productId, quantity } = req.body;
         const userId = req.session.user.id;
+
+        
 
         // Find the product to get its details
         const product = await Product.findById(productId);
@@ -1411,7 +1429,7 @@ router.get('/checkout/order-confirmation/:orderId', isUserAuthenticated, async (
 });
 
 
-// GET order status page
+// GET order status page (focusing on vendor orders)
 router.get("/orderstatus", isUserAuthenticated, async (req, res) => {
     try {
       const userId = req.session.user.id;
@@ -1425,41 +1443,30 @@ router.get("/orderstatus", isUserAuthenticated, async (req, res) => {
       if (!order) {
         return res.render("user/orderstatus", {
           order: null,
-          orders: [],
           vendorOrders: [],
           message: "No orders found."
         });
       }
   
+      // Fetch all vendor orders related to this customer order
       const vendorOrders = await VendorOrder.find({ customerOrderId: order._id })
         .populate('vendorId', 'name email phone')
         .populate('items.productId', 'name description image price')
-        .populate('deliveryPartner')
         .lean();
   
-      const allItems = vendorOrders.flatMap(vendorOrder => {
-        return vendorOrder.items.map(item => ({
-          name: item.productId?.name || "Product",
-          description: item.productId?.description || "",
-          image: item.productId?.image || null,
-          quantity: item.quantity,
-          price: item.productId?.price || 0,
-        }));
-      });
-  
-      const total = allItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+      // Calculate the total from all vendor orders
+      const total = vendorOrders.reduce((sum, vendorOrder) => {
+        return sum + vendorOrder.orderDetails.totalPrice;
+      }, 0);
   
       const finalOrder = {
         orderId: order._id,
-        products: allItems,
         total,
-        estimatedDelivery: order.estimatedDelivery || 'N/A',
-        status: order.status
+        estimatedDelivery: order.estimatedDelivery || 'N/A'
       };
   
       res.render("user/orderstatus", {
         order: finalOrder,
-        orders,
         vendorOrders,
         message: req.query.message || null
       });
@@ -1470,59 +1477,59 @@ router.get("/orderstatus", isUserAuthenticated, async (req, res) => {
     }
   });
   
-  // POST cancel order
-  router.post("/cancel-order", isUserAuthenticated, async (req, res) => {
+  // POST cancel vendor order
+  router.post("/cancel-vendor-order", isUserAuthenticated, async (req, res) => {
     try {
-      const { orderId } = req.body;
+      const { vendorOrderId } = req.body;
   
-      const order = await Order.findOne({ _id: orderId, userId: req.session.user.id });
+      // Find the specific vendor order
+      const vendorOrder = await VendorOrder.findById(vendorOrderId);
+      
+      if (!vendorOrder) {
+        return res.status(404).json({
+          success: false,
+          message: "Vendor order not found."
+        });
+      }
+      
+      // Get the customer order to verify user ownership
+      const customerOrder = await Order.findOne({ 
+        _id: vendorOrder.customerOrderId,
+        userId: req.session.user.id
+      });
+      
+      if (!customerOrder) {
+        return res.status(403).json({
+          success: false,
+          message: "Access denied."
+        });
+      }
   
-      if (!order || order.status !== "Placed") {
+      // Check if the order can be cancelled
+      if (vendorOrder.orderDetails.orderStatus !== "Placed") {
         return res.status(400).json({
           success: false,
-          message: "Cannot cancel this order."
+          message: "This order cannot be cancelled at its current status."
         });
       }
   
-      order.status = "Cancelled";
-  
-      if (Array.isArray(order.products)) {
-        order.products = order.products.map(product => {
-          const productObj = typeof product.toObject === 'function' ? product.toObject() : product;
-          return {
-            ...productObj,
-            status: "Cancelled"
-          };
-        });
-      }
-  
-      await order.save();
-
-       // Find the VendorOrder related to this order and update the status
-    const vendorOrder = await VendorOrder.findOne({ customerOrderId: orderId });
-
-    if (vendorOrder) {
-      // Update the vendor order's orderStatus to 'Cancelled'
+      // Update vendor order status to Cancelled
       vendorOrder.orderDetails.orderStatus = "Cancelled";
-
-      // Save the updated vendor order
       await vendorOrder.save();
-    }
   
       return res.json({
         success: true,
-        message: "Order cancelled successfully."
+        message: "Restaurant's order cancelled successfully."
       });
   
     } catch (err) {
-      console.error("Cancel order error:", err);
+      console.error("Cancel vendor order error:", err);
       return res.status(500).json({
         success: false,
         message: "Something went wrong."
       });
     }
   });
-  
   
   
  
